@@ -280,30 +280,17 @@ function NodeCreationForm({ isOpen, onClose, onCreateNode, nodeTypes, existingNo
         </FormGroup>
         
         {nodeType === 'JTBD' && (
-          <>
-            <FormGroup>
-              <label>Progress (%)</label>
-              <input 
-                type="number" 
-                min="0" 
-                max="100" 
-                value={properties.progress || 0}
-                onChange={(e) => handlePropertyChange('progress', parseInt(e.target.value, 10))}
-                placeholder="Enter progress percentage"
-              />
-            </FormGroup>
-            
-            <FormGroup>
-              <label>Complexity</label>
-              <input 
-                type="number" 
-                min="0" 
-                value={properties.complexity || ''}
-                onChange={(e) => handlePropertyChange('complexity', parseInt(e.target.value, 10))}
-                placeholder="Enter complexity score"
-              />
-            </FormGroup>
-          </>
+          <FormGroup>
+            <label>Progress (%)</label>
+            <input 
+              type="number" 
+              min="0" 
+              max="100" 
+              value={properties.progress || 0}
+              onChange={(e) => handlePropertyChange('progress', parseInt(e.target.value, 10))}
+              placeholder="Enter progress percentage"
+            />
+          </FormGroup>
         )}
         
         {nodeType === 'Data' && (

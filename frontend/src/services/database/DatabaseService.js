@@ -7,6 +7,18 @@ class DatabaseService {
   async executeQuery(query) {
     throw new Error('Method not implemented');
   }
+
+  async addNode(nodeType, properties) {
+    throw new Error('Method not implemented');
+  }
+
+  async addRelationship(sourceId, targetId, type) {
+    throw new Error('Method not implemented');
+  }
+
+  async recalculateComplexity() {
+    throw new Error('Method not implemented');
+  }
 }
 
 export default DatabaseService;

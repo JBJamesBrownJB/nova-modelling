@@ -85,8 +85,15 @@ function App() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
+        // Load initial data
         const data = await dbService.getGraph();
-        setGraphData(data);
+        
+        // Run initial complexity calculation to ensure all nodes have complexity scores
+        await dbService.recalculateComplexity();
+        
+        // Get updated data with complexity values
+        const updatedData = await dbService.getGraph();
+        setGraphData(updatedData);
       } catch (error) {
         console.error('Error fetching graph data:', error);
       } finally {
@@ -122,7 +129,10 @@ function App() {
         }
       }
       
-      // Update graph data
+      // Recalculate complexity after adding node and relationships
+      await dbService.recalculateComplexity();
+      
+      // Get updated graph data
       const updatedGraph = await dbService.getGraph();
       setGraphData(updatedGraph);
       
