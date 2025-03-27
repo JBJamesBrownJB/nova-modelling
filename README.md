@@ -150,6 +150,38 @@ RETURN j1.name, j2.name, count(d) as shared_data
 ORDER BY shared_data DESC
 ```
 
+## Frontend Development
+
+A D3.js visualization frontend is available in the `/frontend` directory. The frontend provides an interactive force-directed graph visualization similar to Neo4j Bloom.
+
+### Directory Structure
+```
+frontend/
+├── public/
+├── src/
+│   ├── components/
+│   │   ├── Graph/
+│   │   ├── Sidebar/
+│   │   ├── Topbar/
+│   │   └── Footer/
+│   ├── services/
+│   │   └── database/
+│   ├── data/
+│   ├── utils/
+│   ├── App.js
+│   └── index.js
+├── package.json
+└── README.md
+```
+
+### Running the Frontend
+
+```
+cd frontend
+npm install
+npm start
+```
+
 ## Theoretical Foundation
 
 The Nova model's complexity calculations are grounded in Fred Brooks' seminal work ["No Silver Bullet — Essence and Accident in Software Engineering"](http://worrydream.com/refs/Brooks-NoSilverBullet.pdf) from The Mythical Man Month. Brooks identifies two types of complexity in software development:
