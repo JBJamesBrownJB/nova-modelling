@@ -37,7 +37,6 @@ const GraphContainer = styled.div`
 
 function Graph({ data, onNodeSelect, selectedNode }) {
   const svgRef = useRef(null);
-  const tooltipRef = useRef(null);
 
   // Define node colors based on node type
   const nodeColors = {
@@ -83,13 +82,14 @@ function Graph({ data, onNodeSelect, selectedNode }) {
       case 'JTBD':
         // Simple linear scaling based on dependency count
         // Min size of 10, grows by 2 pixels per dependency point
-        return 10 + (d.complexity ? Math.min(d.complexity / 1, 100) : 0);
+        return 10 + (d.complexity ? Math.min(d.complexity / 1.4, 100) : 0);
       case 'Service':
         // Size based on number of dependent JTBDs
         // Min size of 12, grows by 3 pixels per dependent
-        return 25 + (d.dependants ? Math.min(d.dependants * 1, 100) : 0);
+        return 25 + (d.dependants ? Math.min(d.dependants * 2, 100) : 0);
       case 'User':
-        return 20; // Fixed size for User icon
+        // Scale user icon based on number of JTBDs they perform - using more dramatic scaling
+        return 25 + (d.jtbd_count ? Math.min(d.jtbd_count * 5, 100) : 0); // Much more significant growth per JTBD
       default:
         return 8;
     }
@@ -172,7 +172,14 @@ function Graph({ data, onNodeSelect, selectedNode }) {
     userNodes.append('path')
       .attr('d', userIconPath)
       .attr('fill', nodeColors['User'])
-      .attr('transform', 'translate(-12, -12) scale(1.2)');
+      .attr('transform', d => {
+        // Calculate scale based on the node radius from getNodeRadius
+        const baseRadius = 20; // Minimum radius for User nodes
+        const radius = getNodeRadius(d);
+        const scale = radius / baseRadius; // Scale proportionally to radius
+        // Center the icon and apply scaling
+        return `translate(-20, -24) scale(${scale})`;
+      });
 
     // Add service icon nodes
     const serviceNodes = nodesGroup.selectAll('.service-node')
@@ -202,9 +209,6 @@ function Graph({ data, onNodeSelect, selectedNode }) {
         return `translate(-24, -24) scale(${scale})`;
       });
 
-    // Combine all node selections for event handling
-    const allNodes = d3.selectAll('.circle-node, .user-node, .service-node');
-
     // Highlight selected node if any
     if (selectedNode) {
       circleNodes.classed('selected-node', d => d.id === selectedNode.id);
@@ -225,41 +229,6 @@ function Graph({ data, onNodeSelect, selectedNode }) {
           return d.name.substring(0, 20) + '...';
         }
         return d.name;
-      });
-
-    // Add tooltip
-    const tooltip = d3.select(tooltipRef.current);
-
-    const showTooltip = (event, d) => {
-      tooltip.transition()
-        .duration(200)
-        .style('opacity', 0.9);
-
-      let tooltipContent = `<strong>${d.name}</strong><br/>`;
-
-      if (d.label === 'JTBD') {
-        tooltipContent += `<strong>Type:</strong> ${d.label}<br/>`;
-        tooltipContent += `${d.complexity ? `<strong>Complexity:</strong> ${d.complexity}<br/>` : ''}`;
-        tooltipContent += `${d.dependency_count !== undefined ? `<strong>Service Dependencies:</strong> ${d.dependency_count}<br/>` : ''}`;
-      } else if (d.label === 'Service') {
-        tooltipContent += `<strong>Type:</strong> ${d.label}<br/>`;
-        tooltipContent += `${d.dependants !== undefined ? `<strong>JTBD Dependants:</strong> ${d.dependants}<br/>` : ''}`;
-      } else {
-        tooltipContent += `<strong>Type:</strong> ${d.label}<br/>`;
-      }
-
-      tooltip.html(tooltipContent)
-        .style('left', (event.pageX + 15) + 'px')
-        .style('top', (event.pageY - 30) + 'px');
-    };
-
-    allNodes.on('mouseover', (event, d) => {
-      showTooltip(event, d);
-    })
-      .on('mouseout', () => {
-        tooltip.transition()
-          .duration(200)
-          .style('opacity', 0);
       });
 
     // Add links after nodes to ensure proper layering
@@ -390,20 +359,6 @@ function Graph({ data, onNodeSelect, selectedNode }) {
       <div
         ref={svgRef}
         style={{ width: '100%', height: '100%' }}
-      />
-      <div
-        ref={tooltipRef}
-        style={{
-          position: 'absolute',
-          display: 'none',
-          backgroundColor: 'white',
-          borderRadius: '4px',
-          padding: '8px',
-          boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-          pointerEvents: 'none',
-          fontSize: '12px',
-          zIndex: 1000
-        }}
       />
     </GraphContainer>
   );

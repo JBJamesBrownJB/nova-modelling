@@ -87,6 +87,42 @@ class ComplexityCalculator {
   }
 
   /**
+   * Calculate the number of JTBDs associated with each User
+   * @param {Object} node - The User node
+   * @param {Array} links - All links in the graph
+   * @param {Array} nodes - All nodes in the graph
+   * @returns {number} - The calculated JTBD count
+   */
+  calculateUserJtbdCount(node, links, nodes) {
+    if (node.label !== 'User') {
+      return 0; // Only User nodes have JTBD counts
+    }
+
+    // Count JTBDs performed by this user
+    let jtbdCount = 0;
+    
+    // Count all DOES relationships from this User to JTBD nodes
+    links.forEach(link => {
+      if ((link.source === node.id || 
+          (typeof link.source === 'object' && link.source.id === node.id)) &&
+          link.type === 'DOES') {
+        // Find target node to check if it's a JTBD node
+        const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+        const targetNode = nodes.find(n => n.id === targetId);
+        
+        if (targetNode && targetNode.label === 'JTBD') {
+          jtbdCount++;
+        }
+      }
+    });
+    
+    // Store the JTBD count
+    node.jtbd_count = jtbdCount;
+    
+    return jtbdCount;
+  }
+
+  /**
    * Calculate complexity for all JTBD nodes and dependants for all Service nodes in the graph
    * @param {Array} nodes - All nodes in the graph
    * @param {Array} links - All links in the graph
@@ -100,6 +136,8 @@ class ComplexityCalculator {
         node.complexity = this.calculateNodeComplexity(node, links, nodes);
       } else if (node.label === 'Service') {
         node.dependants = this.calculateServiceDependants(node, links, nodes);
+      } else if (node.label === 'User') {
+        node.jtbd_count = this.calculateUserJtbdCount(node, links, nodes);
       }
     });
     
