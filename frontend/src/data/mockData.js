@@ -50,32 +50,32 @@ const mockData = {
     { id: 'user8', label: 'User', name: 'Porter' },
     { id: 'user9', label: 'User', name: 'Staff' },
     
-    // Data Nodes
-    { id: 'data1', label: 'Data', name: 'Patient List', readers: 4 },
-    { id: 'data2', label: 'Data', name: 'Diseases', readers: 2 },
-    { id: 'data3', label: 'Data', name: 'Patient Details', readers: 5 },
-    { id: 'data4', label: 'Data', name: 'Diagnosis', readers: 6 },
-    { id: 'data5', label: 'Data', name: 'Patient Record', readers: 4 },
-    { id: 'data6', label: 'Data', name: 'Treatments', readers: 3 },
-    { id: 'data7', label: 'Data', name: 'Facilitites', readers: 5 },
-    { id: 'data8', label: 'Data', name: 'Beds', readers: 3 },
-    { id: 'data9', label: 'Data', name: 'Menu', readers: 1 },
-    { id: 'data10', label: 'Data', name: 'Allergens', readers: 1 },
-    { id: 'data11', label: 'Data', name: 'Meal Order', readers: 1 },
-    { id: 'data12', label: 'Data', name: 'Medicine', readers: 2 },
-    { id: 'data13', label: 'Data', name: 'Equipment', readers: 3 },
-    { id: 'data14', label: 'Data', name: 'Heartbeat', readers: 1 },
-    { id: 'data15', label: 'Data', name: 'Blood Preassure', readers: 1 },
-    { id: 'data16', label: 'Data', name: 'Patient Temperature', readers: 1 },
-    { id: 'data17', label: 'Data', name: 'Patient Visuals', readers: 1 },
-    { id: 'data18', label: 'Data', name: 'Assistance Alarm', readers: 1 },
-    { id: 'data19', label: 'Data', name: 'Staff Schedule', readers: 4 },
-    { id: 'data20', label: 'Data', name: 'Alerts', readers: 2 },
-    { id: 'data21', label: 'Data', name: 'Shifts', readers: 2 },
-    { id: 'data22', label: 'Data', name: 'Schedule', readers: 5 },
-    { id: 'data23', label: 'Data', name: 'Staff', readers: 4 },
-    { id: 'data24', label: 'Data', name: 'Cleaning Task', readers: 2 },
-    { id: 'data25', label: 'Data', name: 'Invoice', readers: 2 },
+    // Service Nodes (previously Data Nodes)
+    { id: 'service1', label: 'Service', name: 'Patient Management', consumers: 4 },
+    { id: 'service2', label: 'Service', name: 'Disease Reference', consumers: 2 },
+    { id: 'service3', label: 'Service', name: 'Patient Profile', consumers: 5 },
+    { id: 'service4', label: 'Service', name: 'Diagnosis System', consumers: 6 },
+    { id: 'service5', label: 'Service', name: 'Electronic Health Records', consumers: 4 },
+    { id: 'service6', label: 'Service', name: 'Treatment Catalog', consumers: 3 },
+    { id: 'service7', label: 'Service', name: 'Facility Management', consumers: 5 },
+    { id: 'service8', label: 'Service', name: 'Bed Management', consumers: 3 },
+    { id: 'service9', label: 'Service', name: 'Nutrition Management', consumers: 1 },
+    { id: 'service10', label: 'Service', name: 'Allergen Repository', consumers: 1 },
+    { id: 'service11', label: 'Service', name: 'Meal Ordering', consumers: 1 },
+    { id: 'service12', label: 'Service', name: 'Pharmacy System', consumers: 2 },
+    { id: 'service13', label: 'Service', name: 'Equipment Management', consumers: 3 },
+    { id: 'service14', label: 'Service', name: 'Vital Signs Monitoring', consumers: 1 },
+    { id: 'service15', label: 'Service', name: 'Blood Pressure Monitoring', consumers: 1 },
+    { id: 'service16', label: 'Service', name: 'Temperature Monitoring', consumers: 1 },
+    { id: 'service17', label: 'Service', name: 'Visual Monitoring', consumers: 1 },
+    { id: 'service18', label: 'Service', name: 'Alert System', consumers: 1 },
+    { id: 'service19', label: 'Service', name: 'Staff Scheduling', consumers: 4 },
+    { id: 'service20', label: 'Service', name: 'Notification System', consumers: 2 },
+    { id: 'service21', label: 'Service', name: 'Shift Management', consumers: 2 },
+    { id: 'service22', label: 'Service', name: 'Calendar System', consumers: 5 },
+    { id: 'service23', label: 'Service', name: 'Staff Directory', consumers: 4 },
+    { id: 'service24', label: 'Service', name: 'Housekeeping Services', consumers: 2 },
+    { id: 'service25', label: 'Service', name: 'Billing System', consumers: 2 },
   ],
   links: [
     // Doctor relationships
@@ -107,14 +107,13 @@ const mockData = {
     
     // Add missing relationships for Contact on duty doctor
     { id: 'rel53', source: 'user2', target: 'jtbd12', type: 'DOES' }, 
-    { id: 'rel54', source: 'jtbd12', target: 'data19', type: 'READS' }, 
-    { id: 'rel55', source: 'jtbd12', target: 'data23', type: 'READS' }, 
+    { id: 'rel54', source: 'jtbd12', target: 'service19', type: 'DEPENDS_ON' }, 
+    { id: 'rel55', source: 'jtbd12', target: 'service23', type: 'DEPENDS_ON' }, 
     
     // Add missing relationships for Pay Invoice
     { id: 'rel56', source: 'user4', target: 'jtbd14', type: 'DOES' }, 
     { id: 'rel57', source: 'user3', target: 'jtbd14', type: 'DOES' }, 
-    { id: 'rel58', source: 'jtbd14', target: 'data25', type: 'READS' }, 
-    { id: 'rel59', source: 'jtbd14', target: 'data25', type: 'UPDATES' }, 
+    { id: 'rel58', source: 'jtbd14', target: 'service25', type: 'DEPENDS_ON' }, 
     
     // Connect Security Guard
     { id: 'rel60', source: 'user5', target: 'jtbd23', type: 'DOES' }, 
@@ -132,259 +131,115 @@ const mockData = {
     { id: 'rel64', source: 'user9', target: 'jtbd13', type: 'DOES' }, 
     { id: 'rel65', source: 'user9', target: 'jtbd22', type: 'DOES' }, 
     
-    // Additional data connections for Find Patient
-    { id: 'rel66', source: 'jtbd3', target: 'data1', type: 'READS' },
-    { id: 'rel67', source: 'jtbd3', target: 'data3', type: 'READS' },
+    // Service dependencies for Find Patient
+    { id: 'rel66', source: 'jtbd3', target: 'service1', type: 'DEPENDS_ON' },
+    { id: 'rel67', source: 'jtbd3', target: 'service3', type: 'DEPENDS_ON' },
     
-    // Data connections for Prescribe treatment
-    { id: 'rel68', source: 'jtbd4', target: 'data4', type: 'READS' },
-    { id: 'rel69', source: 'jtbd4', target: 'data6', type: 'READS' },
-    { id: 'rel70', source: 'jtbd4', target: 'data12', type: 'READS' },
-    { id: 'rel71', source: 'jtbd4', target: 'data5', type: 'UPDATES' },
+    // Service dependencies for Prescribe treatment
+    { id: 'rel68', source: 'jtbd4', target: 'service4', type: 'DEPENDS_ON' },
+    { id: 'rel69', source: 'jtbd4', target: 'service6', type: 'DEPENDS_ON' },
+    { id: 'rel70', source: 'jtbd4', target: 'service12', type: 'DEPENDS_ON' },
+    { id: 'rel71', source: 'jtbd4', target: 'service5', type: 'DEPENDS_ON' },
     
-    // Data connections for Assign bed
-    { id: 'rel72', source: 'jtbd5', target: 'data8', type: 'READS' },
-    { id: 'rel73', source: 'jtbd5', target: 'data8', type: 'UPDATES' },
+    // Service dependencies for Assign bed
+    { id: 'rel72', source: 'jtbd5', target: 'service8', type: 'DEPENDS_ON' },
     
-    // Data connections for Choose Meal
-    { id: 'rel74', source: 'jtbd6', target: 'data9', type: 'READS' },
-    { id: 'rel75', source: 'jtbd6', target: 'data10', type: 'READS' },
-    { id: 'rel76', source: 'jtbd6', target: 'data11', type: 'WRITES' },
+    // Service dependencies for Choose Meal
+    { id: 'rel74', source: 'jtbd6', target: 'service9', type: 'DEPENDS_ON' },
+    { id: 'rel75', source: 'jtbd6', target: 'service10', type: 'DEPENDS_ON' },
+    { id: 'rel76', source: 'jtbd6', target: 'service11', type: 'DEPENDS_ON' },
     
-    // Data connections for Discharge Patient
-    { id: 'rel77', source: 'jtbd7', target: 'data5', type: 'READS' },
-    { id: 'rel78', source: 'jtbd7', target: 'data4', type: 'READS' },
-    { id: 'rel79', source: 'jtbd7', target: 'data25', type: 'WRITES' },
-    { id: 'rel80', source: 'jtbd7', target: 'data5', type: 'UPDATES' },
+    // Service dependencies for Discharge Patient
+    { id: 'rel77', source: 'jtbd7', target: 'service5', type: 'DEPENDS_ON' },
+    { id: 'rel78', source: 'jtbd7', target: 'service4', type: 'DEPENDS_ON' },
+    { id: 'rel79', source: 'jtbd7', target: 'service25', type: 'DEPENDS_ON' },
     
-    // Data relationships for Diagnose Patient
-    { id: 'rel22', source: 'jtbd1', target: 'data1', type: 'READS' },
-    { id: 'rel23', source: 'jtbd1', target: 'data2', type: 'READS' },
-    { id: 'rel24', source: 'jtbd1', target: 'data3', type: 'READS' },
-    { id: 'rel25', source: 'jtbd1', target: 'data4', type: 'READS' },
-    { id: 'rel26', source: 'jtbd1', target: 'data1', type: 'WRITES' },
-    { id: 'rel27', source: 'jtbd1', target: 'data1', type: 'UPDATES' },
+    // Service dependencies for Diagnose Patient
+    { id: 'rel22', source: 'jtbd1', target: 'service1', type: 'DEPENDS_ON' },
+    { id: 'rel23', source: 'jtbd1', target: 'service2', type: 'DEPENDS_ON' },
+    { id: 'rel24', source: 'jtbd1', target: 'service3', type: 'DEPENDS_ON' },
+    { id: 'rel25', source: 'jtbd1', target: 'service4', type: 'DEPENDS_ON' },
+    { id: 'rel26', source: 'jtbd1', target: 'service5', type: 'DEPENDS_ON' },
     
-    // Data relationships for Re-diagnose patient
-    { id: 'rel28', source: 'jtbd2', target: 'data1', type: 'READS' },
-    { id: 'rel29', source: 'jtbd2', target: 'data2', type: 'READS' },
-    { id: 'rel30', source: 'jtbd2', target: 'data3', type: 'READS' },
-    { id: 'rel31', source: 'jtbd2', target: 'data4', type: 'READS' },
-    { id: 'rel32', source: 'jtbd2', target: 'data1', type: 'UPDATES' },
+    // DEPENDS_ON relationships for Re-diagnose patient
+    { id: 'rel27', source: 'jtbd2', target: 'service1', type: 'DEPENDS_ON' },
+    { id: 'rel28', source: 'jtbd2', target: 'service2', type: 'DEPENDS_ON' },
+    { id: 'rel29', source: 'jtbd2', target: 'service3', type: 'DEPENDS_ON' },
+    { id: 'rel30', source: 'jtbd2', target: 'service4', type: 'DEPENDS_ON' },
+    { id: 'rel31', source: 'jtbd2', target: 'service5', type: 'DEPENDS_ON' },
     
-    // Additional sample relationships (not comprehensive)
-    { id: 'rel33', source: 'jtbd8', target: 'data4', type: 'READS' },
-    { id: 'rel34', source: 'jtbd8', target: 'data5', type: 'READS' },
-    { id: 'rel35', source: 'jtbd8', target: 'data6', type: 'READS' },
-    { id: 'rel36', source: 'jtbd8', target: 'data12', type: 'READS' },
-    { id: 'rel37', source: 'jtbd8', target: 'data13', type: 'READS' },
-    { id: 'rel38', source: 'jtbd8', target: 'data4', type: 'WRITES' },
-    { id: 'rel39', source: 'jtbd8', target: 'data4', type: 'UPDATES' },
-    { id: 'rel40', source: 'jtbd8', target: 'data5', type: 'UPDATES' },
+    // Service dependencies for Treat Patient
+    { id: 'rel32', source: 'jtbd8', target: 'service4', type: 'DEPENDS_ON' },
+    { id: 'rel33', source: 'jtbd8', target: 'service5', type: 'DEPENDS_ON' },
+    { id: 'rel34', source: 'jtbd8', target: 'service6', type: 'DEPENDS_ON' },
+    { id: 'rel35', source: 'jtbd8', target: 'service12', type: 'DEPENDS_ON' },
+    { id: 'rel36', source: 'jtbd8', target: 'service13', type: 'DEPENDS_ON' },
     
-    // Monitor Patient relationships
-    { id: 'rel41', source: 'jtbd9', target: 'data4', type: 'READS' },
-    { id: 'rel42', source: 'jtbd9', target: 'data5', type: 'READS' },
-    { id: 'rel43', source: 'jtbd9', target: 'data7', type: 'READS' },
-    { id: 'rel44', source: 'jtbd9', target: 'data13', type: 'READS' },
-    { id: 'rel45', source: 'jtbd9', target: 'data14', type: 'READS' },
-    { id: 'rel46', source: 'jtbd9', target: 'data15', type: 'READS' },
-    { id: 'rel47', source: 'jtbd9', target: 'data16', type: 'READS' },
-    { id: 'rel48', source: 'jtbd9', target: 'data17', type: 'READS' },
-    { id: 'rel49', source: 'jtbd9', target: 'data18', type: 'READS' },
-    { id: 'rel50', source: 'jtbd9', target: 'data19', type: 'READS' },
-    { id: 'rel51', source: 'jtbd9', target: 'data4', type: 'WRITES' },
-    { id: 'rel52', source: 'jtbd9', target: 'data4', type: 'UPDATES' },
+    // Service dependencies for Monitor Patient
+    { id: 'rel37', source: 'jtbd9', target: 'service5', type: 'DEPENDS_ON' },
+    { id: 'rel38', source: 'jtbd9', target: 'service14', type: 'DEPENDS_ON' },
+    { id: 'rel39', source: 'jtbd9', target: 'service15', type: 'DEPENDS_ON' },
+    { id: 'rel40', source: 'jtbd9', target: 'service16', type: 'DEPENDS_ON' },
+    { id: 'rel41', source: 'jtbd9', target: 'service17', type: 'DEPENDS_ON' },
+    { id: 'rel42', source: 'jtbd9', target: 'service18', type: 'DEPENDS_ON' },
     
-    // Assign shift relationships
-    { id: 'rel81', source: 'jtbd10', target: 'data19', type: 'READS' },
-    { id: 'rel82', source: 'jtbd10', target: 'data21', type: 'READS' },
-    { id: 'rel83', source: 'jtbd10', target: 'data22', type: 'READS' },
-    { id: 'rel84', source: 'jtbd10', target: 'data19', type: 'UPDATES' },
-    { id: 'rel85', source: 'jtbd10', target: 'data21', type: 'UPDATES' },
+    // Service dependencies for Assign shift
+    { id: 'rel43', source: 'jtbd10', target: 'service19', type: 'DEPENDS_ON' },
+    { id: 'rel44', source: 'jtbd10', target: 'service21', type: 'DEPENDS_ON' },
+    { id: 'rel45', source: 'jtbd10', target: 'service22', type: 'DEPENDS_ON' },
+    { id: 'rel46', source: 'jtbd10', target: 'service23', type: 'DEPENDS_ON' },
     
-    // View on duty staff relationships
-    { id: 'rel86', source: 'jtbd11', target: 'data19', type: 'READS' },
-    { id: 'rel87', source: 'jtbd11', target: 'data21', type: 'READS' },
-    { id: 'rel88', source: 'jtbd11', target: 'data23', type: 'READS' },
+    // Service dependencies for View on duty staff
+    { id: 'rel47', source: 'jtbd11', target: 'service19', type: 'DEPENDS_ON' },
+    { id: 'rel48', source: 'jtbd11', target: 'service21', type: 'DEPENDS_ON' },
+    { id: 'rel49', source: 'jtbd11', target: 'service23', type: 'DEPENDS_ON' },
     
-    // Request clean up relationships
-    { id: 'rel89', source: 'jtbd13', target: 'data7', type: 'READS' },
-    { id: 'rel90', source: 'jtbd13', target: 'data24', type: 'WRITES' },
+    // Service dependencies for Request clean up
+    { id: 'rel50', source: 'jtbd13', target: 'service7', type: 'DEPENDS_ON' },
+    { id: 'rel51', source: 'jtbd13', target: 'service24', type: 'DEPENDS_ON' },
     
-    // Schedule Appointment relationships
-    { id: 'rel91', source: 'user3', target: 'jtbd15', type: 'DOES' }, 
-    { id: 'rel92', source: 'user4', target: 'jtbd15', type: 'DOES' }, 
-    { id: 'rel93', source: 'jtbd15', target: 'data1', type: 'READS' },
-    { id: 'rel94', source: 'jtbd15', target: 'data22', type: 'READS' },
-    { id: 'rel95', source: 'jtbd15', target: 'data19', type: 'READS' },
-    { id: 'rel96', source: 'jtbd15', target: 'data22', type: 'WRITES' },
-    { id: 'rel97', source: 'jtbd15', target: 'data22', type: 'UPDATES' },
+    // Add dependencies for additional JTBDs
+    { id: 'rel80', source: 'jtbd15', target: 'service22', type: 'DEPENDS_ON' },
+    { id: 'rel81', source: 'jtbd15', target: 'service19', type: 'DEPENDS_ON' },
+    { id: 'rel82', source: 'jtbd15', target: 'service1', type: 'DEPENDS_ON' },
     
-    // Order Medication relationships
-    { id: 'rel98', source: 'user1', target: 'jtbd16', type: 'DOES' }, 
-    { id: 'rel99', source: 'user2', target: 'jtbd16', type: 'DOES' }, 
-    { id: 'rel100', source: 'jtbd16', target: 'data12', type: 'READS' },
-    { id: 'rel101', source: 'jtbd16', target: 'data5', type: 'READS' },
-    { id: 'rel102', source: 'jtbd16', target: 'data12', type: 'UPDATES' },
-    { id: 'rel103', source: 'jtbd16', target: 'data5', type: 'UPDATES' },
+    { id: 'rel83', source: 'jtbd16', target: 'service12', type: 'DEPENDS_ON' },
+    { id: 'rel84', source: 'jtbd16', target: 'service5', type: 'DEPENDS_ON' },
     
-    // Perform Lab Test relationships
-    { id: 'rel104', source: 'user2', target: 'jtbd17', type: 'DOES' }, 
-    { id: 'rel105', source: 'user9', target: 'jtbd17', type: 'DOES' }, 
-    { id: 'rel106', source: 'jtbd17', target: 'data3', type: 'READS' },
-    { id: 'rel107', source: 'jtbd17', target: 'data5', type: 'READS' },
-    { id: 'rel108', source: 'jtbd17', target: 'data13', type: 'READS' },
-    { id: 'rel109', source: 'jtbd17', target: 'data5', type: 'WRITES' },
-    { id: 'rel110', source: 'jtbd17', target: 'data5', type: 'UPDATES' },
+    { id: 'rel85', source: 'jtbd17', target: 'service5', type: 'DEPENDS_ON' },
     
-    // Review Lab Results relationships
-    { id: 'rel111', source: 'user1', target: 'jtbd18', type: 'DOES' }, 
-    { id: 'rel112', source: 'jtbd18', target: 'data5', type: 'READS' },
-    { id: 'rel113', source: 'jtbd18', target: 'data4', type: 'READS' },
-    { id: 'rel114', source: 'jtbd18', target: 'data4', type: 'UPDATES' },
-    { id: 'rel115', source: 'jtbd18', target: 'data5', type: 'UPDATES' },
+    { id: 'rel86', source: 'jtbd18', target: 'service5', type: 'DEPENDS_ON' },
     
-    // Manage Patient Records relationships
-    { id: 'rel116', source: 'user1', target: 'jtbd19', type: 'DOES' }, 
-    { id: 'rel117', source: 'user2', target: 'jtbd19', type: 'DOES' }, 
-    { id: 'rel118', source: 'user3', target: 'jtbd19', type: 'DOES' }, 
-    { id: 'rel119', source: 'jtbd19', target: 'data1', type: 'READS' },
-    { id: 'rel120', source: 'jtbd19', target: 'data3', type: 'READS' },
-    { id: 'rel121', source: 'jtbd19', target: 'data4', type: 'READS' },
-    { id: 'rel122', source: 'jtbd19', target: 'data5', type: 'READS' },
-    { id: 'rel123', source: 'jtbd19', target: 'data1', type: 'WRITES' },
-    { id: 'rel124', source: 'jtbd19', target: 'data3', type: 'WRITES' },
-    { id: 'rel125', source: 'jtbd19', target: 'data5', type: 'WRITES' },
-    { id: 'rel126', source: 'jtbd19', target: 'data1', type: 'UPDATES' },
-    { id: 'rel127', source: 'jtbd19', target: 'data3', type: 'UPDATES' },
-    { id: 'rel128', source: 'jtbd19', target: 'data5', type: 'UPDATES' },
+    { id: 'rel87', source: 'jtbd19', target: 'service5', type: 'DEPENDS_ON' },
+    { id: 'rel88', source: 'jtbd19', target: 'service1', type: 'DEPENDS_ON' },
+    { id: 'rel89', source: 'jtbd19', target: 'service3', type: 'DEPENDS_ON' },
     
-    // Triage Emergency relationships
-    { id: 'rel129', source: 'user1', target: 'jtbd20', type: 'DOES' }, 
-    { id: 'rel130', source: 'user2', target: 'jtbd20', type: 'DOES' }, 
-    { id: 'rel131', source: 'jtbd20', target: 'data1', type: 'READS' },
-    { id: 'rel132', source: 'jtbd20', target: 'data2', type: 'READS' },
-    { id: 'rel133', source: 'jtbd20', target: 'data3', type: 'READS' },
-    { id: 'rel134', source: 'jtbd20', target: 'data13', type: 'READS' },
-    { id: 'rel135', source: 'jtbd20', target: 'data1', type: 'WRITES' },
-    { id: 'rel136', source: 'jtbd20', target: 'data4', type: 'WRITES' },
-    { id: 'rel137', source: 'jtbd20', target: 'data20', type: 'WRITES' },
+    { id: 'rel90', source: 'jtbd20', target: 'service18', type: 'DEPENDS_ON' },
+    { id: 'rel91', source: 'jtbd20', target: 'service5', type: 'DEPENDS_ON' },
     
-    // Transfer Patient relationships
-    { id: 'rel138', source: 'user8', target: 'jtbd21', type: 'DOES' }, 
-    { id: 'rel139', source: 'user2', target: 'jtbd21', type: 'DOES' }, 
-    { id: 'rel140', source: 'jtbd21', target: 'data1', type: 'READS' },
-    { id: 'rel141', source: 'jtbd21', target: 'data7', type: 'READS' },
-    { id: 'rel142', source: 'jtbd21', target: 'data8', type: 'READS' },
-    { id: 'rel143', source: 'jtbd21', target: 'data5', type: 'READS' },
-    { id: 'rel144', source: 'jtbd21', target: 'data8', type: 'UPDATES' },
-    { id: 'rel145', source: 'jtbd21', target: 'data5', type: 'UPDATES' },
+    { id: 'rel92', source: 'jtbd21', target: 'service5', type: 'DEPENDS_ON' },
+    { id: 'rel93', source: 'jtbd21', target: 'service7', type: 'DEPENDS_ON' },
+    { id: 'rel94', source: 'jtbd21', target: 'service8', type: 'DEPENDS_ON' },
     
-    // Check In Patient relationships
-    { id: 'rel146', source: 'user3', target: 'jtbd22', type: 'DOES' }, 
-    { id: 'rel147', source: 'user9', target: 'jtbd22', type: 'DOES' }, 
-    { id: 'rel148', source: 'jtbd22', target: 'data1', type: 'READS' },
-    { id: 'rel149', source: 'jtbd22', target: 'data3', type: 'READS' },
-    { id: 'rel150', source: 'jtbd22', target: 'data22', type: 'READS' },
-    { id: 'rel151', source: 'jtbd22', target: 'data1', type: 'UPDATES' },
-    { id: 'rel152', source: 'jtbd22', target: 'data22', type: 'UPDATES' },
+    { id: 'rel95', source: 'jtbd22', target: 'service1', type: 'DEPENDS_ON' },
+    { id: 'rel96', source: 'jtbd22', target: 'service3', type: 'DEPENDS_ON' },
     
-    // Provide Visitor Pass relationships
-    { id: 'rel153', source: 'user5', target: 'jtbd23', type: 'DOES' }, 
-    { id: 'rel154', source: 'user6', target: 'jtbd23', type: 'DOES' }, 
-    { id: 'rel155', source: 'jtbd23', target: 'data1', type: 'READS' }, 
-    { id: 'rel156', source: 'jtbd23', target: 'data23', type: 'READS' }, 
-    { id: 'rel157', source: 'jtbd23', target: 'data23', type: 'WRITES' }, 
+    { id: 'rel97', source: 'jtbd23', target: 'service7', type: 'DEPENDS_ON' },
     
-    // Conduct Rounds relationships
-    { id: 'rel158', source: 'user1', target: 'jtbd24', type: 'DOES' }, 
-    { id: 'rel159', source: 'user2', target: 'jtbd24', type: 'DOES' }, 
-    { id: 'rel160', source: 'jtbd24', target: 'data1', type: 'READS' },
-    { id: 'rel161', source: 'jtbd24', target: 'data5', type: 'READS' },
-    { id: 'rel162', source: 'jtbd24', target: 'data4', type: 'READS' },
-    { id: 'rel163', source: 'jtbd24', target: 'data5', type: 'UPDATES' },
+    { id: 'rel98', source: 'jtbd24', target: 'service8', type: 'DEPENDS_ON' },
+    { id: 'rel99', source: 'jtbd24', target: 'service5', type: 'DEPENDS_ON' },
     
-    // Administer Medication relationships
-    { id: 'rel164', source: 'user2', target: 'jtbd25', type: 'DOES' }, 
-    { id: 'rel165', source: 'jtbd25', target: 'data5', type: 'READS' },
-    { id: 'rel166', source: 'jtbd25', target: 'data12', type: 'READS' },
-    { id: 'rel167', source: 'jtbd25', target: 'data3', type: 'READS' },
-    { id: 'rel168', source: 'jtbd25', target: 'data5', type: 'UPDATES' },
+    { id: 'rel100', source: 'jtbd25', target: 'service12', type: 'DEPENDS_ON' },
+    { id: 'rel101', source: 'jtbd25', target: 'service5', type: 'DEPENDS_ON' },
     
-    // Process Insurance relationships
-    { id: 'rel169', source: 'user3', target: 'jtbd26', type: 'DOES' }, 
-    { id: 'rel170', source: 'jtbd26', target: 'data3', type: 'READS' },
-    { id: 'rel171', source: 'jtbd26', target: 'data5', type: 'READS' },
-    { id: 'rel172', source: 'jtbd26', target: 'data25', type: 'READS' },
-    { id: 'rel173', source: 'jtbd26', target: 'data25', type: 'WRITES' },
-    { id: 'rel174', source: 'jtbd26', target: 'data25', type: 'UPDATES' },
+    { id: 'rel102', source: 'jtbd26', target: 'service25', type: 'DEPENDS_ON' },
+    { id: 'rel103', source: 'jtbd26', target: 'service5', type: 'DEPENDS_ON' },
     
-    // Handle Incident Report relationships
-    { id: 'rel175', source: 'user7', target: 'jtbd27', type: 'DOES' }, 
-    { id: 'rel176', source: 'user9', target: 'jtbd27', type: 'DOES' }, 
-    { id: 'rel177', source: 'jtbd27', target: 'data3', type: 'READS' },
-    { id: 'rel178', source: 'jtbd27', target: 'data7', type: 'READS' },
-    { id: 'rel179', source: 'jtbd27', target: 'data20', type: 'WRITES' },
-    { id: 'rel180', source: 'jtbd27', target: 'data5', type: 'UPDATES' },
+    { id: 'rel104', source: 'jtbd27', target: 'service5', type: 'DEPENDS_ON' },
+    { id: 'rel105', source: 'jtbd27', target: 'service20', type: 'DEPENDS_ON' },
     
-    // Manage Allergies relationships
-    { id: 'rel181', source: 'user1', target: 'jtbd28', type: 'DOES' }, 
-    { id: 'rel182', source: 'user2', target: 'jtbd28', type: 'DOES' }, 
-    { id: 'rel183', source: 'jtbd28', target: 'data3', type: 'READS' },
-    { id: 'rel184', source: 'jtbd28', target: 'data5', type: 'READS' },
-    { id: 'rel185', source: 'jtbd28', target: 'data10', type: 'READS' },
-    { id: 'rel186', source: 'jtbd28', target: 'data5', type: 'UPDATES' },
-    { id: 'rel187', source: 'jtbd28', target: 'data10', type: 'UPDATES' },
-    
-    // Update Medical History relationships
-    { id: 'rel188', source: 'user1', target: 'jtbd29', type: 'DOES' }, 
-    { id: 'rel189', source: 'jtbd29', target: 'data3', type: 'READS' },
-    { id: 'rel190', source: 'jtbd29', target: 'data4', type: 'READS' },
-    { id: 'rel191', source: 'jtbd29', target: 'data5', type: 'READS' },
-    { id: 'rel192', source: 'jtbd29', target: 'data5', type: 'WRITES' },
-    { id: 'rel193', source: 'jtbd29', target: 'data5', type: 'UPDATES' },
-    
-    // Process Referral relationships
-    { id: 'rel194', source: 'user1', target: 'jtbd30', type: 'DOES' }, 
-    { id: 'rel195', source: 'user3', target: 'jtbd30', type: 'DOES' }, 
-    { id: 'rel196', source: 'jtbd30', target: 'data1', type: 'READS' },
-    { id: 'rel197', source: 'jtbd30', target: 'data5', type: 'READS' },
-    { id: 'rel198', source: 'jtbd30', target: 'data5', type: 'WRITES' },
-    { id: 'rel199', source: 'jtbd30', target: 'data5', type: 'UPDATES' },
-    
-    // Sanitize Equipment relationships
-    { id: 'rel200', source: 'user2', target: 'jtbd31', type: 'DOES' }, 
-    { id: 'rel201', source: 'user9', target: 'jtbd31', type: 'DOES' }, 
-    { id: 'rel202', source: 'jtbd31', target: 'data13', type: 'READS' },
-    { id: 'rel203', source: 'jtbd31', target: 'data7', type: 'READS' },
-    { id: 'rel204', source: 'jtbd31', target: 'data13', type: 'UPDATES' },
-    
-    // Create Care Plan relationships
-    { id: 'rel205', source: 'user1', target: 'jtbd32', type: 'DOES' }, 
-    { id: 'rel206', source: 'user2', target: 'jtbd32', type: 'DOES' }, 
-    { id: 'rel207', source: 'jtbd32', target: 'data3', type: 'READS' },
-    { id: 'rel208', source: 'jtbd32', target: 'data4', type: 'READS' },
-    { id: 'rel209', source: 'jtbd32', target: 'data5', type: 'READS' },
-    { id: 'rel210', source: 'jtbd32', target: 'data6', type: 'READS' },
-    { id: 'rel211', source: 'jtbd32', target: 'data5', type: 'WRITES' },
-    { id: 'rel212', source: 'jtbd32', target: 'data5', type: 'UPDATES' },
-    
-    // Document Patient Encounter relationships
-    { id: 'rel213', source: 'user1', target: 'jtbd33', type: 'DOES' }, 
-    { id: 'rel214', source: 'user2', target: 'jtbd33', type: 'DOES' }, 
-    { id: 'rel215', source: 'jtbd33', target: 'data3', type: 'READS' },
-    { id: 'rel216', source: 'jtbd33', target: 'data5', type: 'READS' },
-    { id: 'rel217', source: 'jtbd33', target: 'data5', type: 'WRITES' },
-    { id: 'rel218', source: 'jtbd33', target: 'data5', type: 'UPDATES' },
-    
-    // Coordinate Follow-up relationships
-    { id: 'rel219', source: 'user2', target: 'jtbd34', type: 'DOES' }, 
-    { id: 'rel220', source: 'user3', target: 'jtbd34', type: 'DOES' }, 
-    { id: 'rel221', source: 'jtbd34', target: 'data1', type: 'READS' },
-    { id: 'rel222', source: 'jtbd34', target: 'data5', type: 'READS' },
-    { id: 'rel223', source: 'jtbd34', target: 'data22', type: 'READS' },
-    { id: 'rel224', source: 'jtbd34', target: 'data22', type: 'UPDATES' },
+    { id: 'rel106', source: 'jtbd28', target: 'service5', type: 'DEPENDS_ON' },
+    { id: 'rel107', source: 'jtbd28', target: 'service10', type: 'DEPENDS_ON' },
   ]
 };
 

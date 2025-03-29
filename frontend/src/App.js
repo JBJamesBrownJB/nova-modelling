@@ -67,16 +67,13 @@ function App() {
   const [filterSettings, setFilterSettings] = useState({
     showJTBD: true,
     showUser: true,
-    showData: true,
-    showReads: true,
-    showWrites: true,
-    showUpdates: true,
-    showDoes: true
+    showService: true,
+    showDependsOn: true
   });
 
   // Node and relationship types
-  const nodeTypes = ['JTBD', 'User', 'Data'];
-  const relationshipTypes = ['DOES', 'READS', 'WRITES', 'UPDATES'];
+  const nodeTypes = ['JTBD', 'User', 'Service'];
+  const relationshipTypes = ['DOES', 'DEPENDS_ON'];
 
   // Initialize database service
   const dbService = new MockDatabaseService();
@@ -87,10 +84,10 @@ function App() {
       try {
         // Load initial data
         const data = await dbService.getGraph();
-        
+
         // Run initial complexity calculation to ensure all nodes have complexity scores
         await dbService.recalculateComplexity();
-        
+
         // Get updated data with complexity values
         const updatedData = await dbService.getGraph();
         setGraphData(updatedData);
@@ -121,24 +118,24 @@ function App() {
     try {
       // Create the node
       const newNode = await dbService.addNode(nodeType, properties);
-      
+
       // Add relationships if any
       for (const rel of relationships) {
         if (rel.targetId) {
           await dbService.addRelationship(newNode.id, rel.targetId, rel.type);
         }
       }
-      
+
       // Recalculate complexity after adding node and relationships
       await dbService.recalculateComplexity();
-      
+
       // Get updated graph data
       const updatedGraph = await dbService.getGraph();
       setGraphData(updatedGraph);
-      
+
       // Show success message
       toast.success(`${nodeType} node created successfully!`);
-      
+
       return newNode;
     } catch (error) {
       console.error('Error creating node:', error);
@@ -149,15 +146,23 @@ function App() {
   // Apply filters to graph data
   const filteredData = {
     nodes: graphData.nodes.filter(node => {
-      if (node.label === 'JTBD' && !filterSettings.showJTBD) return false;
-      if (node.label === 'User' && !filterSettings.showUser) return false;
-      if (node.label === 'Data' && !filterSettings.showData) return false;
+      if (node.label === 'JTBD' && !filterSettings.showJTBD) {
+        filterSettings.showDoes = false;
+        filterSettings.showDependsOn = false;
+        return false;
+      }
+      if (node.label === 'User' && !filterSettings.showUser) {
+        filterSettings.showDoes = false;
+        return false;
+      }
+      if (node.label === 'Service' && !filterSettings.showService) {
+        filterSettings.showDependsOn = false;
+        return false;
+      }
       return true;
     }),
     links: graphData.links.filter(link => {
-      if (link.type === 'READS' && !filterSettings.showReads) return false;
-      if (link.type === 'WRITES' && !filterSettings.showWrites) return false;
-      if (link.type === 'UPDATES' && !filterSettings.showUpdates) return false;
+      if (link.type === 'DEPENDS_ON' && !filterSettings.showDependsOn) return false;
       if (link.type === 'DOES' && !filterSettings.showDoes) return false;
       return true;
     })
@@ -167,9 +172,9 @@ function App() {
     <AppContainer>
       <Topbar onToggleSidebar={toggleSidebar} />
       <MainContent>
-        <Sidebar 
-          isOpen={sidebarOpen} 
-          selectedNode={selectedNode} 
+        <Sidebar
+          isOpen={sidebarOpen}
+          selectedNode={selectedNode}
           filterSettings={filterSettings}
           onFilterChange={handleFilterChange}
         />
@@ -178,8 +183,8 @@ function App() {
             <div>Loading graph data...</div>
           ) : (
             <>
-              <Graph 
-                data={filteredData} 
+              <Graph
+                data={filteredData}
                 onNodeSelect={handleNodeSelect}
                 selectedNode={selectedNode}
               />
@@ -189,7 +194,7 @@ function App() {
         </GraphContainer>
       </MainContent>
       <Footer />
-      
+
       <NodeCreationForm
         isOpen={showNodeForm}
         onClose={() => setShowNodeForm(false)}
@@ -198,7 +203,7 @@ function App() {
         existingNodes={graphData.nodes}
         relationshipTypes={relationshipTypes}
       />
-      
+
       <ToastContainer position="bottom-right" autoClose={3000} />
     </AppContainer>
   );

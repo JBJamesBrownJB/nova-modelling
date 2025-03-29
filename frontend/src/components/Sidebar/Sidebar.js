@@ -116,13 +116,13 @@ const NodeDetailCard = styled.div`
     background-color: ${props => {
       if (props.nodeType === 'JTBD') return '#e3f2fd';
       if (props.nodeType === 'User') return '#f8e3eb';
-      if (props.nodeType === 'Data') return '#e6f4ea';
+      if (props.nodeType === 'Service') return '#e6f4ea';
       return '#f1f3f5';
     }};
     color: ${props => {
       if (props.nodeType === 'JTBD') return '#0d47a1';
       if (props.nodeType === 'User') return '#b31b5b';
-      if (props.nodeType === 'Data') return '#1e8449';
+      if (props.nodeType === 'Service') return '#1e8449';
       return '#495057';
     }};
   }
@@ -214,7 +214,7 @@ function Sidebar({ isOpen, selectedNode, filterSettings, onFilterChange }) {
       <SidebarContent>
         {activeTab === 'filter' && (
           <>
-            <SectionTitle>Node Types</SectionTitle>
+            <SectionTitle>Nodes</SectionTitle>
             <CheckboxLabel>
               <input 
                 type="checkbox" 
@@ -236,14 +236,14 @@ function Sidebar({ isOpen, selectedNode, filterSettings, onFilterChange }) {
             <CheckboxLabel>
               <input 
                 type="checkbox" 
-                checked={filterSettings.showData}
-                onChange={(e) => handleFilterChange('showData', e.target.checked)}
+                checked={filterSettings.showService}
+                onChange={(e) => handleFilterChange('showService', e.target.checked)}
               />
               <span className="color-box" style={{ backgroundColor: '#8DCC93' }}></span>
-              Data
+              Service
             </CheckboxLabel>
             
-            <SectionTitle>Relationship Types</SectionTitle>
+            <SectionTitle>Relationships</SectionTitle>
             <CheckboxLabel>
               <input 
                 type="checkbox" 
@@ -256,29 +256,11 @@ function Sidebar({ isOpen, selectedNode, filterSettings, onFilterChange }) {
             <CheckboxLabel>
               <input 
                 type="checkbox" 
-                checked={filterSettings.showReads}
-                onChange={(e) => handleFilterChange('showReads', e.target.checked)}
+                checked={filterSettings.showDependsOn}
+                onChange={(e) => handleFilterChange('showDependsOn', e.target.checked)}
               />
               <span className="color-box" style={{ backgroundColor: '#F16667' }}></span>
-              READS
-            </CheckboxLabel>
-            <CheckboxLabel>
-              <input 
-                type="checkbox" 
-                checked={filterSettings.showWrites}
-                onChange={(e) => handleFilterChange('showWrites', e.target.checked)}
-              />
-              <span className="color-box" style={{ backgroundColor: '#569480' }}></span>
-              WRITES
-            </CheckboxLabel>
-            <CheckboxLabel>
-              <input 
-                type="checkbox" 
-                checked={filterSettings.showUpdates}
-                onChange={(e) => handleFilterChange('showUpdates', e.target.checked)}
-              />
-              <span className="color-box" style={{ backgroundColor: '#F79767' }}></span>
-              UPDATES
+              DEPENDS_ON
             </CheckboxLabel>
           </>
         )}
@@ -301,10 +283,10 @@ function Sidebar({ isOpen, selectedNode, filterSettings, onFilterChange }) {
               </>
             )}
             
-            {selectedNode.label === 'Data' && (
+            {selectedNode.label === 'Service' && (
               <div className="detail-item">
-                <div className="label">Readers:</div>
-                <div className="value">{selectedNode.readers || 'N/A'}</div>
+                <div className="label">Consumers:</div>
+                <div className="value">{selectedNode.consumers || 'N/A'}</div>
               </div>
             )}
           </NodeDetailCard>
