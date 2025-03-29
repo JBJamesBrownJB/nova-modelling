@@ -1,10 +1,15 @@
 import DatabaseService from './DatabaseService';
 import mockData from '../../data/mockData';
+import ComplexityCalculator from '../complexity/ComplexityCalculator';
 
 class MockDatabaseService extends DatabaseService {
   constructor() {
     super();
     this.data = mockData;
+    this.complexityCalculator = new ComplexityCalculator();
+    
+    // Calculate initial complexity values
+    this.recalculateComplexity();
   }
   
   async getGraph() {
@@ -59,43 +64,11 @@ class MockDatabaseService extends DatabaseService {
 
   // Recalculate complexity for all JTBD nodes based on service dependencies
   async recalculateComplexity() {
-    // Nova complexity model constants
-    const DEPENDENCY_WEIGHT = 3;  // Weight for each service dependency
-    const SERVICE_NODE_COST = 10; // Base cost of service/API
-    const TOIL_FACTOR = 1.8;  // 80/20 split between accidental/essential complexity
-    
-    // Process each JTBD node
-    this.data.nodes.forEach(node => {
-      if (node.label === 'JTBD') {
-        // Count service dependencies
-        let dependencyCount = 0;
-        
-        // Count all relationships from this JTBD node to Service nodes
-        this.data.links.forEach(link => {
-          if (link.source === node.id || link.source.id === node.id) {
-            // Find target node to check if it's a Service node
-            const targetId = typeof link.target === 'object' ? link.target.id : link.target;
-            const targetNode = this.data.nodes.find(n => n.id === targetId);
-            
-            if (targetNode && targetNode.label === 'Service' && link.type === 'DEPENDS_ON') {
-              dependencyCount++;
-            }
-          }
-        });
-        
-        // Calculate base complexity (weighted dependency count)
-        const baseComplexity = dependencyCount * DEPENDENCY_WEIGHT;
-        
-        // Calculate total complexity including toil factor
-        const totalComplexity = Math.round(baseComplexity * TOIL_FACTOR);
-        
-        // Update the node's complexity property
-        node.complexity = totalComplexity;
-        
-        // Store the dependency count as well for reference
-        node.dependency_count = dependencyCount;
-      }
-    });
+    // Use the ComplexityCalculator to update node complexity values
+    this.data.nodes = this.complexityCalculator.calculateGraphComplexity(
+      this.data.nodes, 
+      this.data.links
+    );
     
     return this.data;
   }

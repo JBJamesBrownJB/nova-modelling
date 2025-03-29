@@ -104,50 +104,28 @@ class Neo4jDatabaseService extends DatabaseService {
   async recalculateComplexity() {
     const session = this.driver.session();
     try {
-      // Define the constants for the Nova complexity model
-      const READ_WEIGHT = 1;     // Simple read operations
-      const UPDATE_WEIGHT = 3;    // More complex update operations
-      const WRITE_WEIGHT = 5;     // Most complex write operations
-      const DATA_NODE_COST = 10;  // Base cost of data node/API
-      const TOIL_FACTOR = 1.8;    // 80/20 split between accidental/essential complexity
+      // Define the constant for the simplified Nova complexity model
+      const DEPENDENCY_WEIGHT = 3;  // Weight for each service dependency
 
-      // Step 1: Count READ operations for each JTBD
+      // Count DEPENDS_ON relationships to Service nodes for each JTBD
       await session.run(
-        `MATCH (j:JTBD)-[r:READS]->(d:Data)
-         WITH j, COUNT(r) AS read_count
-         SET j.read_count = read_count`
+        `MATCH (j:JTBD)-[r:DEPENDS_ON]->(s:Service)
+         WITH j, COUNT(r) AS dependency_count
+         SET j.dependency_count = dependency_count`
       );
 
-      // Step 2: Count UPDATE operations for each JTBD
-      await session.run(
-        `MATCH (j:JTBD)-[u:UPDATES]->(d:Data)
-         WITH j, COUNT(u) AS update_count
-         SET j.update_count = update_count`
-      );
-
-      // Step 3: Count WRITE operations for each JTBD
-      await session.run(
-        `MATCH (j:JTBD)-[w:WRITES]->(d:Data)
-         WITH j, COUNT(w) AS write_count
-         SET j.write_count = write_count`
-      );
-
-      // Step 4: Calculate JTBD base complexity (weighted operation counts)
+      // Calculate complexity as weighted dependency count
       await session.run(
         `MATCH (j:JTBD)
-         WITH j,
-             COALESCE(j.read_count, 0) * ${READ_WEIGHT} AS read_complexity,
-             COALESCE(j.update_count, 0) * ${UPDATE_WEIGHT} AS update_complexity,
-             COALESCE(j.write_count, 0) * ${WRITE_WEIGHT} AS write_complexity
-         WITH j, read_complexity + update_complexity + write_complexity AS base_complexity
-         SET j.base_complexity = base_complexity`
+         WITH j, COALESCE(j.dependency_count, 0) AS deps
+         SET j.complexity = toInteger(deps * ${DEPENDENCY_WEIGHT})`
       );
-
-      // Step 5: Calculate total complexity including toil factor
+      
+      // Count JTBD nodes that DEPENDS_ON each Service node
       await session.run(
-        `MATCH (j:JTBD)
-         WITH j, j.base_complexity AS base_complexity
-         SET j.complexity = toInteger(base_complexity * ${TOIL_FACTOR})`
+        `MATCH (j:JTBD)-[r:DEPENDS_ON]->(s:Service)
+         WITH s, COUNT(j) AS dependant_count
+         SET s.dependants = dependant_count`
       );
 
       // Get the updated graph data

@@ -285,8 +285,8 @@ function Sidebar({ isOpen, selectedNode, filterSettings, onFilterChange }) {
             
             {selectedNode.label === 'Service' && (
               <div className="detail-item">
-                <div className="label">Consumers:</div>
-                <div className="value">{selectedNode.consumers || 'N/A'}</div>
+                <div className="label">JTBD Dependants:</div>
+                <div className="value">{selectedNode.dependants || 'N/A'}</div>
               </div>
             )}
           </NodeDetailCard>
