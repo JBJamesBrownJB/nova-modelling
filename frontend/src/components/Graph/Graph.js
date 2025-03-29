@@ -90,7 +90,7 @@ function Graph({ data, onNodeSelect, selectedNode }) {
         return 10 + (d.dependants ? Math.min(d.dependants * 2, 100) : 0);
       case 'User':
         // Scale user icon based on number of JTBDs they perform - using more dramatic scaling
-        return 10 + (d.jtbd_count ? Math.min(d.jtbd_count * 5, 100) : 0); // Much more significant growth per JTBD
+        return 20 + (d.jtbd_count ? Math.min(d.jtbd_count * 3, 100) : 0); // Much more significant growth per JTBD
       default:
         return 8;
     }
