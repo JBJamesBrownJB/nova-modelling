@@ -16,6 +16,7 @@ const mockData = {
     { id: 'jtbd12', label: 'JTBD', name: 'Contact on duty doctor', progress: 0 },
     { id: 'jtbd13', label: 'JTBD', name: 'Request clean up', progress: 0 },
     { id: 'jtbd14', label: 'JTBD', name: 'Pay Invoice', progress: 0 },
+    { id: 'jtbd15', label: 'JTBD', name: 'This has a rather long name, maybe in future these will have title and description', progress: 0 },
     
     // New JTBD nodes (healthcare related)
     { id: 'jtbd15', label: 'JTBD', name: 'Schedule Appointment', progress: 0 },

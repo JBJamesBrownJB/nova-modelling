@@ -33,6 +33,18 @@ const GraphContainer = styled.div`
     stroke: #000;
     stroke-width: 1.1px;
   }
+  
+  .tooltip {
+    position: absolute;
+    background-color: white;
+    border-radius: 4px;
+    padding: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    pointer-events: none;
+    font-size: 12px;
+    z-index: 1000;
+    opacity: 0;
+  }
 `;
 
 function Graph({ data, onNodeSelect, selectedNode }) {
@@ -113,6 +125,45 @@ function Graph({ data, onNodeSelect, selectedNode }) {
 
     setupArrowMarkers(svg);
 
+    // Create tooltip
+    const tooltip = d3.select(svgRef.current)
+      .append('div')
+      .attr('class', 'tooltip');
+
+    // Function to show tooltip
+    const showTooltip = (event, d) => {
+      tooltip.transition()
+        .duration(200)
+        .style('opacity', 0.9);
+
+      let tooltipContent = `<strong>${d.name}</strong><br/>`;
+
+      if (d.label === 'JTBD') {
+        tooltipContent += `<strong>Type:</strong> ${d.label}<br/>`;
+        tooltipContent += `${d.complexity ? `<strong>Complexity:</strong> ${d.complexity.toFixed(1)}<br/>` : ''}`;
+        tooltipContent += `${d.dependency_count !== undefined ? `<strong>Service Dependencies:</strong> ${d.dependency_count}<br/>` : ''}`;
+      } else if (d.label === 'Service') {
+        tooltipContent += `<strong>Type:</strong> ${d.label}<br/>`;
+        tooltipContent += `${d.dependants !== undefined ? `<strong>JTBD Dependants:</strong> ${d.dependants}<br/>` : ''}`;
+      } else if (d.label === 'User') {
+        tooltipContent += `<strong>Type:</strong> ${d.label}<br/>`;
+        tooltipContent += `${d.jtbd_count !== undefined ? `<strong>JTBD Count:</strong> ${d.jtbd_count}<br/>` : ''}`;
+      } else {
+        tooltipContent += `<strong>Type:</strong> ${d.label}<br/>`;
+      }
+
+      tooltip.html(tooltipContent)
+        .style('left', (event.pageX - 400) + 'px')
+        .style('top', (event.pageY - 30) + 'px');
+    };
+
+    // Function to hide tooltip
+    const hideTooltip = () => {
+      tooltip.transition()
+        .duration(200)
+        .style('opacity', 0);
+    };
+
     // Add zoom behavior
     const g = svg.append('g');
 
@@ -152,7 +203,9 @@ function Graph({ data, onNodeSelect, selectedNode }) {
       .call(d3.drag()
         .on('start', dragstarted)
         .on('drag', dragged)
-        .on('end', dragended));
+        .on('end', dragended))
+      .on('mouseover', showTooltip)
+      .on('mouseout', hideTooltip);
 
     // Add user icon nodes
     const userNodes = nodesGroup.selectAll('.user-node')
@@ -167,7 +220,9 @@ function Graph({ data, onNodeSelect, selectedNode }) {
       .call(d3.drag()
         .on('start', dragstarted)
         .on('drag', dragged)
-        .on('end', dragended));
+        .on('end', dragended))
+      .on('mouseover', showTooltip)
+      .on('mouseout', hideTooltip);
 
     // Add path for user icon with fixed positioning for consistent centering
     userNodes.append('path')
@@ -188,7 +243,9 @@ function Graph({ data, onNodeSelect, selectedNode }) {
       .call(d3.drag()
         .on('start', dragstarted)
         .on('drag', dragged)
-        .on('end', dragended));
+        .on('end', dragended))
+      .on('mouseover', showTooltip)
+      .on('mouseout', hideTooltip);
 
     // Add path for service icon with fixed positioning for consistent centering
     serviceNodes.append('path')
@@ -355,11 +412,8 @@ function Graph({ data, onNodeSelect, selectedNode }) {
   }, [data, onNodeSelect, selectedNode]);
 
   return (
-    <GraphContainer>
-      <div
-        ref={svgRef}
-        style={{ width: '100%', height: '100%' }}
-      />
+    <GraphContainer ref={svgRef}>
+      {/* SVG and tooltip will be added dynamically */}
     </GraphContainer>
   );
 }
