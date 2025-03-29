@@ -2,6 +2,10 @@
 
 This repository contains the tools and instructions for implementing the Nova modelling technique, a strategic approach for mapping complex SaaS systems. If you're not familiar with Nova modelling, please first read [the detailed blog post](https://example.com/nova-modelling) to understand its core concepts and benefits.
 
+## Model Fundamentals
+
+For a comprehensive overview of Nova modelling's theoretical foundations, key metrics, and strategic capabilities, please refer to our [Model Fundamentals](./model_fundamentals.md) document.
+
 ## Quick Overview
 
 Nova modelling uses a graph-based approach to visualize three key aspects of any system:
