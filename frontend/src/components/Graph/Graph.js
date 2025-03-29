@@ -31,7 +31,7 @@ const GraphContainer = styled.div`
   
   .selected-node {
     stroke: #000;
-    stroke-width: 1px;
+    stroke-width: 1.1px;
   }
 `;
 
@@ -76,6 +76,7 @@ function Graph({ data, onNodeSelect, selectedNode }) {
     });
   };
 
+  //affects line issue TODO
   // Helper function to calculate the radius of each node type
   const getNodeRadius = (d) => {
     switch (d.label) {
@@ -86,10 +87,10 @@ function Graph({ data, onNodeSelect, selectedNode }) {
       case 'Service':
         // Size based on number of dependent JTBDs
         // Min size of 12, grows by 3 pixels per dependent
-        return 25 + (d.dependants ? Math.min(d.dependants * 2, 100) : 0);
+        return 10 + (d.dependants ? Math.min(d.dependants * 2, 100) : 0);
       case 'User':
         // Scale user icon based on number of JTBDs they perform - using more dramatic scaling
-        return 25 + (d.jtbd_count ? Math.min(d.jtbd_count * 5, 100) : 0); // Much more significant growth per JTBD
+        return 10 + (d.jtbd_count ? Math.min(d.jtbd_count * 5, 100) : 0); // Much more significant growth per JTBD
       default:
         return 8;
     }
@@ -168,18 +169,11 @@ function Graph({ data, onNodeSelect, selectedNode }) {
         .on('drag', dragged)
         .on('end', dragended));
 
-    // Add path for user icon
+    // Add path for user icon with fixed positioning for consistent centering
     userNodes.append('path')
       .attr('d', userIconPath)
       .attr('fill', nodeColors['User'])
-      .attr('transform', d => {
-        // Calculate scale based on the node radius from getNodeRadius
-        const baseRadius = 20; // Minimum radius for User nodes
-        const radius = getNodeRadius(d);
-        const scale = radius / baseRadius; // Scale proportionally to radius
-        // Center the icon and apply scaling
-        return `translate(-20, -24) scale(${scale})`;
-      });
+      .attr('transform', 'translate(-12, -12)');
 
     // Add service icon nodes
     const serviceNodes = nodesGroup.selectAll('.service-node')
@@ -196,18 +190,11 @@ function Graph({ data, onNodeSelect, selectedNode }) {
         .on('drag', dragged)
         .on('end', dragended));
 
-    // Add path for service icon
+    // Add path for service icon with fixed positioning for consistent centering
     serviceNodes.append('path')
       .attr('d', serviceIconPath)
       .attr('fill', nodeColors['Service'])
-      .attr('transform', d => {
-        // Calculate scale based on the node radius from getNodeRadius
-        const baseRadius = 20; // Minimum radius for Service nodes (from getNodeRadius)
-        const radius = getNodeRadius(d);
-        const scale = radius / baseRadius; // Scale proportionally to radius
-        // Center the icon and apply scaling
-        return `translate(-24, -24) scale(${scale})`;
-      });
+      .attr('transform', 'translate(-12, -12)');
 
     // Highlight selected node if any
     if (selectedNode) {
@@ -263,26 +250,21 @@ function Graph({ data, onNodeSelect, selectedNode }) {
 
         if (distance === 0) return;
 
-        // Get radius for target
+        // Get radius for target and source
         let targetRadius = getNodeRadius(targetNode);
         let sourceRadius = getNodeRadius(sourceNode);
 
-        // Add a small offset for JTBD nodes to place arrows outside the circle
-        if (targetNode.label === 'JTBD') {
-          targetRadius += 4; // Add 2px offset for JTBD nodes
-        }
-
         // Calculate the point on the edge of the target node
-        const targetRatio = (distance - targetRadius) / distance;
-        const sourceRatio = (distance - sourceRadius) / distance;
+        const targetRatio = (distance - 3 - targetRadius) / distance;
+        const sourceRatio = sourceRadius / distance;
 
         // Set the endpoint to be at the edge of the target node
         d.targetEdgeX = sourceX + dx * targetRatio;
         d.targetEdgeY = sourceY + dy * targetRatio;
 
         // Set the start point to be at the edge of the source node
-        d.sourceEdgeX = targetX - dx * sourceRatio;
-        d.sourceEdgeY = targetY - dy * sourceRatio;
+        d.sourceEdgeX = sourceX + dx * sourceRatio;
+        d.sourceEdgeY = sourceY + dy * sourceRatio;
       });
 
       // Update the link positions
@@ -296,30 +278,48 @@ function Graph({ data, onNodeSelect, selectedNode }) {
         .attr('cx', d => d.x)
         .attr('cy', d => d.y);
 
+      // Apply scale transform to user nodes based on their size
       userNodes
-        .attr('transform', d => `translate(${d.x},${d.y})`);
+        .attr('transform', d => {
+          const baseRadius = 20;
+          const radius = getNodeRadius(d);
+          const scale = radius / baseRadius;
+          // Transform with position and scale from center
+          return `translate(${d.x},${d.y}) scale(${scale})`;
+        });
 
+      // Apply scale transform to service nodes based on their size
       serviceNodes
-        .attr('transform', d => `translate(${d.x},${d.y})`);
+        .attr('transform', d => {
+          const baseRadius = 20;
+          const radius = getNodeRadius(d);
+          const scale = radius / baseRadius;
+          // Transform with position and scale from center
+          return `translate(${d.x},${d.y}) scale(${scale})`;
+        });
 
       label
         .attr('x', d => d.x)
         .attr('y', d => {
           // Adjust label position based on node type
           if (d.label === 'User') {
-            // Dynamic positioning based on node size
-            const nodeRadius = getNodeRadius(d);
-            return d.y + nodeRadius + 5; // Position label below node, adjusting for size
+            // Position based on User icon size with constrained scaling
+            const baseRadius = 20;
+            const radius = getNodeRadius(d);
+            // Use square root scaling to dampen the effect for larger nodes
+            const scale = Math.sqrt(radius / baseRadius);
+            // Fixed base offset plus moderate scaling
+            return d.y + 7 + (20 * scale);
           }
           if (d.label === 'Service') {
             // Dynamic positioning based on node size
-            const nodeRadius = getNodeRadius(d);
-            return d.y + nodeRadius + 2; // Position label below node, adjusting for size
+            const nodeRadius = getNodeRadius(d) * 0.8; // Slightly reduce the offset
+            return d.y + 12 + nodeRadius; // Position label below node
           }
           if (d.label === 'JTBD') {
             // Dynamic positioning based on node size
             const nodeRadius = getNodeRadius(d);
-            return d.y + nodeRadius + 12; // Position label below node, adjusting for size
+            return d.y + nodeRadius + 18; // Position label below node
           }
           return d.y + 25; // Default position
         });
