@@ -99,7 +99,7 @@ function Graph({ data, onNodeSelect, selectedNode }) {
       case 'Service':
         // Size based on number of dependent JTBDs
         // Min size of 12, grows by 3 pixels per dependent
-        return 10 + (d.dependants ? Math.min(d.dependants * 2, 100) : 0);
+        return 20 + (d.dependants ? Math.min(d.dependants * 3, 100) : 0);
       case 'User':
         // Scale user icon based on number of JTBDs they perform - using more dramatic scaling
         return 20 + (d.jtbd_count ? Math.min(d.jtbd_count * 3, 100) : 0); // Much more significant growth per JTBD
@@ -133,7 +133,8 @@ function Graph({ data, onNodeSelect, selectedNode }) {
     // Function to show tooltip
     const showTooltip = (event, d) => {
       tooltip.transition()
-        .duration(200)
+        .delay(500)
+        .duration(500)
         .style('opacity', 0.9);
 
       let tooltipContent = `<strong>${d.name}</strong><br/>`;
@@ -153,7 +154,7 @@ function Graph({ data, onNodeSelect, selectedNode }) {
       }
 
       tooltip.html(tooltipContent)
-        .style('left', (event.pageX - 400) + 'px')
+        .style('left', (event.pageX - 270) + 'px')
         .style('top', (event.pageY - 30) + 'px');
     };
 
