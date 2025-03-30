@@ -308,7 +308,10 @@ function Sidebar({ isOpen }) {
       <ControlsSection>
         <h4>Keyboard Controls</h4>
         <div className="control-item">
-          <kbd>Ctrl</kbd> + Click to select multiple nodes
+          <kbd>Click</kbd> to add/remove nodes from selection
+        </div>
+        <div className="control-item">
+          <kbd>Ctrl</kbd> + Click to select only one node
         </div>
         <div className="control-item">
           <kbd>Esc</kbd> to clear selection

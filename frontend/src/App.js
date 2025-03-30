@@ -97,7 +97,19 @@ function App() {
 
   const handleNodeSelect = (nodeId, isCtrlPressed) => {
     console.log('Node selection:', { nodeId, isCtrlPressed, currentSelection: selectedNodes });
+    
+    // REVERSED BEHAVIOR: Default is multi-select, Ctrl+click is single-select
     if (isCtrlPressed) {
+      // Ctrl+click now selects only this node (replaces selection)
+      // If clicking already selected single node, clear selection
+      if (selectedNodes.length === 1 && selectedNodes.includes(nodeId)) {
+        setSelectedNodes([]);
+      } else {
+        // Otherwise select only this node
+        setSelectedNodes([nodeId]);
+      }
+    } else {
+      // Default click now adds/removes from multi-selection
       // If node is already selected, remove it
       if (selectedNodes.includes(nodeId)) {
         const newSelectedNodes = selectedNodes.filter(id => id !== nodeId);
@@ -105,14 +117,6 @@ function App() {
       } else {
         // Add to selection
         setSelectedNodes([...selectedNodes, nodeId]);
-      }
-    } else {
-      // If clicking already selected single node, clear selection
-      if (selectedNodes.length === 1 && selectedNodes.includes(nodeId)) {
-        setSelectedNodes([]);
-      } else {
-        // Otherwise select only this node
-        setSelectedNodes([nodeId]);
       }
     }
   };
