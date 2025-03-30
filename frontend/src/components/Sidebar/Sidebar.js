@@ -4,10 +4,9 @@ import {
   FaChartLine, 
   FaListOl,
   FaClock,
-  FaHourglassHalf,
-  FaRegClock,
-  FaStopwatch,
-  FaBusinessTime
+  FaUser,
+  FaServer,
+  FaRegCircle
 } from 'react-icons/fa';
 
 const SidebarContainer = styled.div`
@@ -148,6 +147,42 @@ const IconPreview = styled.div`
   }
 `;
 
+const LegendItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+`;
+
+const ColorDot = styled.div`
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: ${props => props.color};
+`;
+
+const ColorSquare = styled.div`
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  background-color: ${props => props.color};
+  position: relative;
+  
+  ${props => props.icon && `
+    &:after {
+      content: '';
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      width: 10px;
+      height: 10px;
+      border: 2px solid #E67E22;
+      border-radius: 50%;
+    }
+  `}
+`;
+
 function Sidebar({ isOpen }) {
   const [activeTab, setActiveTab] = React.useState('progress');
 
@@ -174,58 +209,109 @@ function Sidebar({ isOpen }) {
           <FaListOl />
           Priority
         </Tab>
-        {/* Try each clock icon - uncomment the one you prefer */}
         <Tab
           active={activeTab === 'projection'}
           onClick={() => setActiveTab('projection')}
         >
           <FaClock />
-          {/* Regular clock */}
           Projection
         </Tab>
-        {/* 
-        Alternative options:
-        <FaHourglassHalf /> - Hourglass
-        <FaRegClock /> - Light clock
-        <FaStopwatch /> - Stopwatch
-        <FaBusinessTime /> - Business clock
-        */}
       </TabContainer>
 
       <SidebarContent>
         {activeTab === 'progress' && (
           <>
             <SectionTitle>Progress View</SectionTitle>
-            <div>Track NPS scores and JTBD completion status</div>
+            <div>
+              <p>
+                <strong>JTBD = Jobs To Be Done</strong>. Users come to your product to get jobs done. If your product enables all users to achieve all of their jobs with good outcomes, you product is done! 👩‍🍳
+              </p>
+              
+              <p>
+                Progress is measured through <strong>Net Promoter Scores (NPS)</strong> from each user against the JTBDs they interact with.
+              </p>
+              
+              <SectionTitle>Node Types</SectionTitle>
+              
+              <LegendItem>
+                <FaRegCircle style={{ color: '#5499C7' }} />
+                <span><strong>JTBD</strong> (Jobs To Be Done) - Circles</span>
+              </LegendItem>
+              
+              <LegendItem>
+                <FaUser style={{ color: '#AEB6BF' }} />
+                <span><strong>User</strong> - Person icons</span>
+              </LegendItem>
+              
+              <LegendItem>
+                <FaServer style={{ color: '#2ECC71' }} />
+                <span><strong>Service</strong> - Server icons</span>
+              </LegendItem>
+              
+              <SectionTitle>Node Sizes</SectionTitle>
+              <ul style={{ fontSize: '0.85rem', paddingLeft: '20px', margin: '5px 0' }}>
+                <li><strong>User</strong>: Larger = does more jobs</li>
+                <li><strong>JTBD</strong>: Larger = more complex</li>
+                <li><strong>Service</strong>: Larger = supports more JTBD</li>
+              </ul>
+              
+              <SectionTitle>NPS Colors</SectionTitle>
+              <LegendItem>
+                <ColorDot color="#81C784" />
+                <span><strong>High</strong>: NPS 70-100</span>
+              </LegendItem>
+              <LegendItem>
+                <ColorDot color="#FFB74D" />
+                <span><strong>Medium</strong>: NPS 30-69</span>
+              </LegendItem>
+              <LegendItem>
+                <ColorDot color="#EF9A9A" />
+                <span><strong>Low</strong>: NPS below 30</span>
+              </LegendItem>
+              <LegendItem>
+                <ColorDot color="#BDBDBD" />
+                <span><strong>Unmeasured</strong>: No NPS data</span>
+              </LegendItem>
+              
+              <SectionTitle>Service Status</SectionTitle>
+              <LegendItem>
+                <ColorSquare color="#2ECC71" />
+                <span><strong>Active</strong>: Live service</span>
+              </LegendItem>
+              <LegendItem>
+                <ColorSquare color="#7F8C8D" icon />
+                <span><strong>In Development</strong></span>
+              </LegendItem>
+              <LegendItem>
+                <ColorSquare color="#7F8C8D" />
+                <span><strong>Vaporware 😶‍🌫️</strong></span>
+              </LegendItem>
+            </div>
           </>
         )}
+
         {activeTab === 'priority' && (
           <>
-            <SectionTitle>Prioritization View</SectionTitle>
-            <div>View and manage JTBD demand and priorities</div>
+            <SectionTitle>Priority View</SectionTitle>
+            <div>Visualize and prioritize JTBDs based on complexity and impact</div>
           </>
         )}
+
         {activeTab === 'projection' && (
           <>
             <SectionTitle>Projection View</SectionTitle>
-            <div>Project completion timelines based on complexity and progress data</div>
+            <div>Forecast project timelines and resource requirements</div>
           </>
         )}
       </SidebarContent>
 
       <ControlsSection>
-        <h4>Keyboard Shortcuts</h4>
+        <h4>Keyboard Controls</h4>
         <div className="control-item">
-          <kbd>ESC</kbd> Clear selection
+          <kbd>Ctrl</kbd> + Click to select multiple nodes
         </div>
         <div className="control-item">
-          <kbd>CTRL</kbd> + Click for multi-select
-        </div>
-        <div className="control-item">
-          Drag nodes to reposition
-        </div>
-        <div className="control-item">
-          Scroll to zoom
+          <kbd>Esc</kbd> to clear selection
         </div>
       </ControlsSection>
     </SidebarContainer>
