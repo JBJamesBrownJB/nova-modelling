@@ -76,7 +76,7 @@ function Graph({ data, onNodeSelect, selectedNode }) {
         .attr('refX', 0)
         .attr('refY', 0)
         .attr('orient', 'auto')
-        .attr('markerWidth', 2)
+        .attr('markerWidth', 3)
         .attr('markerHeight', 2)
         .attr('xoverflow', 'visible')
         .append('svg:path')
@@ -210,14 +210,14 @@ function Graph({ data, onNodeSelect, selectedNode }) {
       .force('y', d3.forceY(height / 2).strength(0.1))
       .on('tick', () => {
         // Update link positions with edge point calculations
-        link.each(function(d) {
+        link.each(d => {
           const edgePoints = calculateLinkEdgePoints(d, data.nodes, getNodeRadius);
-          if (edgePoints) {
-            d.sourceEdgeX = edgePoints.source.x;
-            d.sourceEdgeY = edgePoints.source.y;
-            d.targetEdgeX = edgePoints.target.x;
-            d.targetEdgeY = edgePoints.target.y;
-          }
+          Object.assign(d, edgePoints && {
+            sourceEdgeX: edgePoints.source.x,
+            sourceEdgeY: edgePoints.source.y,
+            targetEdgeX: edgePoints.target.x,
+            targetEdgeY: edgePoints.target.y
+          });
         });
 
         link
