@@ -5,8 +5,6 @@ import { FaFilter, FaTable, FaProjectDiagram, FaChartBar } from 'react-icons/fa'
 const SidebarContainer = styled.div`
   width: ${props => props.isOpen ? '300px' : '0'};
   height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
   background-color: #f8f9fa;
   border-right: 1px solid #e9ecef;
   transition: width 0.3s ease;
@@ -80,9 +78,9 @@ const Tab = styled.button`
 `;
 
 const SidebarContent = styled.div`
-  padding: 15px;
   flex: 1;
   overflow-y: auto;
+  padding: 15px;
 `;
 
 const SectionTitle = styled.h4`
@@ -93,57 +91,105 @@ const SectionTitle = styled.h4`
   letter-spacing: 0.5px;
 `;
 
+const ControlsSection = styled.div`
+  padding: 15px;
+  border-top: 1px solid #e9ecef;
+  background: #fff;
+  
+  h4 {
+    margin: 0 0 10px 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .control-item {
+    margin: 8px 0;
+    font-size: 0.85rem;
+    color: #666;
+    display: flex;
+    align-items: center;
+  }
+
+  kbd {
+    background-color: #f1f1f1;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    padding: 2px 6px;
+    margin: 0 3px;
+    font-family: monospace;
+    font-size: 11px;
+    min-width: 20px;
+    text-align: center;
+    display: inline-block;
+  }
+`;
+
 function Sidebar({ isOpen }) {
   const [activeTab, setActiveTab] = React.useState('filter');
-  
+
   if (!isOpen) return null;
 
-  
   return (
     <SidebarContainer isOpen={isOpen}>
       <SidebarHeader>
         <h3>Graph Explorer</h3>
       </SidebarHeader>
-      
+
       <TabContainer>
-        <Tab 
-          active={activeTab === 'filter'} 
+        <Tab
+          active={activeTab === 'filter'}
           onClick={() => setActiveTab('filter')}
         >
           <FaFilter />
-          <span>Filter</span>
+          Filter
         </Tab>
-        <Tab 
-          active={activeTab === 'details'} 
+        <Tab
+          active={activeTab === 'details'}
           onClick={() => setActiveTab('details')}
         >
           <FaTable />
-          <span>Details</span>
+          Details
         </Tab>
-        <Tab 
-          active={activeTab === 'explore'} 
+        <Tab
+          active={activeTab === 'explore'}
           onClick={() => setActiveTab('explore')}
         >
           <FaProjectDiagram />
-          <span>Explore</span>
+          Explore
         </Tab>
-        <Tab 
-          active={activeTab === 'stats'} 
+        <Tab
+          active={activeTab === 'stats'}
           onClick={() => setActiveTab('stats')}
         >
           <FaChartBar />
-          <span>Stats</span>
+          Stats
         </Tab>
       </TabContainer>
-      
+
       <SidebarContent>
         {activeTab === 'filter' && (
           <>
-            <SectionTitle>TBD</SectionTitle>
-            <SectionTitle>TBD</SectionTitle>
+            <SectionTitle>Progress View</SectionTitle>
           </>
         )}
       </SidebarContent>
+
+      <ControlsSection>
+        <h4>Keyboard Shortcuts</h4>
+        <div className="control-item">
+          <kbd>ESC</kbd> Clear selection
+        </div>
+        <div className="control-item">
+          <kbd>CTRL</kbd> + Click for multi-select
+        </div>
+        <div className="control-item">
+          Drag nodes to reposition
+        </div>
+        <div className="control-item">
+          Scroll to zoom
+        </div>
+      </ControlsSection>
     </SidebarContainer>
   );
 }

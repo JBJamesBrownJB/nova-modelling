@@ -76,9 +76,6 @@ function App() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Load initial data
-        const data = await dbService.getGraph();
-
         // Run initial complexity calculation to ensure all nodes have complexity scores
         await dbService.recalculateComplexity();
 
