@@ -62,14 +62,7 @@ function App() {
   const [graphData, setGraphData] = useState({ nodes: [], links: [] });
   const [isLoading, setIsLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [selectedNode, setSelectedNode] = useState(null);
   const [showNodeForm, setShowNodeForm] = useState(false);
-  const [filterSettings, setFilterSettings] = useState({
-    showJTBD: true,
-    showUser: true,
-    showService: true,
-    showDependsOn: true
-  });
 
   // Node and relationship types
   const nodeTypes = ['JTBD', 'User', 'Service'];
@@ -105,14 +98,6 @@ function App() {
     setSidebarOpen(!sidebarOpen);
   };
 
-  const handleNodeSelect = (node) => {
-    setSelectedNode(node);
-  };
-
-  const handleFilterChange = (newSettings) => {
-    setFilterSettings({ ...filterSettings, ...newSettings });
-  };
-
   // Handle creating a new node
   const handleCreateNode = async (nodeType, properties, relationships) => {
     try {
@@ -143,29 +128,9 @@ function App() {
     }
   };
 
-  // Apply filters to graph data
   const filteredData = {
-    nodes: graphData.nodes.filter(node => {
-      if (node.label === 'JTBD' && !filterSettings.showJTBD) {
-        filterSettings.showDoes = false;
-        filterSettings.showDependsOn = false;
-        return false;
-      }
-      if (node.label === 'User' && !filterSettings.showUser) {
-        filterSettings.showDoes = false;
-        return false;
-      }
-      if (node.label === 'Service' && !filterSettings.showService) {
-        filterSettings.showDependsOn = false;
-        return false;
-      }
-      return true;
-    }),
-    links: graphData.links.filter(link => {
-      if (link.type === 'DEPENDS_ON' && !filterSettings.showDependsOn) return false;
-      if (link.type === 'DOES' && !filterSettings.showDoes) return false;
-      return true;
-    })
+    nodes: graphData.nodes,
+    links: graphData.links
   };
 
   return (
@@ -174,9 +139,6 @@ function App() {
       <MainContent>
         <Sidebar
           isOpen={sidebarOpen}
-          selectedNode={selectedNode}
-          filterSettings={filterSettings}
-          onFilterChange={handleFilterChange}
         />
         <GraphContainer>
           {isLoading ? (
@@ -185,8 +147,6 @@ function App() {
             <>
               <Graph
                 data={filteredData}
-                onNodeSelect={handleNodeSelect}
-                selectedNode={selectedNode}
               />
               <AddNodeButton onClick={() => setShowNodeForm(true)}>+</AddNodeButton>
             </>
