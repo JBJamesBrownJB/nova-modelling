@@ -65,16 +65,18 @@ const GraphContainer = styled.div`
 function Graph({ data, selectedNodes, onNodeSelect }) {
   const svgRef = useRef(null);
 
+  // Color constants
   const nodeColors = {
-    'JTBD': '#57C7E3', // Blue
-    'User': '#ECB5C9', // Brown
-    'Service': {
-      'not_built': '#95A5A6',
-      'in_development': '#95A5A6',
-      'active': '#8DCC93'
+    User: '#AEB6BF',
+    JTBD: '#5499C7',
+    Service: {
+      active: '#2ECC71',  // Green for active
+      in_development: '#7F8C8D',  // Grey for in-development
+      planned: '#7F8C8D',  // Grey for planned
+      not_built: '#7F8C8D'  // Grey for not built or missing status
     }
   };
-
+  
   const linkColors = {
     'DOES': '#ECB5C9',   // Pink
     'DEPENDS_ON': '#F16667'  // Red
@@ -205,7 +207,7 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
       jtbdGroups.append('circle')
         .attr('class', d => `circle-node ${selectedNodes.includes(d.id) ? 'selected-node' : ''}`)
         .attr('r', d => getNodeRadius(d))
-        .attr('fill', d => nodeColors[d.label] || '#666');
+        .attr('fill', d => d.npsColor || nodeColors[d.label] || '#666');
 
       // Add event handlers to the group
       jtbdGroups

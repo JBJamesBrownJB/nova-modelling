@@ -15,10 +15,6 @@ class DatabaseService {
   async addRelationship(sourceId, targetId, type) {
     throw new Error('Method not implemented');
   }
-
-  async recalculateComplexity() {
-    throw new Error('Method not implemented');
-  }
 }
 
 export default DatabaseService;

@@ -8,6 +8,7 @@ import MockDatabaseService from './services/database/MockDatabaseService';
 import NodeCreationForm from './components/NodeCreation/NodeCreationForm';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { enhanceGraphData } from './services/enhancement/DataEnhancementService';
 
 const AppContainer = styled.div`
   display: flex;
@@ -76,13 +77,14 @@ function App() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Run initial complexity calculation to ensure all nodes have complexity scores
-        await dbService.recalculateComplexity();
-
-        // Get updated data with complexity values
-        const updatedData = await dbService.getGraph();
-        console.log('Initial graph data loaded:', updatedData);
-        setGraphData(updatedData);
+        // Get raw data
+        const rawData = await dbService.getGraph();
+        
+        // Process data using the enhancement service
+        const enhancedData = enhanceGraphData(rawData);
+        
+        console.log('Initial graph data loaded:', enhancedData);
+        setGraphData(enhancedData);
       } catch (error) {
         console.error('Error fetching graph data:', error);
       } finally {
@@ -172,33 +174,23 @@ function App() {
     setSidebarOpen(!sidebarOpen);
   };
 
-  // Handle creating a new node
-  const handleCreateNode = async (nodeType, properties, relationships) => {
+  const handleAddNode = async (nodeType, properties) => {
+    setIsLoading(true);
     try {
-      // Create the node
-      const newNode = await dbService.addNode(nodeType, properties);
-
-      // Add relationships if any
-      for (const rel of relationships) {
-        if (rel.targetId) {
-          await dbService.addRelationship(newNode.id, rel.targetId, rel.type);
-        }
-      }
-
-      // Recalculate complexity after adding node and relationships
-      await dbService.recalculateComplexity();
-
-      // Get updated graph data
-      const updatedGraph = await dbService.getGraph();
-      setGraphData(updatedGraph);
-
-      // Show success message
-      toast.success(`${nodeType} node created successfully!`);
-
-      return newNode;
+      await dbService.addNode(nodeType, properties);
+      const updatedData = await dbService.getGraph();
+      
+      // Process the updated data using the enhancement service
+      const enhancedData = enhanceGraphData(updatedData);
+      
+      setGraphData(enhancedData);
+      setShowNodeForm(false);
+      toast.success(`${nodeType} node added successfully`);
     } catch (error) {
-      console.error('Error creating node:', error);
-      toast.error('Error creating node');
+      console.error('Error adding node:', error);
+      toast.error('Failed to add node');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -232,7 +224,7 @@ function App() {
       <NodeCreationForm
         isOpen={showNodeForm}
         onClose={() => setShowNodeForm(false)}
-        onCreateNode={handleCreateNode}
+        onCreateNode={handleAddNode}
         nodeTypes={nodeTypes}
         existingNodes={graphData.nodes}
         relationshipTypes={relationshipTypes}
