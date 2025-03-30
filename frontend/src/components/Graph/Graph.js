@@ -53,7 +53,7 @@ function Graph({ data, onNodeSelect, selectedNode }) {
   // Define node colors based on node type
   const nodeColors = {
     'JTBD': '#57C7E3', // Blue
-    'User': '#ECB5C9', // Pink
+    'User': '#ECB5C9', // Brown
     'Service': '#8DCC93'  // Green
   };
 
@@ -88,7 +88,6 @@ function Graph({ data, onNodeSelect, selectedNode }) {
     });
   };
 
-  //affects line issue TODO
   // Helper function to calculate the radius of each node type
   const getNodeRadius = (d) => {
     switch (d.label) {

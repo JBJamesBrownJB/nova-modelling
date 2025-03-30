@@ -28,6 +28,30 @@ npm install
 npm start
 ```
 
+### Testing
+
+The project uses Jest and React Testing Library for unit tests. You can run tests using the following commands:
+
+```bash
+# Run tests once
+npm test
+
+# Run tests in watch mode (recommended during development)
+npm run test:watch
+
+# Run tests with coverage report
+npm run test:coverage
+```
+
+Test files are co-located with their implementation files and follow the naming convention `*.test.js`. For example:
+- `ComplexityCalculator.js` has its tests in `ComplexityCalculator.test.js`
+
+When writing new features, aim to:
+1. Write tests before implementing the feature (TDD)
+2. Keep test coverage high
+3. Test both happy paths and edge cases
+4. Use descriptive test names that explain the behavior being tested
+
 ## Implementation Details
 
 ### Data Structure

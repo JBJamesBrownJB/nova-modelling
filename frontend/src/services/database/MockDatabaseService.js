@@ -1,12 +1,11 @@
 import DatabaseService from './DatabaseService';
 import mockData from '../../data/mockData';
-import ComplexityCalculator from '../complexity/ComplexityCalculator';
+import { calculateGraphComplexity } from '../complexity/ComplexityCalculator';
 
 class MockDatabaseService extends DatabaseService {
   constructor() {
     super();
     this.data = mockData;
-    this.complexityCalculator = new ComplexityCalculator();
     
     // Calculate initial complexity values
     this.recalculateComplexity();
@@ -63,11 +62,12 @@ class MockDatabaseService extends DatabaseService {
   }
 
   // Recalculate complexity for all JTBD nodes based on service dependencies
-  async recalculateComplexity() {
-    // Use the ComplexityCalculator to update node complexity values
-    this.data.nodes = this.complexityCalculator.calculateGraphComplexity(
+  async recalculateComplexity(config = {}) {
+    // Use the ComplexityCalculator pure function to update node complexity values
+    this.data.nodes = calculateGraphComplexity(
       this.data.nodes, 
-      this.data.links
+      this.data.links,
+      config
     );
     
     return this.data;

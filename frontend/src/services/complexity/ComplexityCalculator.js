@@ -1,163 +1,114 @@
-/**
- * ComplexityCalculator
- * 
- * Responsible for calculating complexity of nodes based on the Nova Modelling principles.
- * This calculates complexity based on the number of service dependencies for each JTBD,
- * and the number of dependant JTBDs for each Service.
- */
-class ComplexityCalculator {
-  constructor(config = {}) {
-    // Default complexity model constant
-    this.dependencyWeight = config.dependencyWeight || 3;  // Weight for each service dependency
-  }
+const DEFAULT_DEPENDENCY_WEIGHT = 3;  
 
-  /**
-   * Calculate complexity for a single JTBD node based on its service dependencies
-   * @param {Object} node - The JTBD node
-   * @param {Array} links - All links in the graph
-   * @param {Array} nodes - All nodes in the graph
-   * @returns {number} - The calculated complexity value
-   */
-  calculateNodeComplexity(node, links, nodes) {
-    if (node.label !== 'JTBD') {
-      return 0; // Only JTBD nodes have complexity
+export const calculateNodeComplexity = (node, links, nodes, config = {}) => {
+  if (node.label !== 'JTBD') {
+    return 0;
+  }
+  const dependencyWeight = config.dependencyWeight || DEFAULT_DEPENDENCY_WEIGHT;
+  const dependencyCount = countServiceDependencies(node, links, nodes);
+  return dependencyCount * dependencyWeight;
+};
+
+export const countServiceDependencies = (node, links, allNodes) => {
+  let dependencyCount = 0;
+  
+  links.forEach(link => {
+    if (isServiceDependencyLink(node, link)) {
+      const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+      const targetNode = allNodes.find(n => n.id === targetId);
+      
+      if (targetNode && targetNode.label === 'Service') {
+        dependencyCount++;
+      }
     }
+  });
+  
+  return dependencyCount;
+};
 
-    // Count service dependencies
-    let dependencyCount = 0;
-    
-    // Count all relationships from this JTBD node to Service nodes
-    links.forEach(link => {
-      if ((link.source === node.id || 
-          (typeof link.source === 'object' && link.source.id === node.id)) &&
-          link.type === 'DEPENDS_ON') {
-        // Find target node to check if it's a Service node
-        const targetId = typeof link.target === 'object' ? link.target.id : link.target;
-        const targetNode = nodes.find(n => n.id === targetId);
-        
-        if (targetNode && targetNode.label === 'Service') {
-          dependencyCount++;
-        }
-      }
-    });
-    
-    // Calculate complexity as weighted dependency count
-    const complexity = dependencyCount * this.dependencyWeight;
-    
-    // Store the dependency count for reference
-    node.dependency_count = dependencyCount;
-    
-    return complexity;
+export const calculateServiceDependants = (node, links, nodes) => {
+  if (node.label !== 'Service') {
+    return 0; // Only Service nodes have dependants
   }
 
-  /**
-   * Calculate dependants for a Service node based on JTBD nodes that depend on it
-   * @param {Object} node - The Service node
-   * @param {Array} links - All links in the graph
-   * @param {Array} nodes - All nodes in the graph
-   * @returns {number} - The calculated dependants count
-   */
-  calculateServiceDependants(node, links, nodes) {
-    if (node.label !== 'Service') {
-      return 0; // Only Service nodes have dependants
+  let dependantCount = 0;
+  
+  links.forEach(link => {
+    if ((link.target === node.id || 
+        (typeof link.target === 'object' && link.target.id === node.id)) &&
+        link.type === 'DEPENDS_ON') {
+      // Find source node to check if it's a JTBD node
+      const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+      const sourceNode = nodes.find(n => n.id === sourceId);
+      
+      if (sourceNode && sourceNode.label === 'JTBD') {
+        dependantCount++;
+      }
     }
+  });
+  
+  return dependantCount;
+};
 
-    // Count JTBD dependants
-    let dependantCount = 0;
-    
-    // Count all relationships from JTBD nodes to this Service node
-    links.forEach(link => {
-      if ((link.target === node.id || 
-          (typeof link.target === 'object' && link.target.id === node.id)) &&
-          link.type === 'DEPENDS_ON') {
-        // Find source node to check if it's a JTBD node
-        const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
-        const sourceNode = nodes.find(n => n.id === sourceId);
-        
-        if (sourceNode && sourceNode.label === 'JTBD') {
-          dependantCount++;
-        }
-      }
-    });
-    
-    // Store the dependant count
-    node.dependants = dependantCount;
-    
-    return dependantCount;
+export const calculateUserJtbdCount = (node, links, nodes) => {
+  if (node.label !== 'User') {
+    return 0; // Only User nodes have JTBD counts
   }
-
-  /**
-   * Calculate the number of JTBDs associated with each User
-   * @param {Object} node - The User node
-   * @param {Array} links - All links in the graph
-   * @param {Array} nodes - All nodes in the graph
-   * @returns {number} - The calculated JTBD count
-   */
-  calculateUserJtbdCount(node, links, nodes) {
-    if (node.label !== 'User') {
-      return 0; // Only User nodes have JTBD counts
+  let jtbdCount = 0;
+  
+  links.forEach(link => {
+    if (isUserJtbdLink(node, link)) {
+      // Find target node to check if it's a JTBD node
+      const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+      const targetNode = nodes.find(n => n.id === targetId);
+      
+      if (targetNode && targetNode.label === 'JTBD') {
+        jtbdCount++;
+      }
     }
+  });
+  
+  return jtbdCount;
+};
 
-    // Count JTBDs performed by this user
-    let jtbdCount = 0;
+export const calculateGraphComplexity = (nodes, links, config = {}) => {
+  return nodes.map(node => {
+    const updatedNode = { ...node };
     
-    // Count all DOES relationships from this User to JTBD nodes
-    links.forEach(link => {
-      if ((link.source === node.id || 
-          (typeof link.source === 'object' && link.source.id === node.id)) &&
-          link.type === 'DOES') {
-        // Find target node to check if it's a JTBD node
-        const targetId = typeof link.target === 'object' ? link.target.id : link.target;
-        const targetNode = nodes.find(n => n.id === targetId);
-        
-        if (targetNode && targetNode.label === 'JTBD') {
-          jtbdCount++;
-        }
-      }
-    });
+    if (node.label === 'JTBD') {
+      updatedNode.complexity = calculateNodeComplexity(node, links, nodes, config);
+      updatedNode.dependency_count = countServiceDependencies(node, links, nodes);
+    } else if (node.label === 'Service') {
+      updatedNode.dependants = calculateServiceDependants(node, links, nodes);
+    } else if (node.label === 'User') {
+      updatedNode.jtbd_count = calculateUserJtbdCount(node, links, nodes);
+    }
     
-    // Store the JTBD count
-    node.jtbd_count = jtbdCount;
-    
-    return jtbdCount;
-  }
+    return updatedNode;
+  });
+};
 
-  /**
-   * Calculate complexity for all JTBD nodes and dependants for all Service nodes in the graph
-   * @param {Array} nodes - All nodes in the graph
-   * @param {Array} links - All links in the graph
-   * @returns {Array} - The nodes with updated values
-   */
-  calculateGraphComplexity(nodes, links) {
-    const updatedNodes = [...nodes];
-    
-    updatedNodes.forEach(node => {
-      if (node.label === 'JTBD') {
-        node.complexity = this.calculateNodeComplexity(node, links, nodes);
-      } else if (node.label === 'Service') {
-        node.dependants = this.calculateServiceDependants(node, links, nodes);
-      } else if (node.label === 'User') {
-        node.jtbd_count = this.calculateUserJtbdCount(node, links, nodes);
-      }
-    });
-    
-    return updatedNodes;
-  }
+export const simulateComplexityChanges = (nodes, links, newParams) => {
+  return calculateGraphComplexity(nodes, links, newParams);
+};
 
-  /**
-   * Simulate complexity changes by adjusting model parameters
-   * @param {Array} nodes - All nodes in the graph
-   * @param {Array} links - All links in the graph 
-   * @param {Object} newParams - New parameters to simulate with
-   * @returns {Array} - The nodes with simulated complexity values
-   */
-  simulateComplexityChanges(nodes, links, newParams) {
-    // Create a temporary calculator with the new parameters
-    const tempCalculator = new ComplexityCalculator(newParams);
-    
-    // Use the temp calculator to calculate new complexity values
-    return tempCalculator.calculateGraphComplexity(nodes, links);
-  }
-}
+const isServiceDependencyLink = (node, link) => {
+  return (link.source === node.id || 
+    (typeof link.source === 'object' && link.source.id === node.id)) &&
+    link.type === 'DEPENDS_ON';
+};
 
-export default ComplexityCalculator;
+const isUserJtbdLink = (node, link) => {
+  return (link.source === node.id || 
+    (typeof link.source === 'object' && link.source.id === node.id)) &&
+    link.type === 'DOES';
+};
+
+// For backwards compatibility with code that expects the class-based API
+export default {
+  calculateNodeComplexity,
+  calculateServiceDependants,
+  calculateUserJtbdCount,
+  calculateGraphComplexity,
+  simulateComplexityChanges
+};
