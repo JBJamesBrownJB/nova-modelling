@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import * as d3 from 'd3';
 import { showTooltip, hideTooltip } from './TooltipUtils';
@@ -51,6 +51,7 @@ const GraphContainer = styled.div`
 
 function Graph({ data, onNodeSelect, selectedNode }) {
   const svgRef = useRef(null);
+  const [selectedNodes, setSelectedNodes] = useState(new Set());
 
   const nodeColors = {
     'JTBD': '#57C7E3', // Blue
@@ -84,6 +85,29 @@ function Graph({ data, onNodeSelect, selectedNode }) {
         .attr('fill', color)
         .style('stroke', 'none');
     });
+  };
+
+  const handleNodeClick = (event, node) => {
+    event.stopPropagation();
+    
+    if (event.ctrlKey) {
+      // Multi-select mode
+      const newSelected = new Set(selectedNodes);
+      if (newSelected.has(node.id)) {
+        newSelected.delete(node.id);
+      } else {
+        newSelected.add(node.id);
+      }
+      setSelectedNodes(newSelected);
+      onNodeSelect && onNodeSelect(Array.from(newSelected).map(id => 
+        data.nodes.find(n => n.id === id)
+      ));
+    } else {
+      // Single select mode
+      const newSelected = new Set([node.id]);
+      setSelectedNodes(newSelected);
+      onNodeSelect && onNodeSelect([node]);
+    }
   };
 
   useEffect(() => {
@@ -130,10 +154,7 @@ function Graph({ data, onNodeSelect, selectedNode }) {
       .attr('fill', d => nodeColors[d.label] || '#666')
       .on('mouseover', (event, d) => showTooltip(tooltip, event, d))
       .on('mouseout', () => hideTooltip(tooltip))
-      .on('click', (event, d) => {
-        event.stopPropagation();
-        onNodeSelect(d);
-      })
+      .on('click', (event, d) => handleNodeClick(event, d))
       .call(d3.drag()
         .on('start', dragstarted)
         .on('drag', dragged)
@@ -146,10 +167,7 @@ function Graph({ data, onNodeSelect, selectedNode }) {
       .attr('class', 'user-node')
       .on('mouseover', (event, d) => showTooltip(tooltip, event, d))
       .on('mouseout', () => hideTooltip(tooltip))
-      .on('click', (event, d) => {
-        event.stopPropagation();
-        onNodeSelect(d);
-      })
+      .on('click', (event, d) => handleNodeClick(event, d))
       .call(d3.drag()
         .on('start', dragstarted)
         .on('drag', dragged)
@@ -167,10 +185,7 @@ function Graph({ data, onNodeSelect, selectedNode }) {
       .attr('class', 'service-node')
       .on('mouseover', (event, d) => showTooltip(tooltip, event, d))
       .on('mouseout', () => hideTooltip(tooltip))
-      .on('click', (event, d) => {
-        event.stopPropagation();
-        onNodeSelect(d);
-      })
+      .on('click', (event, d) => handleNodeClick(event, d))
       .call(d3.drag()
         .on('start', dragstarted)
         .on('drag', dragged)
@@ -181,11 +196,11 @@ function Graph({ data, onNodeSelect, selectedNode }) {
       .attr('fill', nodeColors['Service'])
       .attr('transform', 'translate(-12, -12)');
 
-    // Highlight selected node if any
-    if (selectedNode) {
-      circleNodes.classed('selected-node', d => d.id === selectedNode.id);
-      userNodes.select('path').classed('selected-node', d => d.id === selectedNode.id);
-      serviceNodes.select('path').classed('selected-node', d => d.id === selectedNode.id);
+    // Highlight selected nodes
+    if (selectedNodes.size > 0) {
+      circleNodes.classed('selected-node', d => selectedNodes.has(d.id));
+      userNodes.select('path').classed('selected-node', d => selectedNodes.has(d.id));
+      serviceNodes.select('path').classed('selected-node', d => selectedNodes.has(d.id));
     }
 
     // Add node labels
@@ -281,30 +296,71 @@ function Graph({ data, onNodeSelect, selectedNode }) {
       });
 
     // Click on background to deselect nodes
-    svg.on('click', () => {
-      onNodeSelect(null);
+    svg.on('click', (event) => {
+      if (event.target === svg.node()) {
+        setSelectedNodes(new Set());
+        onNodeSelect && onNodeSelect([]);
+      }
     });
 
     // Drag functions
     function dragstarted(event, d) {
       if (!event.active) simulation.alphaTarget(0.3).restart();
-      d.fx = d.x;
-      d.fy = d.y;
+      
+      // If dragging a selected node, fix all selected nodes
+      if (selectedNodes.has(d.id)) {
+        data.nodes.forEach(node => {
+          if (selectedNodes.has(node.id)) {
+            node.fx = node.x;
+            node.fy = node.y;
+          }
+        });
+      } else {
+        d.fx = d.x;
+        d.fy = d.y;
+      }
     }
 
     function dragged(event, d) {
-      d.fx = event.x;
-      d.fy = event.y;
+      // Calculate the movement delta
+      const dx = event.x - d.x;
+      const dy = event.y - d.y;
+
+      // If dragging a selected node, move all selected nodes
+      if (selectedNodes.has(d.id)) {
+        data.nodes.forEach(node => {
+          if (selectedNodes.has(node.id)) {
+            node.fx = node.x + dx;
+            node.fy = node.y + dy;
+          }
+        });
+      } else {
+        d.fx = event.x;
+        d.fy = event.y;
+      }
     }
 
     function dragended(event, d) {
       if (!event.active) simulation.alphaTarget(0);
+      
+      // Release all fixed positions
+      if (selectedNodes.has(d.id)) {
+        data.nodes.forEach(node => {
+          if (selectedNodes.has(node.id)) {
+            node.fx = null;
+            node.fy = null;
+          }
+        });
+      } else {
+        d.fx = null;
+        d.fy = null;
+      }
     }
 
     return () => {
       simulation.stop();
     };
-  }, [data, onNodeSelect, selectedNode]);
+  }, [data, onNodeSelect, selectedNode, selectedNodes, setSelectedNodes]);
 
   return (
     <GraphContainer ref={svgRef}>
