@@ -92,10 +92,28 @@ function App() {
     fetchData();
   }, []);
 
-  const handleNodeSelect = (nodes) => {
-    // Extract IDs from node objects
-    const nodeIds = nodes.map(node => typeof node === 'object' ? node.id : node);
-    setSelectedNodes(new Set(nodeIds));
+  const handleNodeSelect = (nodeId, isCtrlPressed) => {
+    if (isCtrlPressed) {
+      // If node is already selected, remove it
+      if (selectedNodes.has(nodeId)) {
+        const newSelectedNodes = new Set(selectedNodes);
+        newSelectedNodes.delete(nodeId);
+        setSelectedNodes(newSelectedNodes);
+      } else {
+        // Add to selection
+        const newSelectedNodes = new Set(selectedNodes);
+        newSelectedNodes.add(nodeId);
+        setSelectedNodes(newSelectedNodes);
+      }
+    } else {
+      // If clicking already selected single node, clear selection
+      if (selectedNodes.size === 1 && selectedNodes.has(nodeId)) {
+        setSelectedNodes(new Set());
+      } else {
+        // Otherwise select only this node
+        setSelectedNodes(new Set([nodeId]));
+      }
+    }
   };
 
   const getVisibleData = () => {
@@ -186,7 +204,7 @@ function App() {
             <>
               <Graph
                 data={getVisibleData()}
-                onNodeSelect={handleNodeSelect}
+                onNodeSelect={(nodeId, isCtrlPressed) => handleNodeSelect(nodeId, isCtrlPressed)}
                 selectedNodes={selectedNodes}
               />
               <AddNodeButton onClick={() => setShowNodeForm(true)}>+</AddNodeButton>

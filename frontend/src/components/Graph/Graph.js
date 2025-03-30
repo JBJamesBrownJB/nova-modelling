@@ -100,23 +100,8 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
   };
 
   const handleNodeClick = (event, node) => {
-    event.stopPropagation();
-
-    if (event.ctrlKey) {
-      // Multi-select mode
-      const newSelected = new Set(selectedNodes);
-      if (newSelected.has(node.id)) {
-        newSelected.delete(node.id);
-      } else {
-        newSelected.add(node.id);
-      }
-      onNodeSelect && onNodeSelect(Array.from(newSelected).map(id =>
-        data.nodes.find(n => n.id === id)
-      ));
-    } else {
-      // Single select mode
-      onNodeSelect && onNodeSelect([node]);
-    }
+    event.stopPropagation(); 
+    onNodeSelect(node.id, event.ctrlKey);
   };
 
   useEffect(() => {
