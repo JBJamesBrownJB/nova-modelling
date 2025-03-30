@@ -237,7 +237,7 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
       userGroups.append('path')
         .attr('class', d => `user-node ${selectedNodes.includes(d.id) ? 'selected-node' : ''}`)
         .attr('d', userIconPath)
-        .attr('fill', d => nodeColors[d.label] || '#666')
+        .attr('fill', d => d.npsColor || nodeColors[d.label] || '#666')
         .attr('transform', 'translate(-12, -12)');
 
       // Add event handlers to the group

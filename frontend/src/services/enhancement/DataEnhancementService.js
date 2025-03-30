@@ -11,9 +11,30 @@ export const enhanceGraphData = (data) => {
   
   // Apply enhancements in sequence
   const dataWithComplexity = enhanceWithComplexity(enhancedData);
-  const fullyEnhancedData = enhanceWithNpsScores(dataWithComplexity);
+  const dataWithNps = enhanceWithNpsScores(dataWithComplexity);
+  const fullyEnhancedData = enhanceWithColors(dataWithNps);
   
   return fullyEnhancedData;
+};
+
+/**
+ * Adds appropriate colors to all node types
+ * @param {Object} data - The graph data object containing nodes and links
+ * @returns {Object} - Enhanced data with color properties for all node types
+ */
+export const enhanceWithColors = (data) => {
+  // Create a copy of the data
+  const enhancedData = { ...data, nodes: [...data.nodes] };
+  
+  // Process each node
+  enhancedData.nodes = enhancedData.nodes.map(node => {
+    // User nodes now get colored by NPS in enhanceWithNpsScores
+    // Service nodes use status for coloring directly in the Graph component
+    // No additional coloring needed here
+    return node;
+  });
+  
+  return enhancedData;
 };
 
 /**
@@ -25,11 +46,21 @@ export const enhanceWithNpsScores = (data) => {
   // Create a copy of the data object
   const enhancedData = { ...data, nodes: [...data.nodes] };
   
-  // Process each JTBD node
+  // Process each node
   enhancedData.nodes = enhancedData.nodes.map(node => {
     if (node.label === 'JTBD') {
-      // Calculate aggregate NPS
+      // Calculate aggregate NPS for JTBD nodes based on incoming DOES relationships
       const aggregateNps = calculateAggregateNps(node.id, data.links);
+      
+      // Return node with NPS data
+      return {
+        ...node,
+        npsScore: aggregateNps,
+        npsColor: getNpsColor(aggregateNps)
+      };
+    } else if (node.label === 'User') {
+      // Calculate aggregate NPS for User nodes based on outgoing DOES relationships
+      const aggregateNps = calculateUserNps(node.id, data.links);
       
       // Return node with NPS data
       return {
@@ -98,18 +129,63 @@ export const getNpsColor = (npsScore) => {
  * @returns {Number|null} - Calculated NPS score or null if no data
  */
 export const calculateAggregateNps = (jtbdId, links) => {
+  // Get all DOES relationships targeting this JTBD
   const doesEdges = links.filter(link => 
-    link.target === jtbdId && 
-    link.type === 'DOES' && 
+    (typeof link.target === 'object' ? link.target.id : link.target) === jtbdId && 
+    link.type === 'DOES'
+  );
+  
+  if (doesEdges.length === 0) return null; // No relationships at all
+  
+  // Get edges with NPS scores
+  const edgesWithNps = doesEdges.filter(link => 
     link.nps !== undefined && 
     link.nps !== null
   );
   
-  if (doesEdges.length === 0) return null; // No NPS data available
+  if (edgesWithNps.length === 0) return null; // No NPS data at all
   
-  // Calculate average NPS
-  const totalNps = doesEdges.reduce((sum, edge) => sum + edge.nps, 0);
-  return Math.round(totalNps / doesEdges.length);
+  // Calculate the sum of NPS scores (treat missing values as 0)
+  const npsSum = doesEdges.reduce((sum, link) => {
+    const npsValue = link.nps !== undefined && link.nps !== null ? link.nps : 0;
+    return sum + npsValue;
+  }, 0);
+  
+  // Return the average NPS score
+  return Math.round(npsSum / doesEdges.length);
+};
+
+/**
+ * Calculates aggregate NPS for a User node from its outgoing DOES edges
+ * @param {String} userId - ID of the User node
+ * @param {Array} links - All links in the graph
+ * @returns {Number|null} - Calculated NPS score or null if no data
+ */
+export const calculateUserNps = (userId, links) => {
+  // Get all DOES relationships originating from this User
+  const doesEdges = links.filter(link => 
+    (typeof link.source === 'object' ? link.source.id : link.source) === userId && 
+    link.type === 'DOES'
+  );
+  
+  if (doesEdges.length === 0) return null; // No relationships at all
+  
+  // Get edges with NPS scores
+  const edgesWithNps = doesEdges.filter(link => 
+    link.nps !== undefined && 
+    link.nps !== null
+  );
+  
+  if (edgesWithNps.length === 0) return null; // No NPS data at all
+  
+  // Calculate the sum of NPS scores (treat missing values as 0)
+  const npsSum = doesEdges.reduce((sum, link) => {
+    const npsValue = link.nps !== undefined && link.nps !== null ? link.nps : 0;
+    return sum + npsValue;
+  }, 0);
+  
+  // Return the average NPS score
+  return Math.round(npsSum / doesEdges.length);
 };
 
 // COMPLEXITY CALCULATION FUNCTIONS
