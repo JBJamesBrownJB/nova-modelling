@@ -1,6 +1,14 @@
 import React from 'react';
 import styled from 'styled-components';
-import { FaFilter, FaTable, FaProjectDiagram, FaChartBar } from 'react-icons/fa';
+import { 
+  FaChartLine, 
+  FaListOl,
+  FaClock,
+  FaHourglassHalf,
+  FaRegClock,
+  FaStopwatch,
+  FaBusinessTime
+} from 'react-icons/fa';
 
 const SidebarContainer = styled.div`
   width: ${props => props.isOpen ? '300px' : '0'};
@@ -125,52 +133,82 @@ const ControlsSection = styled.div`
   }
 `;
 
+const IconPreview = styled.div`
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin: 10px 0;
+  font-size: 0.9rem;
+  color: #666;
+  
+  > div {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+`;
+
 function Sidebar({ isOpen }) {
-  const [activeTab, setActiveTab] = React.useState('filter');
+  const [activeTab, setActiveTab] = React.useState('progress');
 
   if (!isOpen) return null;
 
   return (
     <SidebarContainer isOpen={isOpen}>
       <SidebarHeader>
-        <h3>Graph Explorer</h3>
+        <h3>Nova Modelling</h3>
       </SidebarHeader>
 
       <TabContainer>
         <Tab
-          active={activeTab === 'filter'}
-          onClick={() => setActiveTab('filter')}
+          active={activeTab === 'progress'}
+          onClick={() => setActiveTab('progress')}
         >
-          <FaFilter />
-          Filter
+          <FaChartLine />
+          Progress
         </Tab>
         <Tab
-          active={activeTab === 'details'}
-          onClick={() => setActiveTab('details')}
+          active={activeTab === 'priority'}
+          onClick={() => setActiveTab('priority')}
         >
-          <FaTable />
-          Details
+          <FaListOl />
+          Priority
         </Tab>
+        {/* Try each clock icon - uncomment the one you prefer */}
         <Tab
-          active={activeTab === 'explore'}
-          onClick={() => setActiveTab('explore')}
+          active={activeTab === 'projection'}
+          onClick={() => setActiveTab('projection')}
         >
-          <FaProjectDiagram />
-          Explore
+          <FaClock />
+          {/* Regular clock */}
+          Projection
         </Tab>
-        <Tab
-          active={activeTab === 'stats'}
-          onClick={() => setActiveTab('stats')}
-        >
-          <FaChartBar />
-          Stats
-        </Tab>
+        {/* 
+        Alternative options:
+        <FaHourglassHalf /> - Hourglass
+        <FaRegClock /> - Light clock
+        <FaStopwatch /> - Stopwatch
+        <FaBusinessTime /> - Business clock
+        */}
       </TabContainer>
 
       <SidebarContent>
-        {activeTab === 'filter' && (
+        {activeTab === 'progress' && (
           <>
             <SectionTitle>Progress View</SectionTitle>
+            <div>Track NPS scores and JTBD completion status</div>
+          </>
+        )}
+        {activeTab === 'priority' && (
+          <>
+            <SectionTitle>Prioritization View</SectionTitle>
+            <div>View and manage JTBD demand and priorities</div>
+          </>
+        )}
+        {activeTab === 'projection' && (
+          <>
+            <SectionTitle>Projection View</SectionTitle>
+            <div>Project completion timelines based on complexity and progress data</div>
           </>
         )}
       </SidebarContent>
