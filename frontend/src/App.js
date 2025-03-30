@@ -63,7 +63,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showNodeForm, setShowNodeForm] = useState(false);
-  const [selectedNodes, setSelectedNodes] = useState(new Set());
+  const [selectedNodes, setSelectedNodes] = useState([]);
 
   // Node and relationship types
   const nodeTypes = ['JTBD', 'User', 'Service'];
@@ -81,6 +81,7 @@ function App() {
 
         // Get updated data with complexity values
         const updatedData = await dbService.getGraph();
+        console.log('Initial graph data loaded:', updatedData);
         setGraphData(updatedData);
       } catch (error) {
         console.error('Error fetching graph data:', error);
@@ -93,36 +94,53 @@ function App() {
   }, []);
 
   const handleNodeSelect = (nodeId, isCtrlPressed) => {
+    console.log('Node selection:', { nodeId, isCtrlPressed, currentSelection: selectedNodes });
     if (isCtrlPressed) {
       // If node is already selected, remove it
-      if (selectedNodes.has(nodeId)) {
-        const newSelectedNodes = new Set(selectedNodes);
-        newSelectedNodes.delete(nodeId);
+      if (selectedNodes.includes(nodeId)) {
+        const newSelectedNodes = selectedNodes.filter(id => id !== nodeId);
         setSelectedNodes(newSelectedNodes);
       } else {
         // Add to selection
-        const newSelectedNodes = new Set(selectedNodes);
-        newSelectedNodes.add(nodeId);
-        setSelectedNodes(newSelectedNodes);
+        setSelectedNodes([...selectedNodes, nodeId]);
       }
     } else {
       // If clicking already selected single node, clear selection
-      if (selectedNodes.size === 1 && selectedNodes.has(nodeId)) {
-        setSelectedNodes(new Set());
+      if (selectedNodes.length === 1 && selectedNodes.includes(nodeId)) {
+        setSelectedNodes([]);
       } else {
         // Otherwise select only this node
-        setSelectedNodes(new Set([nodeId]));
+        setSelectedNodes([nodeId]);
       }
     }
   };
 
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        console.log('Escape pressed, clearing selection');
+        setSelectedNodes([]);
+      }
+    };
+
+    // Add keyboard listener
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   const getVisibleData = () => {
-    if (selectedNodes.size === 0) {
+    if (selectedNodes.length === 0) {
       // Show only JTBD and User nodes when nothing is selected
+      const filteredNodes = graphData.nodes.filter(node => 
+        node.label === 'JTBD' || node.label === 'User'
+      );
+      console.log('No nodes selected. Showing JTBD and User nodes:', filteredNodes);
       return {
-        nodes: graphData.nodes.filter(node => 
-          node.label === 'JTBD' || node.label === 'User'
-        ),
+        nodes: filteredNodes,
         links: []
       };
     }
@@ -131,11 +149,11 @@ function App() {
     const relevantLinks = graphData.links.filter(link => {
       const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
       const targetId = typeof link.target === 'object' ? link.target.id : link.target;
-      return selectedNodes.has(sourceId) || selectedNodes.has(targetId);
+      return selectedNodes.includes(sourceId) || selectedNodes.includes(targetId);
     });
   
     const connectedIds = new Set([
-      ...Array.from(selectedNodes),
+      ...selectedNodes,
       ...relevantLinks.map(link => {
         return typeof link.source === 'object' ? link.source.id : link.source;
       }),
@@ -184,10 +202,7 @@ function App() {
     }
   };
 
-  const filteredData = {
-    nodes: graphData.nodes,
-    links: graphData.links
-  };
+  const filteredData = getVisibleData();
 
   return (
     <AppContainer>
@@ -203,7 +218,7 @@ function App() {
           ) : (
             <>
               <Graph
-                data={getVisibleData()}
+                data={filteredData}
                 onNodeSelect={(nodeId, isCtrlPressed) => handleNodeSelect(nodeId, isCtrlPressed)}
                 selectedNodes={selectedNodes}
               />
