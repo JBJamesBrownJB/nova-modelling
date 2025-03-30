@@ -21,6 +21,10 @@ const GraphContainer = styled.div`
   .nodes path {
     cursor: pointer;
   }
+  
+  .nodes {
+    cursor: pointer;
+  }
 
   .node-label {
     font-size: 12px;
@@ -88,7 +92,7 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
 
   const handleNodeClick = (event, node) => {
     event.stopPropagation();
-    
+
     if (event.ctrlKey) {
       // Multi-select mode
       const newSelected = new Set(selectedNodes);
@@ -97,7 +101,7 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
       } else {
         newSelected.add(node.id);
       }
-      onNodeSelect && onNodeSelect(Array.from(newSelected).map(id => 
+      onNodeSelect && onNodeSelect(Array.from(newSelected).map(id =>
         data.nodes.find(n => n.id === id)
       ));
     } else {
@@ -141,13 +145,27 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
       .attr('class', 'nodes');
 
     // Add circle nodes for JTBD
-    const circleNodes = nodesGroup.selectAll('.circle-node')
+    const jtbdGroups = nodesGroup.selectAll('.jtbd-group')
       .data(data.nodes.filter(d => d.label === 'JTBD'))
       .enter()
-      .append('circle')
+      .append('g')
+      .attr('class', 'jtbd-group');
+
+    // Add invisible hit area
+    jtbdGroups.append('circle')
+      .attr('class', 'hit-area')
+      .attr('r', d => getNodeRadius(d) * 1.25)
+      .attr('fill', 'rgba(0,0,0,0)')
+      .attr('stroke', 'none');
+
+    // Add visible node
+    jtbdGroups.append('circle')
       .attr('class', d => `circle-node ${selectedNodes.has(d.id) ? 'selected-node' : ''}`)
       .attr('r', d => getNodeRadius(d))
-      .attr('fill', d => nodeColors[d.label] || '#666')
+      .attr('fill', d => nodeColors[d.label] || '#666');
+
+    // Add event handlers to the group
+    jtbdGroups
       .on('mouseover', (event, d) => showTooltip(tooltip, event, d))
       .on('mouseout', () => hideTooltip(tooltip))
       .on('click', (event, d) => handleNodeClick(event, d))
@@ -156,11 +174,29 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
         .on('drag', dragged)
         .on('end', dragended));
 
-    const userNodes = nodesGroup.selectAll('.user-node')
+    // Add User nodes
+    const userGroups = nodesGroup.selectAll('.user-group')
       .data(data.nodes.filter(d => d.label === 'User'))
       .enter()
       .append('g')
-      .attr('class', 'user-node')
+      .attr('class', 'user-group');
+
+    // Add invisible hit area
+    userGroups.append('circle')
+      .attr('class', 'hit-area')
+      .attr('r', d => getNodeRadius(d) * 0.3)
+      .attr('fill', 'rgba(0,0,0,0)')
+      .attr('stroke', 'none');
+
+    // Add visible node
+    userGroups.append('path')
+      .attr('d', userIconPath)
+      .attr('fill', nodeColors['User'])
+      .attr('transform', 'translate(-12, -12)')
+      .classed('selected-node', d => selectedNodes.has(d.id));
+
+    // Add event handlers to the group
+    userGroups
       .on('mouseover', (event, d) => showTooltip(tooltip, event, d))
       .on('mouseout', () => hideTooltip(tooltip))
       .on('click', (event, d) => handleNodeClick(event, d))
@@ -169,16 +205,32 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
         .on('drag', dragged)
         .on('end', dragended));
 
-    userNodes.append('path')
-      .attr('d', userIconPath)
-      .attr('fill', nodeColors['User'])
-      .attr('transform', 'translate(-12, -12)');
-
-    const serviceNodes = nodesGroup.selectAll('.service-node')
+    // Add Service nodes
+    const serviceGroups = nodesGroup.selectAll('.service-group')
       .data(data.nodes.filter(d => d.label === 'Service'))
       .enter()
       .append('g')
-      .attr('class', 'service-node')
+      .attr('class', 'service-group');
+
+    // Add invisible rectangular hit area
+    serviceGroups.append('rect')
+      .attr('class', 'hit-area')
+      .attr('width', d => getNodeRadius(d) * 0.5)
+      .attr('height', d => getNodeRadius(d) * 0.5)
+      .attr('x', d => -getNodeRadius(d) * 0.25)  // Center the rectangle
+      .attr('y', d => -getNodeRadius(d) * 0.25)
+      .attr('fill', 'rgba(1,1,1,0)')
+      .attr('stroke', 'none');
+
+    // Add visible node
+    serviceGroups.append('path')
+      .attr('d', serviceIconPath)
+      .attr('fill', nodeColors['Service'])
+      .attr('transform', 'translate(-12, -12)')
+      .classed('selected-node', d => selectedNodes.has(d.id));
+
+    // Add event handlers to the group
+    serviceGroups
       .on('mouseover', (event, d) => showTooltip(tooltip, event, d))
       .on('mouseout', () => hideTooltip(tooltip))
       .on('click', (event, d) => handleNodeClick(event, d))
@@ -187,16 +239,11 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
         .on('drag', dragged)
         .on('end', dragended));
 
-    serviceNodes.append('path')
-      .attr('d', serviceIconPath)
-      .attr('fill', nodeColors['Service'])
-      .attr('transform', 'translate(-12, -12)');
-
     // Highlight selected nodes
     if (selectedNodes.size > 0) {
-      circleNodes.classed('selected-node', d => selectedNodes.has(d.id));
-      userNodes.select('path').classed('selected-node', d => selectedNodes.has(d.id));
-      serviceNodes.select('path').classed('selected-node', d => selectedNodes.has(d.id));
+      jtbdGroups.select('.circle-node').classed('selected-node', d => selectedNodes.has(d.id));
+      userGroups.select('path').classed('selected-node', d => selectedNodes.has(d.id));
+      serviceGroups.select('path').classed('selected-node', d => selectedNodes.has(d.id));
     }
 
     // Add node labels
@@ -250,11 +297,10 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
           .attr('x2', d => d.targetEdgeX || d.target.x)
           .attr('y2', d => d.targetEdgeY || d.target.y);
 
-        circleNodes
-          .attr('cx', d => d.x)
-          .attr('cy', d => d.y);
+        jtbdGroups
+          .attr('transform', d => `translate(${d.x},${d.y})`);
 
-        userNodes
+        userGroups
           .attr('transform', d => {
             const baseRadius = 20;
             const radius = getNodeRadius(d);
@@ -262,7 +308,7 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
             return `translate(${d.x},${d.y}) scale(${scale})`;
           });
 
-        serviceNodes
+        serviceGroups
           .attr('transform', d => {
             const baseRadius = 20;
             const radius = getNodeRadius(d);
@@ -281,11 +327,11 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
             }
             if (d.label === 'Service') {
               const nodeRadius = getNodeRadius(d) * 0.8;
-              return d.y + 12 + nodeRadius; 
+              return d.y + 12 + nodeRadius;
             }
             if (d.label === 'JTBD') {
               const nodeRadius = getNodeRadius(d);
-              return d.y + nodeRadius + 18; 
+              return d.y + nodeRadius + 18;
             }
             return d.y + 25;
           });
@@ -301,55 +347,20 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
     // Drag functions
     function dragstarted(event, d) {
       if (!event.active) simulation.alphaTarget(0.3).restart();
-      
-      // If dragging a selected node, fix all selected nodes
-      if (selectedNodes.has(d.id)) {
-        data.nodes.forEach(node => {
-          if (selectedNodes.has(node.id)) {
-            node.fx = node.x;
-            node.fy = node.y;
-          }
-        });
-      } else {
-        d.fx = d.x;
-        d.fy = d.y;
-      }
+      d.fx = d.x;
+      d.fy = d.y;
     }
 
     function dragged(event, d) {
-      // Calculate the movement delta
-      const dx = event.x - d.x;
-      const dy = event.y - d.y;
-
-      // If dragging a selected node, move all selected nodes
-      if (selectedNodes.has(d.id)) {
-        data.nodes.forEach(node => {
-          if (selectedNodes.has(node.id)) {
-            node.fx = node.x + dx;
-            node.fy = node.y + dy;
-          }
-        });
-      } else {
-        d.fx = event.x;
-        d.fy = event.y;
-      }
+      d.fx = event.x;
+      d.fy = event.y;
+      simulation.alphaTarget(0.3).restart();
     }
-
+    
     function dragended(event, d) {
       if (!event.active) simulation.alphaTarget(0);
-      
-      // Release all fixed positions
-      if (selectedNodes.has(d.id)) {
-        data.nodes.forEach(node => {
-          if (selectedNodes.has(node.id)) {
-            node.fx = null;
-            node.fy = null;
-          }
-        });
-      } else {
-        d.fx = null;
-        d.fy = null;
-      }
+      d.fx = null;
+      d.fy = null;
     }
 
     return () => {
