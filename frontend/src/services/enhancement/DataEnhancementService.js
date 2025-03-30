@@ -62,13 +62,13 @@ export const enhanceWithComplexity = (data) => {
     }
     
     if (node.label === 'Service') {
-      const dependantCount = calculateServiceDependants(node, data.links, data.nodes);
-      return { ...node, dependantCount };
+      const dependants = calculateServiceDependants(node, data.links, data.nodes);
+      return { ...node, dependants };
     }
     
     if (node.label === 'User') {
-      const jtbdCount = calculateUserJtbdCount(node, data.links, data.nodes);
-      return { ...node, jtbdCount };
+      const jtbd_count = calculateUserJtbdCount(node, data.links, data.nodes);
+      return { ...node, jtbd_count };
     }
     
     return node;
