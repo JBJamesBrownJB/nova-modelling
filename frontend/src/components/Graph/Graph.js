@@ -49,9 +49,8 @@ const GraphContainer = styled.div`
   }
 `;
 
-function Graph({ data, onNodeSelect, selectedNode }) {
+function Graph({ data, selectedNodes, onNodeSelect }) {
   const svgRef = useRef(null);
-  const [selectedNodes, setSelectedNodes] = useState(new Set());
 
   const nodeColors = {
     'JTBD': '#57C7E3', // Blue
@@ -98,14 +97,11 @@ function Graph({ data, onNodeSelect, selectedNode }) {
       } else {
         newSelected.add(node.id);
       }
-      setSelectedNodes(newSelected);
       onNodeSelect && onNodeSelect(Array.from(newSelected).map(id => 
         data.nodes.find(n => n.id === id)
       ));
     } else {
       // Single select mode
-      const newSelected = new Set([node.id]);
-      setSelectedNodes(newSelected);
       onNodeSelect && onNodeSelect([node]);
     }
   };
@@ -149,7 +145,7 @@ function Graph({ data, onNodeSelect, selectedNode }) {
       .data(data.nodes.filter(d => d.label === 'JTBD'))
       .enter()
       .append('circle')
-      .attr('class', 'circle-node')
+      .attr('class', d => `circle-node ${selectedNodes.has(d.id) ? 'selected-node' : ''}`)
       .attr('r', d => getNodeRadius(d))
       .attr('fill', d => nodeColors[d.label] || '#666')
       .on('mouseover', (event, d) => showTooltip(tooltip, event, d))
@@ -298,8 +294,7 @@ function Graph({ data, onNodeSelect, selectedNode }) {
     // Click on background to deselect nodes
     svg.on('click', (event) => {
       if (event.target === svg.node()) {
-        setSelectedNodes(new Set());
-        onNodeSelect && onNodeSelect([]);
+        onNodeSelect([]);
       }
     });
 
@@ -360,7 +355,7 @@ function Graph({ data, onNodeSelect, selectedNode }) {
     return () => {
       simulation.stop();
     };
-  }, [data, onNodeSelect, selectedNode, selectedNodes, setSelectedNodes]);
+  }, [data, selectedNodes, onNodeSelect]);
 
   return (
     <GraphContainer ref={svgRef}>

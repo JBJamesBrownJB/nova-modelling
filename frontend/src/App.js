@@ -63,6 +63,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showNodeForm, setShowNodeForm] = useState(false);
+  const [selectedNodes, setSelectedNodes] = useState(new Set());
 
   // Node and relationship types
   const nodeTypes = ['JTBD', 'User', 'Service'];
@@ -93,6 +94,46 @@ function App() {
 
     fetchData();
   }, []);
+
+  const handleNodeSelect = (nodes) => {
+    // Extract IDs from node objects
+    const nodeIds = nodes.map(node => typeof node === 'object' ? node.id : node);
+    setSelectedNodes(new Set(nodeIds));
+  };
+
+  const getVisibleData = () => {
+    if (selectedNodes.size === 0) {
+      // Show only JTBD and User nodes when nothing is selected
+      return {
+        nodes: graphData.nodes.filter(node => 
+          node.label === 'JTBD' || node.label === 'User'
+        ),
+        links: []
+      };
+    }
+  
+    // Get all connected nodes and links
+    const relevantLinks = graphData.links.filter(link => {
+      const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+      const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+      return selectedNodes.has(sourceId) || selectedNodes.has(targetId);
+    });
+  
+    const connectedIds = new Set([
+      ...Array.from(selectedNodes),
+      ...relevantLinks.map(link => {
+        return typeof link.source === 'object' ? link.source.id : link.source;
+      }),
+      ...relevantLinks.map(link => {
+        return typeof link.target === 'object' ? link.target.id : link.target;
+      })
+    ]);
+  
+    return {
+      nodes: graphData.nodes.filter(node => connectedIds.has(node.id)),
+      links: relevantLinks
+    };
+  };
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -139,6 +180,7 @@ function App() {
       <MainContent>
         <Sidebar
           isOpen={sidebarOpen}
+          selectedNodes={selectedNodes}
         />
         <GraphContainer>
           {isLoading ? (
@@ -146,7 +188,9 @@ function App() {
           ) : (
             <>
               <Graph
-                data={filteredData}
+                data={getVisibleData()}
+                onNodeSelect={handleNodeSelect}
+                selectedNodes={selectedNodes}
               />
               <AddNodeButton onClick={() => setShowNodeForm(true)}>+</AddNodeButton>
             </>
