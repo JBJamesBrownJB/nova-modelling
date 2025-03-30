@@ -66,8 +66,8 @@ function Graph({ data, onNodeSelect, selectedNode }) {
   const userIconPath = "M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z";
   const serviceIconPath = "M4,1H20A1,1 0 0,1 21,2V6A1,1 0 0,1 20,7H4A1,1 0 0,1 3,6V2A1,1 0 0,1 4,1M4,9H20A1,1 0 0,1 21,10V14A1,1 0 0,1 20,15H4A1,1 0 0,1 3,14V10A1,1 0 0,1 4,9M4,17H20A1,1 0 0,1 21,18V22A1,1 0 0,1 20,23H4A1,1 0 0,1 3,22V18A1,1 0 0,1 4,17Z";
 
-  const setupArrowMarkers = (svg) => {
-    const defs = svg.append('defs');
+  const setupArrowMarkers = (container) => {
+    const defs = container.append('defs');
 
     Object.entries(linkColors).forEach(([type, color]) => {
       defs.append('marker')
@@ -99,13 +99,25 @@ function Graph({ data, onNodeSelect, selectedNode }) {
       .attr('width', width)
       .attr('height', height);
 
-    setupArrowMarkers(svg);
+    // Add zoom behavior
+    const zoom = d3.zoom()
+      .scaleExtent([0.1, 4])
+      .on('zoom', (event) => {
+        container.attr('transform', event.transform);
+      });
+
+    svg.call(zoom);
+
+    // Create a container for all graph elements that will be zoomed
+    const container = svg.append('g');
+
+    setupArrowMarkers(container);
 
     const tooltip = d3.select(svgRef.current)
       .append('div')
       .attr('class', 'tooltip');
 
-    const nodesGroup = svg.append('g')
+    const nodesGroup = container.append('g')
       .attr('class', 'nodes');
 
     // Add circle nodes for JTBD
@@ -177,7 +189,7 @@ function Graph({ data, onNodeSelect, selectedNode }) {
     }
 
     // Add node labels
-    const label = svg.append('g')
+    const label = container.append('g')
       .attr('class', 'node-labels')
       .selectAll('text')
       .data(data.nodes)
@@ -191,7 +203,7 @@ function Graph({ data, onNodeSelect, selectedNode }) {
         return d.name;
       });
 
-    const link = svg.append('g')
+    const link = container.append('g')
       .attr('class', 'links')
       .selectAll('line')
       .data(data.links)
