@@ -215,8 +215,9 @@ function Graph({ data, onNodeSelect, selectedNode }) {
     const simulation = d3.forceSimulation(data.nodes)
       .force('link', d3.forceLink(data.links)
         .id(d => d.id)
-        .distance(100))
-      .force('charge', d3.forceManyBody().strength(-300))
+        .distance(100)
+        .strength(0.9))  // Increased to 0.9 for stronger connections
+      .force('charge', d3.forceManyBody().strength(-400))
       .force('center', d3.forceCenter(width / 2, height / 2))
       .force('x', d3.forceX(width / 2).strength(0.1))
       .force('y', d3.forceY(height / 2).strength(0.1))
