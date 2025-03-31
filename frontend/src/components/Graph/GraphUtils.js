@@ -19,15 +19,15 @@ export const getNodeRadius = (node) => {
     case 'Goal':
       // Scale Goal nodes based on their complexity
       // Complexity reflects the essential complexity in Fred Brooks' model
-      return 10 + (node.complexity ? Math.min(node.complexity / 1.4, 100) : 0);
+      return node.complexity;
     case 'Service':
       // Scale Service nodes based on number of Goal dependants
       // More dependants indicate a more critical service (potential toil reduction target)
-      return 20 + (node.dependants ? Math.min(node.dependants * 3, 100) : 0);
+      return node.dependants;
     case 'User':
       // Scale User nodes based on number of Goals they perform
       // More Goals indicate a more prominent user persona
-      return 20 + (node.Importance ? Math.min(node.Importance * 3, 100) : 0);
+      return node.Importance;
     default:
       return 10; // Default size
   }
