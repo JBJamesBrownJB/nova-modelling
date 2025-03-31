@@ -16,19 +16,8 @@ export const enhanceGraphData = (data) => {
   
   const dataWithComplexity = addCalculatedAttributes(enhancedData);
   const dataWithNps = enhanceWithNpsScores(dataWithComplexity);
-  const fullyEnhancedData = enhanceWithColors(dataWithNps);
   
-  return fullyEnhancedData;
-};
-
-export const enhanceWithColors = (data) => {
-  const enhancedData = { ...data, nodes: [...data.nodes] };
-  
-  enhancedData.nodes = enhancedData.nodes.map(node => {
-    return node;
-  });
-  
-  return enhancedData;
+  return dataWithNps;
 };
 
 export const enhanceWithNpsScores = (data) => {
