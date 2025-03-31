@@ -180,7 +180,7 @@ function NodeCreationForm({ isOpen, onClose, onCreateNode, nodeTypes, existingNo
   // Get node color based on node type
   const getNodeColor = (type) => {
     switch (type) {
-      case 'JTBD': return '#57C7E3';
+      case 'Goal': return '#57C7E3';
       case 'User': return '#ECB5C9';
       case 'Data': return '#8DCC93';
       default: return '#D9D9D9';
@@ -231,8 +231,8 @@ function NodeCreationForm({ isOpen, onClose, onCreateNode, nodeTypes, existingNo
       ...properties
     };
     
-    // For JTBD nodes, add default progress if not specified
-    if (nodeType === 'JTBD' && !nodeProps.progress) {
+    // For Goal nodes, add default progress if not specified
+    if (nodeType === 'Goal' && !nodeProps.progress) {
       nodeProps.progress = 0;
     }
     
@@ -279,7 +279,7 @@ function NodeCreationForm({ isOpen, onClose, onCreateNode, nodeTypes, existingNo
           />
         </FormGroup>
         
-        {nodeType === 'JTBD' && (
+        {nodeType === 'Goal' && (
           <FormGroup>
             <label>Progress (%)</label>
             <input 

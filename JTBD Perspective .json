@@ -2,9 +2,9 @@
     "categories": [
         {
             "id": 1,
-            "name": "JTBD",
+            "name": "Goal",
             "labels": [
-                "JTBD"
+                "Goal"
             ],
             "properties": [
                 {
@@ -186,18 +186,18 @@
             ]
         }
     ],
-    "name": "JTBD Perspective",
+    "name": "Goal Perspective",
     "id": "0d2477c0-480a-11ed-9f09-237bc3cedeb2",
     "labels": {
-        "JTBD": [
+        "Goal": [
             {
                 "propertyKey": "name",
-                "type": "JTBD",
+                "type": "Goal",
                 "dataType": "string"
             },
             {
                 "propertyKey": "progress",
-                "type": "JTBD",
+                "type": "Goal",
                 "dataType": "bigint"
             }
         ],
@@ -299,22 +299,22 @@
     "metadata": {
         "pathSegments": [
             {
-                "source": "JTBD",
+                "source": "Goal",
                 "relationshipType": "UPDATES",
                 "target": "Data"
             },
             {
                 "source": "User",
                 "relationshipType": "DOES",
-                "target": "JTBD"
+                "target": "Goal"
             },
             {
-                "source": "JTBD",
+                "source": "Goal",
                 "relationshipType": "READS",
                 "target": "Data"
             },
             {
-                "source": "JTBD",
+                "source": "Goal",
                 "relationshipType": "WRITES",
                 "target": "Data"
             }
@@ -326,7 +326,7 @@
                 "propertyKeys": []
             },
             {
-                "label": "JTBD",
+                "label": "Goal",
                 "type": "native",
                 "isMetadataPropIndex": true,
                 "propertyKeys": [

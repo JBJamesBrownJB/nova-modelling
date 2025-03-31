@@ -211,20 +211,18 @@ function Sidebar({ isOpen }) {
             <SectionTitle>Progress View</SectionTitle>
             <div>
               <p>
-                Progress means enabling users to complete their tasks effectively. It's not about code changes, velocity, or features. It's about helping users achieve their goals and receiving positive feedback.
+                Progress means enabling users to achieve their goals effectively. It's not about code changes, velocity, or features. It's about helping users achieve their goals and receiving positive feedback.
+                Your product is successful when it helps all users accomplish their goals with positive outcomes.
               </p>
               <p>
-                <strong>JTBD = Jobs To Be Done</strong>. Your product is successful when it helps all users accomplish their tasks with positive outcomes.
-              </p>
-              <p>
-                Progress is measured through <strong>Net Promoter Scores (NPS)</strong> from users for the JTBDs they engage with.
+                Progress is measured through <strong>Net Promoter Scores (NPS)</strong> from users for the Goals they engage with.
               </p>
               
               <SectionTitle>Node Types</SectionTitle>
               
               <LegendItem>
-                <FaCircle style={{ color: COLORS.NODE_JTBD }} />
-                <span><strong>JTBD</strong> -Tasks users aim to complete</span>
+                <FaCircle style={{ color: COLORS.NODE_GOAL }} />
+                <span><strong>Goal</strong> - Goals users aim to achieve</span>
               </LegendItem>
               
               <LegendItem>
@@ -239,9 +237,9 @@ function Sidebar({ isOpen }) {
               
               <SectionTitle>Node Sizes</SectionTitle>
               <ul style={{ fontSize: '0.85rem', paddingLeft: '20px', margin: '5px 0' }}>
-                <li><strong>User</strong>: Larger = does more jobs</li>
-                <li><strong>JTBD</strong>: Larger = more complex</li>
-                <li><strong>Service</strong>: Larger = supports more JTBD</li>
+                <li><strong>User</strong>: Larger = more goals</li>
+                <li><strong>Goal</strong>: Larger = more complex</li>
+                <li><strong>Service</strong>: Larger = supports more goals</li>
               </ul>
               
               <SectionTitle>NPS Colors</SectionTitle>
@@ -291,7 +289,7 @@ function Sidebar({ isOpen }) {
         {activeTab === 'priority' && (
           <>
             <SectionTitle>Priority View</SectionTitle>
-            <div>Visualize and prioritize JTBDs based on complexity and impact</div>
+            <div>Visualize and prioritize Goals based on complexity and impact</div>
           </>
         )}
 

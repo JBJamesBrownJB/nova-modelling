@@ -48,8 +48,8 @@ export const enhanceWithNpsScores = (data) => {
   
   // Process each node
   enhancedData.nodes = enhancedData.nodes.map(node => {
-    if (node.label === 'JTBD') {
-      // Calculate aggregate NPS for JTBD nodes based on incoming DOES relationships
+    if (node.label === 'Goal') {
+      // Calculate aggregate NPS for Goal nodes based on incoming DOES relationships
       const aggregateNps = calculateAggregateNps(node.id, data.links);
       
       // Return node with NPS data
@@ -87,7 +87,7 @@ export const enhanceWithComplexity = (data) => {
   // Calculate complexity for each node
   enhancedData.nodes = enhancedData.nodes.map(node => {
     // Calculate node complexity based on node type
-    if (node.label === 'JTBD') {
+    if (node.label === 'Goal') {
       const complexity = calculateNodeComplexity(node, data.links, data.nodes);
       return { ...node, complexity };
     }
@@ -98,8 +98,8 @@ export const enhanceWithComplexity = (data) => {
     }
     
     if (node.label === 'User') {
-      const jtbd_count = calculateUserJtbdCount(node, data.links, data.nodes);
-      return { ...node, jtbd_count };
+      const Goal_count = calculateUserGoalCount(node, data.links, data.nodes);
+      return { ...node, Goal_count };
     }
     
     return node;
@@ -123,15 +123,15 @@ export const getNpsColor = (npsScore) => {
 };
 
 /**
- * Calculates aggregate NPS for a JTBD node from its incoming DOES edges
- * @param {String} jtbdId - ID of the JTBD node
+ * Calculates aggregate NPS for a Goal node from its incoming DOES edges
+ * @param {String} GoalId - ID of the Goal node
  * @param {Array} links - All links in the graph
  * @returns {Number|null} - Calculated NPS score or null if no data
  */
-export const calculateAggregateNps = (jtbdId, links) => {
-  // Get all DOES relationships targeting this JTBD
+export const calculateAggregateNps = (GoalId, links) => {
+  // Get all DOES relationships targeting this Goal
   const doesEdges = links.filter(link => 
-    (typeof link.target === 'object' ? link.target.id : link.target) === jtbdId && 
+    (typeof link.target === 'object' ? link.target.id : link.target) === GoalId && 
     link.type === 'DOES'
   );
   
@@ -198,7 +198,7 @@ export const calculateUserNps = (userId, links) => {
  * @returns {Number} - Calculated complexity
  */
 export const calculateNodeComplexity = (node, links, nodes) => {
-  if (node.label !== 'JTBD') {
+  if (node.label !== 'Goal') {
     return 0;
   }
   
@@ -208,7 +208,7 @@ export const calculateNodeComplexity = (node, links, nodes) => {
 };
 
 /**
- * Counts service dependencies for a JTBD node
+ * Counts service dependencies for a Goal node
  * @param {Object} node - The node object
  * @param {Array} links - All links in the graph
  * @param {Array} nodes - All nodes in the graph
@@ -232,11 +232,11 @@ export const countServiceDependencies = (node, links, allNodes) => {
 };
 
 /**
- * Calculates the number of JTBDs dependent on a service
+ * Calculates the number of Goals dependent on a service
  * @param {Object} node - The service node
  * @param {Array} links - All links in the graph
  * @param {Array} nodes - All nodes in the graph
- * @returns {Number} - Count of dependent JTBDs
+ * @returns {Number} - Count of dependent Goals
  */
 export const calculateServiceDependants = (node, links, nodes) => {
   if (node.label !== 'Service') {
@@ -249,11 +249,11 @@ export const calculateServiceDependants = (node, links, nodes) => {
     if ((link.target === node.id || 
         (typeof link.target === 'object' && link.target.id === node.id)) &&
         link.type === 'DEPENDS_ON') {
-      // Find source node to check if it's a JTBD node
+      // Find source node to check if it's a Goal node
       const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
       const sourceNode = nodes.find(n => n.id === sourceId);
       
-      if (sourceNode && sourceNode.label === 'JTBD') {
+      if (sourceNode && sourceNode.label === 'Goal') {
         dependantCount++;
       }
     }
@@ -263,32 +263,32 @@ export const calculateServiceDependants = (node, links, nodes) => {
 };
 
 /**
- * Calculates the number of JTBDs a user performs
+ * Calculates the number of Goals a user performs
  * @param {Object} node - The user node
  * @param {Array} links - All links in the graph
  * @param {Array} nodes - All nodes in the graph
- * @returns {Number} - Count of JTBDs
+ * @returns {Number} - Count of Goals
  */
-export const calculateUserJtbdCount = (node, links, nodes) => {
+export const calculateUserGoalCount = (node, links, nodes) => {
   if (node.label !== 'User') {
-    return 0; // Only User nodes count JTBDs
+    return 0; // Only User nodes count Goals
   }
 
-  let jtbdCount = 0;
+  let GoalCount = 0;
   
   links.forEach(link => {
-    if (isUserJtbdLink(node, link)) {
-      // Find target node to confirm it's a JTBD
+    if (isUserGoalLink(node, link)) {
+      // Find target node to confirm it's a Goal
       const targetId = typeof link.target === 'object' ? link.target.id : link.target;
       const targetNode = nodes.find(n => n.id === targetId);
       
-      if (targetNode && targetNode.label === 'JTBD') {
-        jtbdCount++;
+      if (targetNode && targetNode.label === 'Goal') {
+        GoalCount++;
       }
     }
   });
   
-  return jtbdCount;
+  return GoalCount;
 };
 
 // HELPER FUNCTIONS
@@ -305,12 +305,12 @@ export const isServiceDependencyLink = (node, link) => {
 };
 
 /**
- * Checks if a link represents a User-JTBD relationship
+ * Checks if a link represents a User-Goal relationship
  * @param {Object} node - The node object
  * @param {Object} link - The link object
- * @returns {Boolean} - True if it's a User-JTBD link
+ * @returns {Boolean} - True if it's a User-Goal link
  */
-export const isUserJtbdLink = (node, link) => {
+export const isUserGoalLink = (node, link) => {
   const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
   return sourceId === node.id && link.type === 'DOES';
 };

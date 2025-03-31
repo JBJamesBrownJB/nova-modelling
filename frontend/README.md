@@ -5,7 +5,7 @@ A D3.js and React-based visualization tool for Nova Modelling, providing an inte
 ## Features
 
 - Interactive force-directed graph visualization
-- Node filtering by type (JTBD, User, Data)
+- Node filtering by type (Goal, User, Data)
 - Relationship filtering by type (DOES, READS, WRITES, UPDATES)
 - Node details panel
 - Pan and zoom capabilities
@@ -61,13 +61,13 @@ The visualization uses the following data structure:
 ```javascript
 {
   nodes: [
-    { id: 'jtbd1', label: 'JTBD', name: 'Diagnose Patient', ... },
+    { id: 'Goal1', label: 'Goal', name: 'Diagnose Patient', ... },
     { id: 'user1', label: 'User', name: 'Doctor', ... },
     { id: 'data1', label: 'Data', name: 'Patient List', ... }
   ],
   links: [
-    { id: 'rel1', source: 'user1', target: 'jtbd1', type: 'DOES' },
-    { id: 'rel2', source: 'jtbd1', target: 'data1', type: 'READS' },
+    { id: 'rel1', source: 'user1', target: 'Goal1', type: 'DOES' },
+    { id: 'rel2', source: 'Goal1', target: 'data1', type: 'READS' },
     ...
   ]
 }

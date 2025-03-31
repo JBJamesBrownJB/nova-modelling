@@ -67,7 +67,7 @@ function App() {
   const [selectedNodes, setSelectedNodes] = useState([]);
 
   // Node and relationship types
-  const nodeTypes = ['JTBD', 'User', 'Service'];
+  const nodeTypes = ['Goal', 'User', 'Service'];
   const relationshipTypes = ['DOES', 'DEPENDS_ON'];
 
   // Initialize database service
@@ -140,11 +140,11 @@ function App() {
 
   const getVisibleData = () => {
     if (selectedNodes.length === 0) {
-      // Show only JTBD and User nodes when nothing is selected
+      // Show only Goal and User nodes when nothing is selected
       const filteredNodes = graphData.nodes.filter(node => 
-        node.label === 'JTBD' || node.label === 'User'
+        node.label === 'Goal' || node.label === 'User'
       );
-      console.log('No nodes selected. Showing JTBD and User nodes:', filteredNodes);
+      console.log('No nodes selected. Showing Goal and User nodes:', filteredNodes);
       return {
         nodes: filteredNodes,
         links: []

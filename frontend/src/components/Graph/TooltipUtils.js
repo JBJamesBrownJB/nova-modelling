@@ -8,7 +8,7 @@ export const generateTooltipContent = (node) => {
   content += `<strong>Type:</strong> ${node.label}<br/>`;
 
   switch (node.label) {
-    case 'JTBD':
+    case 'Goal':
       if (node.complexity) {
         content += `<strong>Complexity:</strong> ${node.complexity.toFixed(1)}<br/>`;
       }
@@ -18,12 +18,12 @@ export const generateTooltipContent = (node) => {
       break;
     case 'Service':
       if (node.dependants !== undefined) {
-        content += `<strong>JTBD Dependants:</strong> ${node.dependants}<br/>`;
+        content += `<strong>Goal Dependants:</strong> ${node.dependants}<br/>`;
       }
       break;
     case 'User':
-      if (node.jtbd_count !== undefined) {
-        content += `<strong>JTBD Count:</strong> ${node.jtbd_count}<br/>`;
+      if (node.Goal_count !== undefined) {
+        content += `<strong>Goal Count:</strong> ${node.Goal_count}<br/>`;
       }
       break;
   }

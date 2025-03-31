@@ -56,13 +56,13 @@ jest.mock('react', () => {
 describe('Graph Component', () => {
   const mockData = {
     nodes: [
-      { id: 'jtbd1', label: 'JTBD', name: 'Test JTBD', complexity: 10 },
+      { id: 'Goal1', label: 'Goal', name: 'Test Goal', complexity: 10 },
       { id: 'service1', label: 'Service', name: 'Test Service', dependants: 5 },
-      { id: 'user1', label: 'User', name: 'Test User', jtbd_count: 3 }
+      { id: 'user1', label: 'User', name: 'Test User', Goal_count: 3 }
     ],
     links: [
-      { source: 'user1', target: 'jtbd1', type: 'DOES' },
-      { source: 'jtbd1', target: 'service1', type: 'DEPENDS_ON' }
+      { source: 'user1', target: 'Goal1', type: 'DOES' },
+      { source: 'Goal1', target: 'service1', type: 'DEPENDS_ON' }
     ]
   };
 

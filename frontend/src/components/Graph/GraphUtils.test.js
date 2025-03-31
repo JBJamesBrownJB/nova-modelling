@@ -3,7 +3,7 @@ import { calculateLinkEdgePoints, getNodeFromReference, getNodeRadius } from './
 describe('GraphUtils', () => {
   // Mock getNodeRadius function for testing link calculations
   const mockGetNodeRadius = (node) => {
-    if (node.label === 'JTBD') return 10;
+    if (node.label === 'Goal') return 10;
     if (node.label === 'Service') return 20;
     if (node.label === 'User') return 15;
     return 10; // Default
@@ -11,21 +11,21 @@ describe('GraphUtils', () => {
 
   // Test nodes with positions
   const mockNodes = [
-    { id: 'jtbd1', label: 'JTBD', x: 100, y: 100 },
+    { id: 'Goal1', label: 'Goal', x: 100, y: 100 },
     { id: 'service1', label: 'Service', x: 200, y: 100 },
     { id: 'user1', label: 'User', x: 100, y: 200 }
   ];
 
   describe('getNodeRadius', () => {
-    describe('JTBD Nodes', () => {
-      test('scales JTBD nodes based on complexity', () => {
-        const baseSize = 10; // Base size for JTBD nodes
+    describe('Goal Nodes', () => {
+      test('scales Goal nodes based on complexity', () => {
+        const baseSize = 10; // Base size for Goal nodes
         
         // Test various complexity values
-        const lowComplexity = { label: 'JTBD', complexity: 5 };
-        const mediumComplexity = { label: 'JTBD', complexity: 20 };
-        const highComplexity = { label: 'JTBD', complexity: 50 };
-        const extremeComplexity = { label: 'JTBD', complexity: 1000 }; // Test max cap
+        const lowComplexity = { label: 'Goal', complexity: 5 };
+        const mediumComplexity = { label: 'Goal', complexity: 20 };
+        const highComplexity = { label: 'Goal', complexity: 50 };
+        const extremeComplexity = { label: 'Goal', complexity: 1000 }; // Test max cap
         
         // Low complexity should add a small amount to radius
         expect(getNodeRadius(lowComplexity)).toBeCloseTo(baseSize + (5 / 1.4));
@@ -40,8 +40,8 @@ describe('GraphUtils', () => {
         expect(getNodeRadius(extremeComplexity)).toBeCloseTo(baseSize + 100);
       });
       
-      test('handles JTBD nodes without complexity value', () => {
-        const node = { label: 'JTBD' };
+      test('handles Goal nodes without complexity value', () => {
+        const node = { label: 'Goal' };
         expect(getNodeRadius(node)).toBe(10); // Should return base size only
       });
     });
@@ -76,14 +76,14 @@ describe('GraphUtils', () => {
     });
     
     describe('User Nodes', () => {
-      test('scales User nodes based on JTBD count', () => {
+      test('scales User nodes based on Goal count', () => {
         const baseSize = 20; // Base size for User nodes
         
-        // Test various JTBD counts
-        const lowCount = { label: 'User', jtbd_count: 1 };
-        const mediumCount = { label: 'User', jtbd_count: 10 };
-        const highCount = { label: 'User', jtbd_count: 25 };
-        const extremeCount = { label: 'User', jtbd_count: 100 }; // Test max cap
+        // Test various Goal counts
+        const lowCount = { label: 'User', Goal_count: 1 };
+        const mediumCount = { label: 'User', Goal_count: 10 };
+        const highCount = { label: 'User', Goal_count: 25 };
+        const extremeCount = { label: 'User', Goal_count: 100 }; // Test max cap
         
         // Low count should add a small amount to radius
         expect(getNodeRadius(lowCount)).toBe(baseSize + (1 * 3));
@@ -98,7 +98,7 @@ describe('GraphUtils', () => {
         expect(getNodeRadius(extremeCount)).toBe(baseSize + 100);
       });
       
-      test('handles User nodes without jtbd_count value', () => {
+      test('handles User nodes without Goal_count value', () => {
         const node = { label: 'User' };
         expect(getNodeRadius(node)).toBe(20); // Should return base size only
       });
@@ -117,7 +117,7 @@ describe('GraphUtils', () => {
 
   describe('getNodeFromReference', () => {
     test('returns node when given string id', () => {
-      const result = getNodeFromReference('jtbd1', mockNodes);
+      const result = getNodeFromReference('Goal1', mockNodes);
       expect(result).toEqual(mockNodes[0]);
     });
 
@@ -134,15 +134,15 @@ describe('GraphUtils', () => {
 
   describe('calculateLinkEdgePoints', () => {
     test('calculates correct edge points for horizontal links (string refs)', () => {
-      // JTBD -> Service (horizontal)
-      const link = { source: 'jtbd1', target: 'service1' };
+      // Goal -> Service (horizontal)
+      const link = { source: 'Goal1', target: 'service1' };
       const result = calculateLinkEdgePoints(link, mockNodes, mockGetNodeRadius);
 
-      // Source: JTBD at (100,100) with radius 10
+      // Source: Goal at (100,100) with radius 10
       // Target: Service at (200,100) with radius 20
       // Distance: 100 units horizontally
 
-      // Expected source point: Start from JTBD center, move right by its radius
+      // Expected source point: Start from Goal center, move right by its radius
       expect(result.source.x).toBeCloseTo(110); // 100 + 10 (radius)
       expect(result.source.y).toBeCloseTo(100); // Same y
 
@@ -152,15 +152,15 @@ describe('GraphUtils', () => {
     });
 
     test('calculates correct edge points for vertical links (string refs)', () => {
-      // JTBD -> User (vertical)
-      const link = { source: 'jtbd1', target: 'user1' };
+      // Goal -> User (vertical)
+      const link = { source: 'Goal1', target: 'user1' };
       const result = calculateLinkEdgePoints(link, mockNodes, mockGetNodeRadius);
 
-      // Source: JTBD at (100,100) with radius 10
+      // Source: Goal at (100,100) with radius 10
       // Target: User at (100,200) with radius 15
       // Distance: 100 units vertically
 
-      // Expected source point: Start from JTBD center, move down by its radius
+      // Expected source point: Start from Goal center, move down by its radius
       expect(result.source.x).toBeCloseTo(100); // Same x
       expect(result.source.y).toBeCloseTo(110); // 100 + 10 (radius)
 
@@ -196,7 +196,7 @@ describe('GraphUtils', () => {
     test('calculates correct edge points with object references', () => {
       // Using object references instead of string IDs
       const link = { 
-        source: { id: 'jtbd1' }, 
+        source: { id: 'Goal1' }, 
         target: { id: 'service1' } 
       };
       const result = calculateLinkEdgePoints(link, mockNodes, mockGetNodeRadius);
@@ -239,13 +239,13 @@ describe('GraphUtils', () => {
     test('works with different node sizes', () => {
       // Testing that different radii affect the edge points correctly
       const variableSizeGetRadius = (node) => {
-        return node.id === 'jtbd1' ? 30 : 10; // JTBD has large radius, service small
+        return node.id === 'Goal1' ? 30 : 10; // Goal has large radius, service small
       };
 
-      const link = { source: 'jtbd1', target: 'service1' };
+      const link = { source: 'Goal1', target: 'service1' };
       const result = calculateLinkEdgePoints(link, mockNodes, variableSizeGetRadius);
 
-      // Source: JTBD at (100,100) with larger radius 30
+      // Source: Goal at (100,100) with larger radius 30
       expect(result.source.x).toBeCloseTo(130); // 100 + 30 (larger radius)
       expect(result.source.y).toBeCloseTo(100);
 

@@ -5,68 +5,68 @@ function generateNovaModelCypher() {
   var values = activeSheet.getDataRange().offset(1, 0).getValues();
 
   // make functional?
-  let jtbd_collection = [];
+  let Goal_collection = [];
   for (var i = 0; i < values.length; i++) {
-    let jtbd = {};
-    jtbd.name = values[i][0];
-    jtbd.users = values[i][1].toString().split(';');
-    jtbd.read = values[i][2].toString().split(';');
-    jtbd.write = values[i][3].toString().split(';');
-    jtbd.update = values[i][4].toString().split(';');
-    jtbd_collection.push(jtbd);
+    let Goal = {};
+    Goal.name = values[i][0];
+    Goal.users = values[i][1].toString().split(';');
+    Goal.read = values[i][2].toString().split(';');
+    Goal.write = values[i][3].toString().split(';');
+    Goal.update = values[i][4].toString().split(';');
+    Goal_collection.push(Goal);
   }
 
   let cypher_script = "";
 
-  jtbd_collection.filter(jtbd => jtbd.name).forEach(jtbd => {
-    let jtbd_merge = 'MERGE (jtbd:JTBD {name: \'' + jtbd.name + '\', progress: 0})\r\n';
+  Goal_collection.filter(Goal => Goal.name).forEach(Goal => {
+    let Goal_merge = 'MERGE (Goal:Goal {name: \'' + Goal.name + '\', progress: 0})\r\n';
     let data_merge = '';
-    jtbd.read
+    Goal.read
       .filter(d => d)
       .forEach((data, i) => data_merge
         += 'MERGE (reading' + i + ':Data {name: \'' + data + '\'})\r\n');
 
-    jtbd.update
+    Goal.update
       .filter(d => d)
       .forEach((data, i) => data_merge
         += 'MERGE (updating' + i + ':Data {name: \'' + data + '\'})\r\n');
 
-    jtbd.write
+    Goal.write
       .filter(d => d)
       .forEach((data, i) => data_merge
         += 'MERGE (writing' + i + ':Data {name: \'' + data + '\'})\r\n');
 
     let user_merge = '';
-    jtbd.users
+    Goal.users
       .filter(u => u)
       .forEach((user, i) => user_merge
         += 'MERGE (u' + i + ':User {name: \'' + user + '\'})\r\n'
-        + 'MERGE (u' + i + ')-[does' + i + ':DOES]->(jtbd)\r\n'
+        + 'MERGE (u' + i + ')-[does' + i + ':DOES]->(Goal)\r\n'
       );
 
     let readers_merge = '';
-    jtbd.read
+    Goal.read
       .filter(r => r)
       .forEach((r, i) => readers_merge
-        += 'MERGE (jtbd)-[reads' + i + ':READS]->(reading' + i + ')\r\n'
+        += 'MERGE (Goal)-[reads' + i + ':READS]->(reading' + i + ')\r\n'
       );
 
     let updaters_merge = '';
-    jtbd.update
+    Goal.update
       .filter(r => r)
       .forEach((r, i) => updaters_merge
-        += 'MERGE (jtbd)-[updates' + i + ':UPDATES]->(updating' + i + ')\r\n'
+        += 'MERGE (Goal)-[updates' + i + ':UPDATES]->(updating' + i + ')\r\n'
       );
 
     let writers_merge = '';
-    jtbd.write
+    Goal.write
       .filter(r => r)
       .forEach((r, i) => writers_merge
-        += 'MERGE (jtbd)-[writes' + i + ':WRITES]->(writing' + i + ')\r\n'
+        += 'MERGE (Goal)-[writes' + i + ':WRITES]->(writing' + i + ')\r\n'
       );
 
     cypher_script
-      += jtbd_merge
+      += Goal_merge
       + user_merge
       + data_merge
       + readers_merge

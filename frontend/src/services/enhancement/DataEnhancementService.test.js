@@ -13,10 +13,10 @@ describe('DataEnhancementService', () => {
   // Test data setup
   const mockGraphData = {
     nodes: [
-      { id: 'jtbd1', label: 'JTBD', name: 'Test JTBD 1' },
-      { id: 'jtbd2', label: 'JTBD', name: 'Test JTBD 2' },
-      { id: 'jtbd3', label: 'JTBD', name: 'Test JTBD 3' },
-      { id: 'jtbd4', label: 'JTBD', name: 'Test JTBD 4' },
+      { id: 'Goal1', label: 'Goal', name: 'Test Goal 1' },
+      { id: 'Goal2', label: 'Goal', name: 'Test Goal 2' },
+      { id: 'Goal3', label: 'Goal', name: 'Test Goal 3' },
+      { id: 'Goal4', label: 'Goal', name: 'Test Goal 4' },
       { id: 'user1', label: 'User', name: 'Test User 1' },
       { id: 'user2', label: 'User', name: 'Test User 2' },
       { id: 'user3', label: 'User', name: 'Test User 3' },
@@ -25,18 +25,18 @@ describe('DataEnhancementService', () => {
       { id: 'service2', label: 'Service', name: 'Test Service 2', status: 'in_development' }
     ],
     links: [
-      { id: 'rel1', source: 'user1', target: 'jtbd1', type: 'DOES', nps: 85 },
-      { id: 'rel2', source: 'user1', target: 'jtbd1', type: 'DOES', nps: 75 },
-      { id: 'rel3', source: 'user1', target: 'jtbd2', type: 'DOES', nps: 25 },
-      { id: 'rel4', source: 'jtbd1', target: 'service1', type: 'DEPENDS_ON' },
-      { id: 'rel5', source: 'user2', target: 'jtbd3', type: 'DOES' }, // No NPS data
+      { id: 'rel1', source: 'user1', target: 'Goal1', type: 'DOES', nps: 85 },
+      { id: 'rel2', source: 'user1', target: 'Goal1', type: 'DOES', nps: 75 },
+      { id: 'rel3', source: 'user1', target: 'Goal2', type: 'DOES', nps: 25 },
+      { id: 'rel4', source: 'Goal1', target: 'service1', type: 'DEPENDS_ON' },
+      { id: 'rel5', source: 'user2', target: 'Goal3', type: 'DOES' }, // No NPS data
       // Mixed NPS data scenario - one with score, one without
-      { id: 'rel6', source: 'user3', target: 'jtbd4', type: 'DOES', nps: 50 },
-      { id: 'rel7', source: 'user3', target: 'jtbd4', type: 'DOES' }, // No NPS data
+      { id: 'rel6', source: 'user3', target: 'Goal4', type: 'DOES', nps: 50 },
+      { id: 'rel7', source: 'user3', target: 'Goal4', type: 'DOES' }, // No NPS data
       // User with mixed NPS values
-      { id: 'rel8', source: 'user4', target: 'jtbd1', type: 'DOES', nps: 60 },
-      { id: 'rel9', source: 'user4', target: 'jtbd2', type: 'DOES' }, // No NPS data
-      { id: 'rel10', source: 'user4', target: 'jtbd3', type: 'DOES', nps: null } // Explicit null
+      { id: 'rel8', source: 'user4', target: 'Goal1', type: 'DOES', nps: 60 },
+      { id: 'rel9', source: 'user4', target: 'Goal2', type: 'DOES' }, // No NPS data
+      { id: 'rel10', source: 'user4', target: 'Goal3', type: 'DOES', nps: null } // Explicit null
     ]
   };
 
@@ -49,10 +49,10 @@ describe('DataEnhancementService', () => {
       expect(mockGraphData).toEqual(originalData);
       
       // Verify the enhanced data has the expected properties
-      const jtbd1 = enhancedData.nodes.find(n => n.id === 'jtbd1');
-      expect(jtbd1).toHaveProperty('npsScore');
-      expect(jtbd1).toHaveProperty('npsColor');
-      expect(jtbd1).toHaveProperty('complexity');
+      const Goal1 = enhancedData.nodes.find(n => n.id === 'Goal1');
+      expect(Goal1).toHaveProperty('npsScore');
+      expect(Goal1).toHaveProperty('npsColor');
+      expect(Goal1).toHaveProperty('complexity');
     });
 
     it('should correctly apply colors to all node types', () => {
@@ -60,7 +60,7 @@ describe('DataEnhancementService', () => {
       
       // Check all node types have appropriate coloring
       enhancedData.nodes.forEach(node => {
-        if (node.label === 'JTBD') {
+        if (node.label === 'Goal') {
           expect(node).toHaveProperty('npsColor');
         } else if (node.label === 'User') {
           expect(node).toHaveProperty('npsColor');
@@ -95,43 +95,43 @@ describe('DataEnhancementService', () => {
   });
 
   describe('calculateAggregateNps', () => {
-    it('should correctly calculate average NPS for a JTBD node', () => {
-      // JTBD1 has three DOES edges with NPS 85, 75, and 60 (from user4), average should be 73
-      const result = calculateAggregateNps('jtbd1', mockGraphData.links);
+    it('should correctly calculate average NPS for a Goal node', () => {
+      // Goal1 has three DOES edges with NPS 85, 75, and 60 (from user4), average should be 73
+      const result = calculateAggregateNps('Goal1', mockGraphData.links);
       expect(result).toBe(73); // (85 + 75 + 60) / 3 = 73.33, rounded to 73
     });
 
     it('should handle a single NPS value', () => {
-      // JTBD2 has two DOES edges with NPS 25 and one without NPS, average should be 13
-      const result = calculateAggregateNps('jtbd2', mockGraphData.links);
+      // Goal2 has two DOES edges with NPS 25 and one without NPS, average should be 13
+      const result = calculateAggregateNps('Goal2', mockGraphData.links);
       expect(result).toBe(13); // (25 + 0) / 2 = 12.5, rounded to 13
     });
 
     it('should return null if no NPS data is available', () => {
-      // JTBD3 has a DOES relationship but no NPS score
-      const result = calculateAggregateNps('jtbd3', mockGraphData.links);
+      // Goal3 has a DOES relationship but no NPS score
+      const result = calculateAggregateNps('Goal3', mockGraphData.links);
       expect(result).toBeNull();
     });
     
     it('should treat missing NPS scores as 0 when calculating the average', () => {
-      // JTBD4 has two DOES edges: one with NPS 50 and one without NPS score
+      // Goal4 has two DOES edges: one with NPS 50 and one without NPS score
       // The one without score should be treated as 0, making the average 25
-      const result = calculateAggregateNps('jtbd4', mockGraphData.links);
+      const result = calculateAggregateNps('Goal4', mockGraphData.links);
       expect(result).toBe(25); // (50 + 0) / 2 = 25
     });
   });
 
   describe('calculateNodeComplexity', () => {
-    it('should return 0 for non-JTBD nodes', () => {
+    it('should return 0 for non-Goal nodes', () => {
       const userNode = mockGraphData.nodes.find(n => n.id === 'user1');
       const result = calculateNodeComplexity(userNode, mockGraphData.links, mockGraphData.nodes);
       expect(result).toBe(0);
     });
 
     it('should calculate complexity based on service dependencies', () => {
-      const jtbdNode = mockGraphData.nodes.find(n => n.id === 'jtbd1');
-      // jtbd1 has one service dependency with weight 3, so complexity should be 3
-      const result = calculateNodeComplexity(jtbdNode, mockGraphData.links, mockGraphData.nodes);
+      const GoalNode = mockGraphData.nodes.find(n => n.id === 'Goal1');
+      // Goal1 has one service dependency with weight 3, so complexity should be 3
+      const result = calculateNodeComplexity(GoalNode, mockGraphData.links, mockGraphData.nodes);
       expect(result).toBe(3);
     });
   });
@@ -165,28 +165,28 @@ describe('DataEnhancementService', () => {
   });
 
   describe('enhanceWithNpsScores', () => {
-    it('should correctly enhance JTBD nodes with NPS data', () => {
+    it('should correctly enhance Goal nodes with NPS data', () => {
       const enhancedData = enhanceWithNpsScores(mockGraphData);
       
-      // Check JTBD1 node (should have high satisfaction color)
-      const jtbd1 = enhancedData.nodes.find(n => n.id === 'jtbd1');
-      expect(jtbd1.npsScore).toBe(73);
-      expect(jtbd1.npsColor).toBe('#81C784'); // Light Green for high satisfaction
+      // Check Goal1 node (should have high satisfaction color)
+      const Goal1 = enhancedData.nodes.find(n => n.id === 'Goal1');
+      expect(Goal1.npsScore).toBe(73);
+      expect(Goal1.npsColor).toBe('#81C784'); // Light Green for high satisfaction
       
-      // Check JTBD2 node (should have low satisfaction color)
-      const jtbd2 = enhancedData.nodes.find(n => n.id === 'jtbd2');
-      expect(jtbd2.npsScore).toBe(13);
-      expect(jtbd2.npsColor).toBe('#EF9A9A'); // Light Red for low satisfaction
+      // Check Goal2 node (should have low satisfaction color)
+      const Goal2 = enhancedData.nodes.find(n => n.id === 'Goal2');
+      expect(Goal2.npsScore).toBe(13);
+      expect(Goal2.npsColor).toBe('#EF9A9A'); // Light Red for low satisfaction
       
-      // Check JTBD3 node (should have default color for null NPS)
-      const jtbd3 = enhancedData.nodes.find(n => n.id === 'jtbd3');
-      expect(jtbd3.npsScore).toBeNull();
-      expect(jtbd3.npsColor).toBe('#BDBDBD'); // Grey for unmeasured
+      // Check Goal3 node (should have default color for null NPS)
+      const Goal3 = enhancedData.nodes.find(n => n.id === 'Goal3');
+      expect(Goal3.npsScore).toBeNull();
+      expect(Goal3.npsColor).toBe('#BDBDBD'); // Grey for unmeasured
       
-      // Check JTBD4 node (should treat missing NPS as 0)
-      const jtbd4 = enhancedData.nodes.find(n => n.id === 'jtbd4');
-      expect(jtbd4.npsScore).toBe(25); // (50 + 0) / 2 = 25
-      expect(jtbd4.npsColor).toBe('#EF9A9A'); // Light Red for low satisfaction
+      // Check Goal4 node (should treat missing NPS as 0)
+      const Goal4 = enhancedData.nodes.find(n => n.id === 'Goal4');
+      expect(Goal4.npsScore).toBe(25); // (50 + 0) / 2 = 25
+      expect(Goal4.npsColor).toBe('#EF9A9A'); // Light Red for low satisfaction
     });
     
     it('should correctly enhance User nodes with NPS data', () => {

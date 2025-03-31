@@ -49,7 +49,7 @@ export const COLORS = {
   
   // Node type colors
   NODE_USER: '#8D5524',
-  NODE_JTBD: '#BBDEFB',         // Blue 100
+  NODE_GOAL: '#BBDEFB',         // Blue 100
   
   // Edge colors
   EDGE_DOES: '#F8BBD0',         // Pink 100

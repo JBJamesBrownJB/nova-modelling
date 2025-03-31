@@ -184,28 +184,28 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
       const nodesGroup = container.append('g')
         .attr('class', 'nodes');
 
-      // Add circle nodes for JTBD
-      const jtbdGroups = nodesGroup.selectAll('.jtbd-group')
-        .data(data.nodes.filter(d => d.label === 'JTBD'))
+      // Add circle nodes for Goal
+      const GoalGroups = nodesGroup.selectAll('.Goal-group')
+        .data(data.nodes.filter(d => d.label === 'Goal'))
         .enter()
         .append('g')
-        .attr('class', 'jtbd-group');
+        .attr('class', 'Goal-group');
 
       // Add invisible hit area
-      jtbdGroups.append('circle')
+      GoalGroups.append('circle')
         .attr('class', 'hit-area')
         .attr('r', d => getNodeRadius(d) * 1.25)
         .attr('fill', 'rgba(0,0,0,0)')
         .attr('stroke', 'none');
 
       // Add visible node
-      jtbdGroups.append('circle')
+      GoalGroups.append('circle')
         .attr('class', d => `circle-node ${selectedNodes.includes(d.id) ? 'selected-node' : ''}`)
         .attr('r', d => getNodeRadius(d))
         .attr('fill', d => d.npsColor || nodeColors[d.label] || '#666');
 
       // Add event handlers to the group
-      jtbdGroups
+      GoalGroups
         .on('mouseover', (event, d) => showTooltip(tooltip, event, d))
         .on('mouseout', () => hideTooltip(tooltip))
         .on('click', (event, d) => handleNodeClick(event, d))
@@ -293,7 +293,7 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
 
       // Highlight selected nodes
       if (selectedNodes.length > 0) {
-        jtbdGroups.select('.circle-node').classed('selected-node', d => selectedNodes.includes(d.id));
+        GoalGroups.select('.circle-node').classed('selected-node', d => selectedNodes.includes(d.id));
         userGroups.select('path').classed('selected-node', d => selectedNodes.includes(d.id));
         serviceGroups.select('path').classed('selected-node', d => selectedNodes.includes(d.id));
       }
@@ -306,8 +306,8 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
         .enter().append('text')
         .attr('class', 'node-label')
         .text(d => {
-          // Truncate long JTBD node names
-          if (d.label === 'JTBD' && d.name.length > 20) {
+          // Truncate long Goal node names
+          if (d.label === 'Goal' && d.name.length > 20) {
             return d.name.substring(0, 20) + '...';
           }
           return d.name;
@@ -349,7 +349,7 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
             .attr('x2', d => d.targetEdgeX || d.target.x)
             .attr('y2', d => d.targetEdgeY || d.target.y);
 
-          jtbdGroups
+          GoalGroups
             .attr('transform', d => `translate(${d.x},${d.y})`);
 
           userGroups
@@ -381,7 +381,7 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
                 const nodeRadius = getNodeRadius(d) * 0.8;
                 return d.y + 12 + nodeRadius;
               }
-              if (d.label === 'JTBD') {
+              if (d.label === 'Goal') {
                 const nodeRadius = getNodeRadius(d);
                 return d.y + nodeRadius + 18;
               }

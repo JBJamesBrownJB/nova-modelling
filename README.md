@@ -9,7 +9,7 @@ For a comprehensive overview of Nova modelling's theoretical foundations, key me
 ## Quick Overview
 
 Nova modelling uses a graph-based approach to visualize three key aspects of any system:
-- **Jobs To Be Done (JTBD)**: Core business functions the system must perform
+- **Jobs To Be Done (Goal)**: Core business functions the system must perform
 - **Users**: People, roles, or systems that interact with these functions
 - **Data**: Information elements that are read, written, or updated by each job
 
@@ -18,7 +18,7 @@ Nova modelling uses a graph-based approach to visualize three key aspects of any
 Nova modelling requires three tools working together:
 
 1. **Data Collection (Google Sheets)**
-   - Captures structured information about JTBDs, Users, and Data interactions
+   - Captures structured information about Goals, Users, and Data interactions
    - Provides a collaborative interface for product and technical teams
 
 2. **Graph Generation (This Repository)**
@@ -40,7 +40,7 @@ Nova modelling requires three tools working together:
 ### 1. Set Up Data Collection
 
 Create a new Google Spreadsheet with the following columns:
-- Column A: **JTBD Name** (core system function)
+- Column A: **Goal Name** (core system function)
 - Column B: **Users** (roles/systems involved, semicolon-separated for multiple users)
 - Column C: **Data Read** (input data requirements, semicolon-separated for multiple data items)
 - Column D: **Data Created** (output data generated, semicolon-separated for multiple data items)
@@ -59,7 +59,7 @@ Create a new Google Spreadsheet with the following columns:
 Following system analysis, enter your data in the spreadsheet using this format:
 
 ```
-| JTBD Name          | Users                           | Data Read                             | Data Created    | Data Updated         |
+| Goal Name          | Users                           | Data Read                             | Data Created    | Data Updated         |
 |--------------------|---------------------------------|---------------------------------------|-----------------|----------------------|
 | Diagnose Patient   | Doctor                          | Patient List;Diseases;Patient Details | Diagnosis       | Patient Record       |
 | Find Patient       | Doctor;Nurse;Security Guard     | Patient List;Facilities               |                 |                      |
@@ -84,19 +84,19 @@ The Nova model employs a hierarchy of data interaction complexity that directly 
 
 1. **Data READ**:
    - Lowest complexity level
-   - JTBD only consumes existing data
+   - Goal only consumes existing data
    - No data modifications
    - Typically requires fewer resources to implement
 
 2. **Data UPDATE**:
    - Medium complexity level
-   - JTBD modifies existing data entities
+   - Goal modifies existing data entities
    - Requires validation and consistency checks
    - Assumes READ capabilities as a prerequisite
 
 3. **Data CREATE**:
    - Highest complexity level
-   - JTBD generates entirely new data entries
+   - Goal generates entirely new data entries
    - System becomes the "master" or authoritative source for this data
    - Implies both READ and UPDATE capabilities
    - Typically requires more development resources and architectural attention
@@ -108,7 +108,7 @@ This hierarchy helps technology leaders identify which system components will re
 The spreadsheet format uses semicolon-separated values to represent many-to-many relationships. For example:
 
 ```
-| JTBD Name          | Users                     | Data Read                        | Data Created    | Data Updated     |
+| Goal Name          | Users                     | Data Read                        | Data Created    | Data Updated     |
 |--------------------|---------------------------|---------------------------------|-----------------|------------------|
 | Process Application| Reviewer;Admin            | Application;User Profile        | Decision        | Application      |
 ```
@@ -118,7 +118,7 @@ This entry creates:
 - Two Data Read nodes (Application, User Profile)
 - One Data Created node (Decision)
 - One Data Updated node (Application)
-- Multiple relationships connecting these nodes to the JTBD
+- Multiple relationships connecting these nodes to the Goal
 
 The transformation script handles these relationships automatically, generating the appropriate Cypher queries to establish all connections.
 
@@ -136,19 +136,19 @@ The `create_model_EXAMPLE.cypher` file in this repository demonstrates a complet
 Once your model is in Neo4j, use these queries to explore different aspects:
 
 ```cypher
-// View all JTBDs and their connected Users
-MATCH (j:JTBD)<-[:DOES]-(u:User)
+// View all Goals and their connected Users
+MATCH (j:Goal)<-[:DOES]-(u:User)
 RETURN j.name, collect(u.name) as Users
 
-// Find the most complex JTBDs (those with the most data interactions)
-MATCH (j:JTBD)-[r]->(d:Data)
+// Find the most complex Goals (those with the most data interactions)
+MATCH (j:Goal)-[r]->(d:Data)
 WITH j, count(r) as interactions
 RETURN j.name, interactions
 ORDER BY interactions DESC
 LIMIT 10
 
-// Identify potential system boundaries (clusters of JTBDs that share data)
-MATCH (j1:JTBD)-[]->(d:Data)<-[]-(j2:JTBD)
+// Identify potential system boundaries (clusters of Goals that share data)
+MATCH (j1:Goal)-[]->(d:Data)<-[]-(j2:Goal)
 WHERE j1 <> j2
 RETURN j1.name, j2.name, count(d) as shared_data
 ORDER BY shared_data DESC
@@ -195,7 +195,7 @@ The Nova model's complexity calculations are grounded in Fred Brooks' seminal wo
 
 The model quantifies these complexities:
 
-- Essential complexity is captured in the JTBD interactions (READ=1, UPDATE=3, WRITE=5)
+- Essential complexity is captured in the Goal interactions (READ=1, UPDATE=3, WRITE=5)
 - Accidental complexity is represented by the TOIL_FACTOR (default 1.8, representing an 80/20 split)
 - Each Data node adds a base complexity cost (default 10) for building and maintaining its API
 
@@ -221,7 +221,7 @@ The basic model can be enhanced with additional metrics to better quantify compl
 
 ```cypher
 // Set complexity based on data interaction types
-MATCH (j:JTBD)
+MATCH (j:Goal)
 OPTIONAL MATCH (j)-[:READS]->(dr:Data)
 WITH j, count(dr) as reads
 OPTIONAL MATCH (j)-[:UPDATES]->(du:Data)
@@ -244,7 +244,7 @@ Using the complexity metrics, you can generate delivery estimates:
 
 ```cypher
 // Calculate total system effort based on complexity
-MATCH (j:JTBD)
+MATCH (j:Goal)
 WHERE j.complexity IS NOT NULL
 RETURN sum(j.complexity) as total_complexity,
        sum(j.complexity) / 20 as estimated_team_months

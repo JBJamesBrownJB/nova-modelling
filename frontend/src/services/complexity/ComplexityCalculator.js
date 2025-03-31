@@ -1,7 +1,7 @@
 const DEFAULT_DEPENDENCY_WEIGHT = 3;  
 
 export const calculateNodeComplexity = (node, links, nodes, config = {}) => {
-  if (node.label !== 'JTBD') {
+  if (node.label !== 'Goal') {
     return 0;
   }
   const dependencyWeight = config.dependencyWeight || DEFAULT_DEPENDENCY_WEIGHT;
@@ -37,11 +37,11 @@ export const calculateServiceDependants = (node, links, nodes) => {
     if ((link.target === node.id || 
         (typeof link.target === 'object' && link.target.id === node.id)) &&
         link.type === 'DEPENDS_ON') {
-      // Find source node to check if it's a JTBD node
+      // Find source node to check if it's a Goal node
       const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
       const sourceNode = nodes.find(n => n.id === sourceId);
       
-      if (sourceNode && sourceNode.label === 'JTBD') {
+      if (sourceNode && sourceNode.label === 'Goal') {
         dependantCount++;
       }
     }
@@ -50,38 +50,38 @@ export const calculateServiceDependants = (node, links, nodes) => {
   return dependantCount;
 };
 
-export const calculateUserJtbdCount = (node, links, nodes) => {
+export const calculateUserGoalCount = (node, links, nodes) => {
   if (node.label !== 'User') {
-    return 0; // Only User nodes have JTBD counts
+    return 0; // Only User nodes have Goal counts
   }
-  let jtbdCount = 0;
+  let GoalCount = 0;
   
   links.forEach(link => {
-    if (isUserJtbdLink(node, link)) {
-      // Find target node to check if it's a JTBD node
+    if (isUserGoalLink(node, link)) {
+      // Find target node to check if it's a Goal node
       const targetId = typeof link.target === 'object' ? link.target.id : link.target;
       const targetNode = nodes.find(n => n.id === targetId);
       
-      if (targetNode && targetNode.label === 'JTBD') {
-        jtbdCount++;
+      if (targetNode && targetNode.label === 'Goal') {
+        GoalCount++;
       }
     }
   });
   
-  return jtbdCount;
+  return GoalCount;
 };
 
 export const calculateGraphComplexity = (nodes, links, config = {}) => {
   return nodes.map(node => {
     const updatedNode = { ...node };
     
-    if (node.label === 'JTBD') {
+    if (node.label === 'Goal') {
       updatedNode.complexity = calculateNodeComplexity(node, links, nodes, config);
       updatedNode.dependency_count = countServiceDependencies(node, links, nodes);
     } else if (node.label === 'Service') {
       updatedNode.dependants = calculateServiceDependants(node, links, nodes);
     } else if (node.label === 'User') {
-      updatedNode.jtbd_count = calculateUserJtbdCount(node, links, nodes);
+      updatedNode.Goal_count = calculateUserGoalCount(node, links, nodes);
     }
     
     return updatedNode;
@@ -98,7 +98,7 @@ const isServiceDependencyLink = (node, link) => {
     link.type === 'DEPENDS_ON';
 };
 
-const isUserJtbdLink = (node, link) => {
+const isUserGoalLink = (node, link) => {
   return (link.source === node.id || 
     (typeof link.source === 'object' && link.source.id === node.id)) &&
     link.type === 'DOES';
@@ -108,7 +108,7 @@ const isUserJtbdLink = (node, link) => {
 export default {
   calculateNodeComplexity,
   calculateServiceDependants,
-  calculateUserJtbdCount,
+  calculateUserGoalCount,
   calculateGraphComplexity,
   simulateComplexityChanges
 };

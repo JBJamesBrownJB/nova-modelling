@@ -2,25 +2,25 @@ import {
   calculateNodeComplexity,
   countServiceDependencies,
   calculateServiceDependants,
-  calculateUserJtbdCount,
+  calculateUserGoalCount,
   calculateGraphComplexity,
 } from './ComplexityCalculator';
 
 describe('ComplexityCalculator', () => {
   // Test fixtures
   const mockNodes = [
-    { id: 'jtbd1', label: 'JTBD', name: 'Test JTBD' },
+    { id: 'Goal1', label: 'Goal', name: 'Test Goal' },
     { id: 'service1', label: 'Service', name: 'Test Service' },
     { id: 'user1', label: 'User', name: 'Test User' }
   ];
   
   const mockLinks = [
-    { source: 'jtbd1', target: 'service1', type: 'DEPENDS_ON' },
-    { source: 'user1', target: 'jtbd1', type: 'DOES' }
+    { source: 'Goal1', target: 'service1', type: 'DEPENDS_ON' },
+    { source: 'user1', target: 'Goal1', type: 'DOES' }
   ];
 
   describe('calculateNodeComplexity', () => {
-    test('returns 0 for non-JTBD nodes', () => {
+    test('returns 0 for non-Goal nodes', () => {
       const result = calculateNodeComplexity(
         { id: 'service1', label: 'Service' },
         mockLinks,
@@ -31,7 +31,7 @@ describe('ComplexityCalculator', () => {
 
     test('calculates complexity based on service dependencies', () => {
       const result = calculateNodeComplexity(
-        { id: 'jtbd1', label: 'JTBD' },
+        { id: 'Goal1', label: 'Goal' },
         mockLinks,
         mockNodes
       );
@@ -40,7 +40,7 @@ describe('ComplexityCalculator', () => {
 
     test('respects custom dependency weight', () => {
       const result = calculateNodeComplexity(
-        { id: 'jtbd1', label: 'JTBD' },
+        { id: 'Goal1', label: 'Goal' },
         mockLinks,
         mockNodes,
         { dependencyWeight: 5 }
@@ -52,7 +52,7 @@ describe('ComplexityCalculator', () => {
   describe('countServiceDependencies', () => {
     test('counts correct number of service dependencies', () => {
       const result = countServiceDependencies(
-        { id: 'jtbd1', label: 'JTBD' },
+        { id: 'Goal1', label: 'Goal' },
         mockLinks,
         mockNodes
       );
@@ -61,7 +61,7 @@ describe('ComplexityCalculator', () => {
 
     test('handles nodes with no dependencies', () => {
       const result = countServiceDependencies(
-        { id: 'jtbd2', label: 'JTBD' },
+        { id: 'Goal2', label: 'Goal' },
         mockLinks,
         mockNodes
       );
@@ -70,7 +70,7 @@ describe('ComplexityCalculator', () => {
   });
 
   describe('calculateServiceDependants', () => {
-    test('counts correct number of JTBD dependants', () => {
+    test('counts correct number of Goal dependants', () => {
       const result = calculateServiceDependants(
         { id: 'service1', label: 'Service' },
         mockLinks,
@@ -81,7 +81,7 @@ describe('ComplexityCalculator', () => {
 
     test('returns 0 for non-Service nodes', () => {
       const result = calculateServiceDependants(
-        { id: 'jtbd1', label: 'JTBD' },
+        { id: 'Goal1', label: 'Goal' },
         mockLinks,
         mockNodes
       );
@@ -89,9 +89,9 @@ describe('ComplexityCalculator', () => {
     });
   });
 
-  describe('calculateUserJtbdCount', () => {
-    test('counts correct number of JTBDs for user', () => {
-      const result = calculateUserJtbdCount(
+  describe('calculateUserGoalCount', () => {
+    test('counts correct number of Goals for user', () => {
+      const result = calculateUserGoalCount(
         { id: 'user1', label: 'User' },
         mockLinks,
         mockNodes
@@ -100,8 +100,8 @@ describe('ComplexityCalculator', () => {
     });
 
     test('returns 0 for non-User nodes', () => {
-      const result = calculateUserJtbdCount(
-        { id: 'jtbd1', label: 'JTBD' },
+      const result = calculateUserGoalCount(
+        { id: 'Goal1', label: 'Goal' },
         mockLinks,
         mockNodes
       );
@@ -113,14 +113,14 @@ describe('ComplexityCalculator', () => {
     test('updates all node types correctly', () => {
       const result = calculateGraphComplexity(mockNodes, mockLinks);
       
-      const jtbdNode = result.find(n => n.label === 'JTBD');
+      const GoalNode = result.find(n => n.label === 'Goal');
       const serviceNode = result.find(n => n.label === 'Service');
       const userNode = result.find(n => n.label === 'User');
 
-      expect(jtbdNode.complexity).toBe(3);
-      expect(jtbdNode.dependency_count).toBe(1);
+      expect(GoalNode.complexity).toBe(3);
+      expect(GoalNode.dependency_count).toBe(1);
       expect(serviceNode.dependants).toBe(1);
-      expect(userNode.jtbd_count).toBe(1);
+      expect(userNode.Goal_count).toBe(1);
     });
 
     test('maintains immutability', () => {
@@ -131,8 +131,8 @@ describe('ComplexityCalculator', () => {
 
     test('handles custom complexity configuration', () => {
       const result = calculateGraphComplexity(mockNodes, mockLinks, { dependencyWeight: 5 });
-      const jtbdNode = result.find(n => n.label === 'JTBD');
-      expect(jtbdNode.complexity).toBe(5); // Custom weight * 1 dependency
+      const GoalNode = result.find(n => n.label === 'Goal');
+      expect(GoalNode.complexity).toBe(5); // Custom weight * 1 dependency
     });
   });
 
@@ -147,7 +147,7 @@ describe('ComplexityCalculator', () => {
       expect(result.every(node => 
         node.complexity === 0 || 
         node.dependants === 0 || 
-        node.jtbd_count === 0
+        node.Goal_count === 0
       )).toBe(true);
     });
 
