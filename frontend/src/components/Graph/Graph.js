@@ -81,7 +81,7 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
       case 'active':
         return COLORS.STATUS_ACTIVE;
       default:
-        return COLORS.STATUS_DEFAULT;
+        return COLORS.STATUS_VAPOUR;
     }
   };
 
