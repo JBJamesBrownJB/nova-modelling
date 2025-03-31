@@ -6,8 +6,10 @@ import {
   FaClock,
   FaUser,
   FaServer,
-  FaRegCircle
+  FaCircle
 } from 'react-icons/fa';
+import { COLORS } from '../../styles/colors';
+import { ICONS } from '../../styles/icons';
 
 const SidebarContainer = styled.div`
   width: ${props => props.isOpen ? '300px' : '0'};
@@ -132,21 +134,6 @@ const ControlsSection = styled.div`
   }
 `;
 
-const IconPreview = styled.div`
-  display: flex;
-  gap: 15px;
-  align-items: center;
-  margin: 10px 0;
-  font-size: 0.9rem;
-  color: #666;
-  
-  > div {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-`;
-
 const LegendItem = styled.div`
   display: flex;
   align-items: center;
@@ -234,17 +221,17 @@ function Sidebar({ isOpen }) {
               <SectionTitle>Node Types</SectionTitle>
               
               <LegendItem>
-                <FaRegCircle style={{ color: '#5499C7' }} />
+                <FaCircle style={{ color: COLORS.NODE_JTBD }} />
                 <span><strong>JTBD</strong> (Jobs To Be Done) - Circles</span>
               </LegendItem>
               
               <LegendItem>
-                <FaUser style={{ color: '#AEB6BF' }} />
+                <FaUser style={{ color: COLORS.NODE_USER }} />
                 <span><strong>User</strong> - Person icons</span>
               </LegendItem>
               
               <LegendItem>
-                <FaServer style={{ color: '#2ECC71' }} />
+                <FaServer style={{ color: COLORS.STATUS_VAPOUR }} />
                 <span><strong>Service</strong> - Server icons</span>
               </LegendItem>
               
@@ -275,15 +262,24 @@ function Sidebar({ isOpen }) {
               
               <SectionTitle>Service Status</SectionTitle>
               <LegendItem>
-                <ColorSquare color="#2ECC71" />
+                <ColorSquare color={COLORS.STATUS_ACTIVE} />
                 <span><strong>Active</strong>: Live service</span>
               </LegendItem>
               <LegendItem>
-                <ColorSquare color="#7F8C8D" icon />
+                <svg width="22" height="22" viewBox="2 0 26 25" style={{ marginRight: '-6px' }}>
+                  <path
+                    d={ICONS.PLANNING}
+                    fill="none"
+                    stroke={COLORS.STATUS_IN_DEVELOPMENT_ICON}
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
                 <span><strong>In Development</strong></span>
               </LegendItem>
               <LegendItem>
-                <ColorSquare color="#7F8C8D" />
+                <ColorSquare color={COLORS.STATUS_VAPOUR} />
                 <span><strong>Vaporware 😶‍🌫️</strong></span>
               </LegendItem>
             </div>

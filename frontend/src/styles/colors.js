@@ -44,10 +44,11 @@ export const COLORS = {
   // Node status colors
   STATUS_ACTIVE: '#A5D6A7',      // Green 200
   STATUS_IN_DEVELOPMENT: '#757575', 
+  STATUS_IN_DEVELOPMENT_ICON: '#E67E22', 
   STATUS_VAPOUR: '#9E9E9E',     
   
   // Node type colors
-  NODE_USER: '#E3F2FD',         // Blue 50
+  NODE_USER: '#8D5524',
   NODE_JTBD: '#BBDEFB',         // Blue 100
   
   // Edge colors
