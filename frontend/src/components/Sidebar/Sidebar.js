@@ -211,28 +211,30 @@ function Sidebar({ isOpen }) {
             <SectionTitle>Progress View</SectionTitle>
             <div>
               <p>
-                <strong>JTBD = Jobs To Be Done</strong>. Users come to your product to get jobs done. If your product enables all users to achieve all of their jobs with good outcomes, you product is done! 👩‍🍳
+                Progress means enabling users to complete their tasks effectively. It's not about code changes, velocity, or features. It's about helping users achieve their goals and receiving positive feedback.
               </p>
-              
               <p>
-                Progress is measured through <strong>Net Promoter Scores (NPS)</strong> from each user against the JTBDs they interact with.
+                <strong>JTBD = Jobs To Be Done</strong>. Your product is successful when it helps all users accomplish their tasks with positive outcomes.
+              </p>
+              <p>
+                Progress is measured through <strong>Net Promoter Scores (NPS)</strong> from users for the JTBDs they engage with.
               </p>
               
               <SectionTitle>Node Types</SectionTitle>
               
               <LegendItem>
                 <FaCircle style={{ color: COLORS.NODE_JTBD }} />
-                <span><strong>JTBD</strong> (Jobs To Be Done) - Circles</span>
+                <span><strong>JTBD</strong> -Tasks users aim to complete</span>
               </LegendItem>
               
               <LegendItem>
                 <FaUser style={{ color: COLORS.NODE_USER }} />
-                <span><strong>User</strong> - Person icons</span>
+                <span><strong>User</strong> - Users of your product</span>
               </LegendItem>
               
               <LegendItem>
                 <FaServer style={{ color: COLORS.STATUS_VAPOUR }} />
-                <span><strong>Service</strong> - Server icons</span>
+                <span><strong>Services</strong> - Architectural components</span>
               </LegendItem>
               
               <SectionTitle>Node Sizes</SectionTitle>
