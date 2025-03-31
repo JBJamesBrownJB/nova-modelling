@@ -221,12 +221,12 @@ function Sidebar({ isOpen }) {
               <SectionTitle>Node Types</SectionTitle>
               
               <LegendItem>
-                <FaCircle style={{ color: COLORS.NODE_GOAL }} />
+                <FaCircle style={{ color: COLORS.NODE_GOAL_DEFAULT }} />
                 <span><strong>Goal</strong> - Goals users aim to achieve</span>
               </LegendItem>
               
               <LegendItem>
-                <FaUser style={{ color: COLORS.NODE_USER }} />
+                <FaUser style={{ color: COLORS.NODE_USER_DEFAULT }} />
                 <span><strong>User</strong> - Users of your product</span>
               </LegendItem>
               

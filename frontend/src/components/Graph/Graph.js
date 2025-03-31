@@ -66,19 +66,23 @@ const GraphContainer = styled.div`
 
 function Graph({ data, selectedNodes, onNodeSelect }) {
   const svgRef = useRef(null);
-
-  // Color constants
-  const nodeColors = {
-    Service: {
-      active: COLORS.STATUS_ACTIVE,  
-      in_development: COLORS.STATUS_IN_DEVELOPMENT, 
-      vapourware: COLORS.STATUS_VAPOUR
-    }
-  };
   
   const linkColors = {
     'DOES': '#ECB5C9',   // Pink
     'DEPENDS_ON': '#F16667'  // Red
+  };
+
+  const getServiceColor = (status) => {
+    switch (status) {
+      case 'in_development':
+        return COLORS.STATUS_IN_DEVELOPMENT;
+      case 'vapour':
+        return COLORS.STATUS_VAPOUR;
+      case 'active':
+        return COLORS.STATUS_ACTIVE;
+      default:
+        return COLORS.STATUS_DEFAULT;
+    }
   };
 
   const setupArrowMarkers = (container) => {
@@ -202,7 +206,7 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
       GoalGroups.append('circle')
         .attr('class', d => `circle-node ${selectedNodes.includes(d.id) ? 'selected-node' : ''}`)
         .attr('r', d => getNodeRadius(d))
-        .attr('fill', d => d.npsColor || nodeColors[d.label] || '#666');
+        .attr('fill', d => d.npsColor);
 
       // Add event handlers to the group
       GoalGroups
@@ -232,7 +236,7 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
       userGroups.append('path')
         .attr('class', d => `user-node ${selectedNodes.includes(d.id) ? 'selected-node' : ''}`)
         .attr('d', ICONS.USER)
-        .attr('fill', d => d.npsColor || nodeColors[d.label] || '#666')
+        .attr('fill', d => d.npsColor)
         .attr('transform', 'translate(-12, -12)');
 
       // Add event handlers to the group
@@ -266,7 +270,8 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
       serviceGroups.append('path')
         .attr('class', d => `service-node ${selectedNodes.includes(d.id) ? 'selected-node' : ''}`)
         .attr('d', ICONS.SERVICE)
-        .attr('fill', d => nodeColors[d.label][d.status || 'vapourware'])
+        //SELECT COLOUR BASED ON STATUS FROM COLORS 
+        .attr('fill', (d) => getServiceColor(d.status))
         .attr('transform', 'translate(-12, -12)');
 
       // Add planning icon for in-development services

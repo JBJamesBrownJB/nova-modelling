@@ -11,6 +11,7 @@ export const generateTooltipContent = (node) => {
     case 'Goal':
       if (node.complexity) {
         content += `<strong>Complexity Score:</strong> ${node.complexity.toFixed(1)}<br/>`;
+        content += `<strong>NPS Score:</strong> ${node.npsScore}<br/>`;
       }
       break;
     case 'Service':
@@ -21,6 +22,7 @@ export const generateTooltipContent = (node) => {
     case 'User':
       if (node.Importance !== undefined) {
         content += `<strong>User Importance Score:</strong> ${node.Importance}<br/>`;
+        content += `<strong>NPS Score:</strong> ${node.npsScore}<br/>`;
       }
       break;
   }

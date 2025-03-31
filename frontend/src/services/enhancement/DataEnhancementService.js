@@ -5,6 +5,24 @@
  * such as NPS scores and complexity metrics.
  */
 
+import { color } from "d3";
+import { COLORS } from "../../styles/colors";
+
+// Node sizing configuration constants
+const BUCKET_COUNT = 4; // Number of buckets for quantized sizing
+
+// Size range for Goal nodes (complexity)
+const GOAL_MIN_SIZE = 10;
+const GOAL_MAX_SIZE = 25;
+
+// Size range for User nodes (importance)
+const USER_MIN_SIZE = 30;
+const USER_MAX_SIZE = 70;
+
+// Size range for Service nodes (dependants)
+const SERVICE_MIN_SIZE = 20;
+const SERVICE_MAX_SIZE = 50;
+
 export const enhanceGraphData = (data) => {
   // Create a deep copy to avoid mutation
   const enhancedData = JSON.parse(JSON.stringify(data));
@@ -56,7 +74,7 @@ export const enhanceWithNpsScores = (data) => {
       return {
         ...node,
         npsScore: aggregateNps,
-        npsColor: getNpsColor(aggregateNps)
+        npsColor: getNpsColor(aggregateNps, node.label)
       };
     } else if (node.label === 'User') {
       // Calculate aggregate NPS for User nodes based on outgoing DOES relationships
@@ -66,7 +84,7 @@ export const enhanceWithNpsScores = (data) => {
       return {
         ...node,
         npsScore: aggregateNps,
-        npsColor: getNpsColor(aggregateNps)
+        npsColor: getNpsColor(aggregateNps, 'User')
       };
     }
     return node;
@@ -109,17 +127,12 @@ export const addCalculatedAttributes = (data) => {
 };
 
 // NPS CALCULATION FUNCTIONS
-
-/**
- * Maps NPS score to a color based on satisfaction level
- * @param {Number|null} npsScore - The NPS score
- * @returns {String} - HEX color code
- */
 export const getNpsColor = (npsScore) => {
-  if (npsScore === null || npsScore === undefined) return '#BDBDBD'; // Material Light Grey for unmeasured
-  if (npsScore >= 70) return '#81C784';  // Material Light Green for high satisfaction
-  if (npsScore >= 30) return '#FFB74D';  // Material Light Orange for medium satisfaction
-  return '#EF9A9A';  // Material Light Red for low satisfaction
+  if (npsScore === null || npsScore === undefined) return COLORS.NPS_UNMEASURED; 
+  if (npsScore >= 70) return COLORS.NPS_EXCELLENT;  
+  if (npsScore >= 30) return COLORS.NPS_GOOD;  
+  if (npsScore >= 0) return COLORS.NPS_LOW;  
+  return COLORS.NPS_BAD;  
 };
 
 /**
@@ -222,14 +235,11 @@ export const calculateNodeComplexity = (node, links, nodes) => {
   
   // If all nodes have the same complexity, return a default value
   if (minComplexity === maxComplexity) {
-    return 10; // Default size for uniform complexity
+    return GOAL_MIN_SIZE; // Default size for uniform complexity
   }
   
-  // Define 4 buckets with corresponding complexity values
-  const BUCKET_COUNT = 4;
-  const BUCKET_MIN_SIZE = 10;  // Minimum node size
-  const BUCKET_MAX_SIZE = 25; // Maximum node size
-  const bucketSize = (BUCKET_MAX_SIZE - BUCKET_MIN_SIZE) / (BUCKET_COUNT - 1);
+  // Define buckets with corresponding complexity values
+  const bucketSize = (GOAL_MAX_SIZE - GOAL_MIN_SIZE) / (BUCKET_COUNT - 1);
   
   // Calculate which bucket this node's complexity falls into
   const complexityRange = maxComplexity - minComplexity;
@@ -237,7 +247,7 @@ export const calculateNodeComplexity = (node, links, nodes) => {
   const bucketIndex = Math.min(Math.floor(normalizedComplexity * BUCKET_COUNT), BUCKET_COUNT - 1);
   
   // Map bucket index to a specific size
-  return BUCKET_MIN_SIZE + (bucketIndex * bucketSize);
+  return GOAL_MIN_SIZE + (bucketIndex * bucketSize);
 };
 
 /**
@@ -319,14 +329,11 @@ export const calculateServiceDependants = (node, links, nodes) => {
   
   // If all nodes have the same dependant count, return a default value
   if (minDependants === maxDependants) {
-    return 5; // Default size for uniform dependants
+    return SERVICE_MIN_SIZE; // Default size for uniform dependants
   }
   
-  // Define 4 buckets with corresponding dependant values
-  const BUCKET_COUNT = 4;
-  const BUCKET_MIN_SIZE = 20;  // Minimum node size
-  const BUCKET_MAX_SIZE = 50; // Maximum node size
-  const bucketSize = (BUCKET_MAX_SIZE - BUCKET_MIN_SIZE) / (BUCKET_COUNT - 1);
+  // Define buckets with corresponding dependant values
+  const bucketSize = (SERVICE_MAX_SIZE - SERVICE_MIN_SIZE) / (BUCKET_COUNT - 1);
   
   // Calculate which bucket this node's dependant count falls into
   const dependantRange = maxDependants - minDependants;
@@ -334,7 +341,7 @@ export const calculateServiceDependants = (node, links, nodes) => {
   const bucketIndex = Math.min(Math.floor(normalizedDependants * BUCKET_COUNT), BUCKET_COUNT - 1);
   
   // Map bucket index to a specific size
-  return BUCKET_MIN_SIZE + (bucketIndex * bucketSize);
+  return SERVICE_MIN_SIZE + (bucketIndex * bucketSize);
 };
 
 /**
@@ -388,14 +395,11 @@ export const calculateUserImportance = (node, links, nodes) => {
   
   // If all nodes have the same importance, return a default value
   if (minImportance === maxImportance) {
-    return 30; // Default size for uniform importance
+    return USER_MIN_SIZE; // Default size for uniform importance
   }
   
-  // Define 4 buckets with corresponding importance values
-  const BUCKET_COUNT = 4;
-  const BUCKET_MIN_SIZE = 30;  // Minimum node size
-  const BUCKET_MAX_SIZE = 70; // Maximum node size
-  const bucketSize = (BUCKET_MAX_SIZE - BUCKET_MIN_SIZE) / (BUCKET_COUNT - 1);
+  // Define buckets with corresponding importance values
+  const bucketSize = (USER_MAX_SIZE - USER_MIN_SIZE) / (BUCKET_COUNT - 1);
   
   // Calculate which bucket this node's importance falls into
   const importanceRange = maxImportance - minImportance;
@@ -403,7 +407,7 @@ export const calculateUserImportance = (node, links, nodes) => {
   const bucketIndex = Math.min(Math.floor(normalizedImportance * BUCKET_COUNT), BUCKET_COUNT - 1);
   
   // Map bucket index to a specific size
-  return BUCKET_MIN_SIZE + (bucketIndex * bucketSize);
+  return USER_MIN_SIZE + (bucketIndex * bucketSize);
 };
 
 // HELPER FUNCTIONS

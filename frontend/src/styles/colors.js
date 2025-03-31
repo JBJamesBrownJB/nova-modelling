@@ -35,11 +35,11 @@ export const COLORS = {
   BORDER: '#E0E0E0',
   
   // NPS Score colors
-  NPS_UNMEASURED: '#E0E0E0',    // Grey 300
-  NPS_EXCELLENT: '#A5D6A7',      // Green 200
-  NPS_GOOD: '#FFE0B2',          // Orange 100
-  NPS_NEUTRAL: '#FFCCBC',        // Deep Orange 100
-  NPS_LOW: '#FFCDD2',           // Red 100
+  NPS_UNMEASURED: '#E0E0E0',    
+  NPS_EXCELLENT: '#81C784',      
+  NPS_GOOD:'#C8E6C9',         
+  NPS_LOW: '#FFE0B2',
+  NPS_BAD: '#EF9A9A',        
   
   // Node status colors
   STATUS_ACTIVE: '#A5D6A7',      // Green 200
@@ -48,8 +48,8 @@ export const COLORS = {
   STATUS_VAPOUR: '#9E9E9E',     
   
   // Node type colors
-  NODE_USER: '#8D5524',
-  NODE_GOAL: '#BBDEFB',         // Blue 100
+  NODE_USER_DEFAULT: '#8D5524',
+  NODE_GOAL_DEFAULT: '#BBDEFB',         // Blue 100
   
   // Edge colors
   EDGE_DOES: '#F8BBD0',         // Pink 100
@@ -57,8 +57,13 @@ export const COLORS = {
 };
 
 // Helper function to get NPS color based on score
-export const getNpsColor = (score) => {
-  if (score === null || score === undefined) return COLORS.NPS_UNMEASURED;
+export const getNpsColor = (score, nodeType) => {
+  if (score === null || score === undefined){
+    if (nodeType && nodeType === 'User') {
+      return COLORS.NODE_USER_DEFAULT;
+    }
+    return COLORS.NPS_UNMEASURED;
+  } 
   if (score >= 70) return COLORS.NPS_EXCELLENT;
   if (score >= 30) return COLORS.NPS_GOOD;
   if (score >= 0) return COLORS.NPS_NEUTRAL;

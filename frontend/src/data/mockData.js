@@ -50,6 +50,7 @@ const mockData = {
     { id: 'user7', label: 'User', name: 'Police' },
     { id: 'user8', label: 'User', name: 'Porter' },
     { id: 'user9', label: 'User', name: 'Staff' },
+    { id: 'user10', label: 'User', name: 'Pest Control' },
     
     // Service Nodes (previously Data Nodes)
     { id: 'service1', label: 'Service', name: 'Patient Management', status: 'active' },
