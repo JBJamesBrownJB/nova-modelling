@@ -48,7 +48,7 @@ export const COLORS = {
   STATUS_VAPOUR: '#9E9E9E',     
   
   // Node type colors
-  NODE_USER_DEFAULT: '#8D5524',
+  NODE_USER_DEFAULT: '#D4C4BC',
   NODE_GOAL_DEFAULT: '#BBDEFB',         // Blue 100
   
   // Edge colors
