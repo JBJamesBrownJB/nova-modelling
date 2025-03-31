@@ -269,13 +269,14 @@ export const countServiceDependencies = (node, links, allNodes) => {
  * @param {Object} node - The service node
  * @param {Array} links - All links in the graph
  * @param {Array} nodes - All nodes in the graph
- * @returns {Number} - Count of dependent Goals
+ * @returns {Number} - Quantized score based on dependent Goals
  */
 export const calculateServiceDependants = (node, links, nodes) => {
   if (node.label !== 'Service') {
     return 0; // Only Service nodes have dependants
   }
 
+  // Calculate raw dependant count
   let dependantCount = 0;
   
   links.forEach(link => {
@@ -291,8 +292,49 @@ export const calculateServiceDependants = (node, links, nodes) => {
       }
     }
   });
+
+  // Get all Service nodes to determine min/max dependants
+  const serviceNodes = nodes.filter(n => n.label === 'Service');
   
-  return dependantCount;
+  // Calculate raw dependant counts for all Service nodes
+  const dependantValues = serviceNodes.map(serviceNode => {
+    let count = 0;
+    links.forEach(link => {
+      if ((link.target === serviceNode.id || 
+          (typeof link.target === 'object' && link.target.id === serviceNode.id)) &&
+          link.type === 'DEPENDS_ON') {
+        const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+        const sourceNode = nodes.find(n => n.id === sourceId);
+        if (sourceNode && sourceNode.label === 'Goal') {
+          count++;
+        }
+      }
+    });
+    return count;
+  });
+  
+  // Find min and max dependants (handle edge cases)
+  const minDependants = Math.min(...dependantValues) || 0;
+  const maxDependants = Math.max(...dependantValues) || 0;
+  
+  // If all nodes have the same dependant count, return a default value
+  if (minDependants === maxDependants) {
+    return 5; // Default size for uniform dependants
+  }
+  
+  // Define 4 buckets with corresponding dependant values
+  const BUCKET_COUNT = 4;
+  const BUCKET_MIN_SIZE = 20;  // Minimum node size
+  const BUCKET_MAX_SIZE = 50; // Maximum node size
+  const bucketSize = (BUCKET_MAX_SIZE - BUCKET_MIN_SIZE) / (BUCKET_COUNT - 1);
+  
+  // Calculate which bucket this node's dependant count falls into
+  const dependantRange = maxDependants - minDependants;
+  const normalizedDependants = (dependantCount - minDependants) / dependantRange; // 0 to 1
+  const bucketIndex = Math.min(Math.floor(normalizedDependants * BUCKET_COUNT), BUCKET_COUNT - 1);
+  
+  // Map bucket index to a specific size
+  return BUCKET_MIN_SIZE + (bucketIndex * bucketSize);
 };
 
 /**
