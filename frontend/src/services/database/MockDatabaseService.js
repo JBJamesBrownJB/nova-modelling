@@ -1,10 +1,11 @@
 import DatabaseService from './DatabaseService';
-import mockData from '../../data/mockData';
+import mockData, { mockDataMinimal } from '../../data/mockData';
 
 class MockDatabaseService extends DatabaseService {
   constructor() {
     super();
     this.data = mockData;
+    // this.data = mockDataMinimal;
   }
   
   async getGraph() {

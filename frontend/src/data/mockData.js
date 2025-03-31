@@ -248,4 +248,17 @@ const mockData = {
   ]
 };
 
+const mockDataMinimal = {
+  nodes: [
+    { id: 'user1', label: 'User', name: 'Test User', Goal_count: 0 },
+    { id: 'goal1', label: 'Goal', name: 'Test Goal', complexity: 8 },
+    { id: 'service1', label: 'Service', name: 'Test Service', dependants: 0, status: 'active' }
+  ],
+  links: [
+    { source: 'user1', target: 'goal1', type: 'DOES' },
+    { source: 'goal1', target: 'service1', type: 'DEPENDS_ON' }
+  ]
+};
+
 export default mockData;
+export { mockDataMinimal };
