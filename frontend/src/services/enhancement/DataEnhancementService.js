@@ -202,9 +202,42 @@ export const calculateNodeComplexity = (node, links, nodes) => {
     return 0;
   }
   
+  // Calculate raw complexity based on service dependencies
   const dependencyWeight = 3; // Default weight
   const dependencyCount = countServiceDependencies(node, links, nodes);
-  return dependencyCount * dependencyWeight;
+  const rawComplexity = dependencyCount * dependencyWeight;
+
+  // Get all Goal nodes to determine min/max complexity
+  const goalNodes = nodes.filter(n => n.label === 'Goal');
+  
+  // Calculate raw complexity for all Goal nodes
+  const complexityValues = goalNodes.map(goalNode => {
+    const depCount = countServiceDependencies(goalNode, links, nodes);
+    return depCount * dependencyWeight;
+  });
+  
+  // Find min and max complexity (handle edge cases)
+  const minComplexity = Math.min(...complexityValues) || 0;
+  const maxComplexity = Math.max(...complexityValues) || 0;
+  
+  // If all nodes have the same complexity, return a default value
+  if (minComplexity === maxComplexity) {
+    return 10; // Default size for uniform complexity
+  }
+  
+  // Define 4 buckets with corresponding complexity values
+  const BUCKET_COUNT = 4;
+  const BUCKET_MIN_SIZE = 10;  // Minimum node size
+  const BUCKET_MAX_SIZE = 25; // Maximum node size
+  const bucketSize = (BUCKET_MAX_SIZE - BUCKET_MIN_SIZE) / (BUCKET_COUNT - 1);
+  
+  // Calculate which bucket this node's complexity falls into
+  const complexityRange = maxComplexity - minComplexity;
+  const normalizedComplexity = (rawComplexity - minComplexity) / complexityRange; // 0 to 1
+  const bucketIndex = Math.min(Math.floor(normalizedComplexity * BUCKET_COUNT), BUCKET_COUNT - 1);
+  
+  // Map bucket index to a specific size
+  return BUCKET_MIN_SIZE + (bucketIndex * bucketSize);
 };
 
 /**
