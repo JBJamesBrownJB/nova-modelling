@@ -98,7 +98,7 @@ export const addCalculatedAttributes = (data) => {
     }
     
     if (node.label === 'User') {
-      const Importance = calculateUserGoalCount(node, data.links, data.nodes);
+      const Importance = calculateUserImportance(node, data.links, data.nodes);
       return { ...node, Importance };
     }
     
@@ -300,14 +300,15 @@ export const calculateServiceDependants = (node, links, nodes) => {
  * @param {Object} node - The user node
  * @param {Array} links - All links in the graph
  * @param {Array} nodes - All nodes in the graph
- * @returns {Number} - Count of Goals
+ * @returns {Number} - Calculated importance based on Goal count
  */
-export const calculateUserGoalCount = (node, links, nodes) => {
+export const calculateUserImportance = (node, links, nodes) => {
   if (node.label !== 'User') {
     return 0; // Only User nodes count Goals
   }
 
-  let GoalCount = 0;
+  // Calculate raw importance based on Goals performed
+  let goalCount = 0;
   
   links.forEach(link => {
     if (isUserGoalLink(node, link)) {
@@ -316,12 +317,51 @@ export const calculateUserGoalCount = (node, links, nodes) => {
       const targetNode = nodes.find(n => n.id === targetId);
       
       if (targetNode && targetNode.label === 'Goal') {
-        GoalCount++;
+        goalCount++;
       }
     }
   });
   
-  return GoalCount;
+  // Get all User nodes to determine min/max importance
+  const userNodes = nodes.filter(n => n.label === 'User');
+  
+  // Calculate raw importance for all User nodes
+  const importanceValues = userNodes.map(userNode => {
+    let count = 0;
+    links.forEach(link => {
+      if (isUserGoalLink(userNode, link)) {
+        const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+        const targetNode = nodes.find(n => n.id === targetId);
+        if (targetNode && targetNode.label === 'Goal') {
+          count++;
+        }
+      }
+    });
+    return count;
+  });
+  
+  // Find min and max importance (handle edge cases)
+  const minImportance = Math.min(...importanceValues) || 0;
+  const maxImportance = Math.max(...importanceValues) || 0;
+  
+  // If all nodes have the same importance, return a default value
+  if (minImportance === maxImportance) {
+    return 30; // Default size for uniform importance
+  }
+  
+  // Define 4 buckets with corresponding importance values
+  const BUCKET_COUNT = 4;
+  const BUCKET_MIN_SIZE = 30;  // Minimum node size
+  const BUCKET_MAX_SIZE = 70; // Maximum node size
+  const bucketSize = (BUCKET_MAX_SIZE - BUCKET_MIN_SIZE) / (BUCKET_COUNT - 1);
+  
+  // Calculate which bucket this node's importance falls into
+  const importanceRange = maxImportance - minImportance;
+  const normalizedImportance = (goalCount - minImportance) / importanceRange; // 0 to 1
+  const bucketIndex = Math.min(Math.floor(normalizedImportance * BUCKET_COUNT), BUCKET_COUNT - 1);
+  
+  // Map bucket index to a specific size
+  return BUCKET_MIN_SIZE + (bucketIndex * bucketSize);
 };
 
 // HELPER FUNCTIONS

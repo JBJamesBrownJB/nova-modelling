@@ -10,20 +10,17 @@ export const generateTooltipContent = (node) => {
   switch (node.label) {
     case 'Goal':
       if (node.complexity) {
-        content += `<strong>Complexity:</strong> ${node.complexity.toFixed(1)}<br/>`;
-      }
-      if (node.dependency_count !== undefined) {
-        content += `<strong>Service Dependencies:</strong> ${node.dependency_count}<br/>`;
+        content += `<strong>Complexity Score:</strong> ${node.complexity.toFixed(1)}<br/>`;
       }
       break;
     case 'Service':
       if (node.dependants !== undefined) {
-        content += `<strong>Goal Dependants:</strong> ${node.dependants}<br/>`;
+        content += `<strong>Goal Dependency Score:</strong> ${node.dependants}<br/>`;
       }
       break;
     case 'User':
       if (node.Importance !== undefined) {
-        content += `<strong>Goal Count:</strong> ${node.Importance}<br/>`;
+        content += `<strong>User Importance Score:</strong> ${node.Importance}<br/>`;
       }
       break;
   }
