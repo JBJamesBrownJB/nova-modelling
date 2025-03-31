@@ -29,7 +29,7 @@ export const COLORS = {
   
   // Semantic colors
   PRIMARY: '#4361EE',
-  BACKGROUND: '#F8F9FA',
+  BACKGROUND: '#FAFAFA',
   TEXT: '#212121',
   TEXT_SECONDARY: '#757575',
   BORDER: '#E0E0E0',
@@ -42,9 +42,9 @@ export const COLORS = {
   NPS_LOW: '#FFCDD2',           // Red 100
   
   // Node status colors
-  STATUS_ACTIVE: '#C8E6C9',      // Green 100
-  STATUS_IN_DEVELOPMENT: '#EEEEEE', // Grey 200
-  STATUS_PLANNED: '#EEEEEE',     // Grey 200
+  STATUS_ACTIVE: '#A5D6A7',      // Green 200
+  STATUS_IN_DEVELOPMENT: '#757575', 
+  STATUS_VAPOUR: '#9E9E9E',     
   
   // Node type colors
   NODE_USER: '#E3F2FD',         // Blue 50

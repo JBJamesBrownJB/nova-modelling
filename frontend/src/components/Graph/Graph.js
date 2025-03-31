@@ -3,11 +3,12 @@ import styled from 'styled-components';
 import * as d3 from 'd3';
 import { showTooltip, hideTooltip } from './TooltipUtils';
 import { calculateLinkEdgePoints, getNodeRadius } from './GraphUtils';
+import { COLORS } from '../../styles/colors';
 
 const GraphContainer = styled.div`
   width: 100%;
   height: 100%;
-  background-color: #f0f2f5;
+  background-color: ${COLORS.BACKGROUND};
 
   .links line {
     stroke-opacity: 0.6;
@@ -67,13 +68,10 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
 
   // Color constants
   const nodeColors = {
-    User: '#AEB6BF',
-    JTBD: '#5499C7',
     Service: {
-      active: '#2ECC71',  // Green for active
-      in_development: '#7F8C8D',  // Grey for in-development
-      planned: '#7F8C8D',  // Grey for planned
-      not_built: '#7F8C8D'  // Grey for not built or missing status
+      active: COLORS.STATUS_ACTIVE,  
+      in_development: COLORS.STATUS_IN_DEVELOPMENT, 
+      vapourware: COLORS.STATUS_VAPOUR
     }
   };
   
@@ -271,7 +269,7 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
       serviceGroups.append('path')
         .attr('class', d => `service-node ${selectedNodes.includes(d.id) ? 'selected-node' : ''}`)
         .attr('d', serviceIconPath)
-        .attr('fill', d => nodeColors[d.label][d.status || 'not_built'])
+        .attr('fill', d => nodeColors[d.label][d.status || 'vapourware'])
         .attr('transform', 'translate(-12, -12)');
 
       // Add planning icon for in-development services
