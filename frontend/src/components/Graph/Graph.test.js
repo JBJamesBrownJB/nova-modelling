@@ -58,7 +58,7 @@ describe('Graph Component', () => {
     nodes: [
       { id: 'Goal1', label: 'Goal', name: 'Test Goal', complexity: 10 },
       { id: 'service1', label: 'Service', name: 'Test Service', dependants: 5 },
-      { id: 'user1', label: 'User', name: 'Test User', Goal_count: 3 }
+      { id: 'user1', label: 'User', name: 'Test User', Importance: 3 }
     ],
     links: [
       { source: 'user1', target: 'Goal1', type: 'DOES' },
@@ -86,7 +86,7 @@ describe('Graph Component', () => {
     // Prepare data with only one user node
     const singleUserData = {
       nodes: [
-        { id: 'user1', label: 'User', name: 'Test User', Goal_count: 0 }
+        { id: 'user1', label: 'User', name: 'Test User', Importance: 0 }
       ],
       links: []
     };
@@ -132,7 +132,7 @@ describe('Graph Component', () => {
     // User connected to Goal via DOES link
     const userGoalData = {
       nodes: [
-        { id: 'user1', label: 'User', name: 'Test User', Goal_count: 1 },
+        { id: 'user1', label: 'User', name: 'Test User', Importance: 1 },
         { id: 'goal1', label: 'Goal', name: 'Test Goal', complexity: 5 }
       ],
       links: [
@@ -166,7 +166,7 @@ describe('Graph Component', () => {
     // Full chain: User connected to Goal, Goal connected to Service
     const fullChainData = {
       nodes: [
-        { id: 'user1', label: 'User', name: 'Test User', Goal_count: 1 },
+        { id: 'user1', label: 'User', name: 'Test User', Importance: 1 },
         { id: 'goal1', label: 'Goal', name: 'Test Goal', complexity: 6 },
         { id: 'service1', label: 'Service', name: 'Test Service', dependants: 1, status: 'IN_DEVELOPMENT' }
       ],

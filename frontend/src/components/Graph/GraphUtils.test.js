@@ -80,10 +80,10 @@ describe('GraphUtils', () => {
         const baseSize = 20; // Base size for User nodes
         
         // Test various Goal counts
-        const lowCount = { label: 'User', Goal_count: 1 };
-        const mediumCount = { label: 'User', Goal_count: 10 };
-        const highCount = { label: 'User', Goal_count: 25 };
-        const extremeCount = { label: 'User', Goal_count: 100 }; // Test max cap
+        const lowCount = { label: 'User', Importance: 1 };
+        const mediumCount = { label: 'User', Importance: 10 };
+        const highCount = { label: 'User', Importance: 25 };
+        const extremeCount = { label: 'User', Importance: 100 }; // Test max cap
         
         // Low count should add a small amount to radius
         expect(getNodeRadius(lowCount)).toBe(baseSize + (1 * 3));
@@ -98,7 +98,7 @@ describe('GraphUtils', () => {
         expect(getNodeRadius(extremeCount)).toBe(baseSize + 100);
       });
       
-      test('handles User nodes without Goal_count value', () => {
+      test('handles User nodes without Importance value', () => {
         const node = { label: 'User' };
         expect(getNodeRadius(node)).toBe(20); // Should return base size only
       });

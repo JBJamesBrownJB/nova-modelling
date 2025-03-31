@@ -10,7 +10,7 @@ export const enhanceGraphData = (data) => {
   const enhancedData = JSON.parse(JSON.stringify(data));
   
   // Apply enhancements in sequence
-  const dataWithComplexity = enhanceWithComplexity(enhancedData);
+  const dataWithComplexity = addCalculatedAttributes(enhancedData);
   const dataWithNps = enhanceWithNpsScores(dataWithComplexity);
   const fullyEnhancedData = enhanceWithColors(dataWithNps);
   
@@ -80,7 +80,7 @@ export const enhanceWithNpsScores = (data) => {
  * @param {Object} data - The graph data object containing nodes and links
  * @returns {Object} - Enhanced data with complexity values
  */
-export const enhanceWithComplexity = (data) => {
+export const addCalculatedAttributes = (data) => {
   // Create a copy of the data
   const enhancedData = { ...data, nodes: [...data.nodes] };
   
@@ -98,8 +98,8 @@ export const enhanceWithComplexity = (data) => {
     }
     
     if (node.label === 'User') {
-      const Goal_count = calculateUserGoalCount(node, data.links, data.nodes);
-      return { ...node, Goal_count };
+      const Importance = calculateUserGoalCount(node, data.links, data.nodes);
+      return { ...node, Importance };
     }
     
     return node;

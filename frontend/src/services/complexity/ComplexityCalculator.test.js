@@ -120,7 +120,7 @@ describe('ComplexityCalculator', () => {
       expect(GoalNode.complexity).toBe(3);
       expect(GoalNode.dependency_count).toBe(1);
       expect(serviceNode.dependants).toBe(1);
-      expect(userNode.Goal_count).toBe(1);
+      expect(userNode.Importance).toBe(1);
     });
 
     test('maintains immutability', () => {
@@ -147,7 +147,7 @@ describe('ComplexityCalculator', () => {
       expect(result.every(node => 
         node.complexity === 0 || 
         node.dependants === 0 || 
-        node.Goal_count === 0
+        node.Importance === 0
       )).toBe(true);
     });
 

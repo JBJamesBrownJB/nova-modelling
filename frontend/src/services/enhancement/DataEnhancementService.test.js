@@ -1,7 +1,7 @@
 import { 
   enhanceGraphData,
   enhanceWithNpsScores,
-  enhanceWithComplexity,
+  addCalculatedAttributes,
   enhanceWithColors,
   getNpsColor,
   calculateAggregateNps,

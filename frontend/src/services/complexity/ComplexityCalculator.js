@@ -81,7 +81,7 @@ export const calculateGraphComplexity = (nodes, links, config = {}) => {
     } else if (node.label === 'Service') {
       updatedNode.dependants = calculateServiceDependants(node, links, nodes);
     } else if (node.label === 'User') {
-      updatedNode.Goal_count = calculateUserGoalCount(node, links, nodes);
+      updatedNode.Importance = calculateUserGoalCount(node, links, nodes);
     }
     
     return updatedNode;

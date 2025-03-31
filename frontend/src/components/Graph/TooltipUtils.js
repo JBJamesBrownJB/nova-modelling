@@ -22,8 +22,8 @@ export const generateTooltipContent = (node) => {
       }
       break;
     case 'User':
-      if (node.Goal_count !== undefined) {
-        content += `<strong>Goal Count:</strong> ${node.Goal_count}<br/>`;
+      if (node.Importance !== undefined) {
+        content += `<strong>Goal Count:</strong> ${node.Importance}<br/>`;
       }
       break;
   }

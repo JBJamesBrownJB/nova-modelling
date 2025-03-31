@@ -27,7 +27,7 @@ export const getNodeRadius = (node) => {
     case 'User':
       // Scale User nodes based on number of Goals they perform
       // More Goals indicate a more prominent user persona
-      return 20 + (node.Goal_count ? Math.min(node.Goal_count * 3, 100) : 0);
+      return 20 + (node.Importance ? Math.min(node.Importance * 3, 100) : 0);
     default:
       return 10; // Default size
   }
