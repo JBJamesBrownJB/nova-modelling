@@ -4,76 +4,7 @@ import * as d3 from 'd3';
 import { showTooltip, hideTooltip } from './TooltipUtils';
 import { calculateLinkEdgePoints, getNodeRadius } from './GraphUtils';
 import { COLORS } from '../../styles/colors';
-import { ICONS } from '../../styles/icons';
-
-// ============================================================================
-// SIMULATION CONFIGURATION
-// ============================================================================
-// Adjust these values to control the physics and behavior of the graph
-const SIMULATION_CONFIG = {
-  // Base force parameters
-  forces: {
-    // Link forces - control how nodes are connected by links
-    link: {
-      strength: 0.9,                // Base link strength (0-1), higher = more rigid connections
-      selectedMultiplier: 1.5,      // Multiplier for links connected to selected nodes
-      distance: {
-        selected: 3.8                 // Link distance multiplier for selected connections
-      }
-    },
-    
-    // Charge forces - control node repulsion/attraction
-    charge: {
-      strength: -400,              // Base repulsion strength, negative = repel
-      selectedMultiplier: 2.5,      // Multiplier for selected nodes
-      connectedMultiplier: 1.2,     // Multiplier for nodes connected to selected
-      contextMultiplier: 0.5        // Multiplier for background nodes
-    },
-    
-    // Collision detection - prevents nodes from overlapping
-    collision: {
-      radiusMultiplier: 1.2,       // How much extra space around nodes
-      strength: 0.8                // How strongly to enforce collision (0-1)
-    },
-    
-    // Positioning forces - keep graph centered or control expansion
-    positioning: {
-      strength: 0.07,              // Base positioning force strength
-      minStrength: 0.005           // Minimal strength for selected mode
-    }
-  },
-  
-  // Simulation behavior
-  simulation: {
-    alphaDecay: 0.03,             // How quickly simulation cools down (higher = faster stabilization)
-    alphaTarget: 0,                // Target cooling value (0 = complete stop)
-    restartStrength: 0.1,          // Alpha value when restarting simulation
-    nodeFixedDamping: 0.0,         // How strongly fixed nodes resist movement
-    velocityDecay: 0.4,           // How quickly node velocity decays (lower = faster movement)
-    initialStabilizationSpeed: 0.012, // Initial alpha for faster initial layout (0-1)
-    fastCooling: {                // Fast cooling parameters for quick stabilization
-      velocityDecay: 0.2,         // Lower value = faster movement during fast cooling
-      alphaDecay: 0.06,           // Higher value = faster cooling
-      iterations: 100             // Number of rapid iterations to run
-    }
-  },
-  
-  // Timing configuration
-  timing: {
-    restartDelay: 500,            // Delay before simulation restarts after selection (ms)
-    stabilizationDelay: 300,      // Delay before initial stabilization starts (ms)
-    dragInitiationDelay: 100      // Delay before deciding if it's a drag operation (ms)
-  }
-};
-
-// Legacy constants - maintained for compatibility
-const NODE_CONSTANTS = {
-  BASE_RADIUS: 20,
-  GOAL_HIT_AREA_MULTIPLIER: 1.25,
-  USER_HIT_AREA_MULTIPLIER: 0.3,
-  SERVICE_HIT_AREA_MULTIPLIER: 0.5,
-  LABEL_TRUNCATE_LENGTH: 20
-};
+import { SIMULATION_CONFIG, NODE_CONSTANTS, LINK_CONSTANTS, goalNodeConfig, userNodeConfig, serviceNodeConfig } from './SimulationConfig';
 
 const GraphContainer = styled.div`
   width: 100%;
@@ -136,39 +67,20 @@ const GraphContainer = styled.div`
 
 function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
   const svgRef = useRef(null);
-  
-  const linkColors = {
-    'DOES': '#ECB5C9',   // Pink
-    'DEPENDS_ON': '#F16667'  // Red
-  };
-
-  const getServiceColor = (status) => {
-    switch (status) {
-      case 'in_development':
-        return COLORS.STATUS_IN_DEVELOPMENT;
-      case 'vapour':
-        return COLORS.STATUS_VAPOUR;
-      case 'active':
-        return COLORS.STATUS_ACTIVE;
-      default:
-        return COLORS.STATUS_VAPOUR;
-    }
-  };
-
   // Utility functions for node and link ID handling
   const getNodeId = node => typeof node === 'object' ? node.id : node;
 
   const getConnectedNodes = (links, selectedNodes) => {
     const connectedNodeIds = new Set(selectedNodes);
-    
+
     links.forEach(link => {
       const sourceId = getNodeId(link.source);
       const targetId = getNodeId(link.target);
-      
+
       if (selectedNodes.includes(sourceId)) connectedNodeIds.add(targetId);
       if (selectedNodes.includes(targetId)) connectedNodeIds.add(sourceId);
     });
-    
+
     return connectedNodeIds;
   };
 
@@ -183,7 +95,7 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
   const setupArrowMarkers = (container) => {
     const defs = container.append('defs');
 
-    Object.entries(linkColors).forEach(([type, color]) => {
+    Object.entries(LINK_CONSTANTS).forEach(([type, color]) => {
       defs.append('marker')
         .attr('id', `arrowhead-${type}`)
         .attr('viewBox', '0 -5 10 10')
@@ -208,19 +120,19 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
   };
 
   const handleNodeClick = (event, node, simulation) => {
-    event.stopPropagation(); 
-  
+    event.stopPropagation();
+
     // Stop any ongoing simulation activity immediately to prevent movement
     if (simulation) {
       simulation.stop();
-      
+
       // Fix all nodes in their current positions
       simulation.nodes().forEach(n => {
         n.fx = n.x;
         n.fy = n.y;
       });
     }
-    
+
     onNodeSelect(node.id, event.ctrlKey);
   };
 
@@ -233,7 +145,7 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
     // Start with node fixed at its current position
     d.fx = d.x;
     d.fy = d.y;
-    
+
     if (!event.active) {
       simulation.alphaTarget(0.3).restart();
     }
@@ -241,7 +153,7 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
 
   const dragged = (event, d) => {
     const timeSinceStart = Date.now() - dragState.dragStartTime;
-    
+
     // Wait for delay before allowing drag
     if (!dragState.initialDragDone && timeSinceStart > SIMULATION_CONFIG.timing.dragInitiationDelay) {
       dragState.initialDragDone = true;
@@ -261,15 +173,15 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
       handleNodeClick(event.sourceEvent, d, simulation);
       return;
     }
-    
+
     // Reset drag state
     dragState.isDragging = false;
     dragState.initialDragDone = false;
-    
+
     // Free the node and let it settle
     d.fx = null;
     d.fy = null;
-    
+
     if (!event.active) {
       simulation.alphaTarget(0);
     }
@@ -278,14 +190,14 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
   // Create a reusable function for node creation
   const createNodeGroups = (parent, nodeConfig, tooltip, simulation) => {
     const { nodeType, filter, hitAreaShape, hitAreaMultiplier, nodeShape, icon, getNodeFill, extraIconCondition } = nodeConfig;
-    
+
     // Create groups
     const groups = parent.selectAll(`.${nodeType.toLowerCase()}-group`)
       .data(data.nodes.filter(filter))
       .enter()
       .append('g')
       .attr('class', `${nodeType.toLowerCase()}-group`);
-      
+
     // Add hit area
     if (hitAreaShape === 'circle') {
       groups.append('circle')
@@ -298,12 +210,12 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
         .attr('class', 'hit-area')
         .attr('width', d => getNodeRadius(d) * hitAreaMultiplier)
         .attr('height', d => getNodeRadius(d) * hitAreaMultiplier)
-        .attr('x', d => -getNodeRadius(d) * (hitAreaMultiplier/2))
-        .attr('y', d => -getNodeRadius(d) * (hitAreaMultiplier/2))
+        .attr('x', d => -getNodeRadius(d) * (hitAreaMultiplier / 2))
+        .attr('y', d => -getNodeRadius(d) * (hitAreaMultiplier / 2))
         .attr('fill', 'rgba(0,0,0,0)')
         .attr('stroke', 'none');
     }
-    
+
     // Add visible node
     if (nodeShape === 'circle') {
       groups.append('circle')
@@ -317,7 +229,7 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
         .attr('fill', getNodeFill)
         .attr('transform', 'translate(-12, -12)');
     }
-    
+
     // Add special icons if needed
     if (extraIconCondition && nodeConfig.extraIcon) {
       groups.filter(extraIconCondition)
@@ -331,7 +243,7 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
         .attr('stroke-linejoin', nodeConfig.extraIconStrokeLinejoin || 'miter')
         .attr('transform', nodeConfig.extraIconTransform || '');
     }
-    
+
     // Add event handlers
     groups
       .on('mouseover', (event, d) => showTooltip(tooltip, event, d))
@@ -341,7 +253,7 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
         .on('start', (event, d) => dragstarted(event, d, simulation))
         .on('drag', dragged)
         .on('end', (event, d) => dragended(event, d, simulation)));
-        
+
     return groups;
   };
 
@@ -379,7 +291,7 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
     if (JSON.stringify(currentSelectedNodes) !== JSON.stringify(previousSelectedNodes)) {
       // Stop the current simulation
       simulation.stop();
-      
+
       // Fix positions of newly selected nodes and free previously selected ones
       simulation.nodes().forEach(node => {
         if (currentSelectedNodes.includes(node.id)) {
@@ -392,46 +304,46 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
           node.fy = null;
         }
       });
-      
+
       // Store original simulation parameters
       const originalVelocityDecay = simulation.velocityDecay();
       const originalAlphaDecay = simulation.alphaDecay();
-      
+
       // Apply fast cooling parameters
       simulation.velocityDecay(SIMULATION_CONFIG.simulation.fastCooling.velocityDecay)
-               .alphaDecay(SIMULATION_CONFIG.simulation.fastCooling.alphaDecay);
-      
+        .alphaDecay(SIMULATION_CONFIG.simulation.fastCooling.alphaDecay);
+
       // Run rapid iterations to quickly reach a more stable state
       for (let i = 0; i < SIMULATION_CONFIG.simulation.fastCooling.iterations; i++) {
         simulation.tick();
       }
-      
+
       // Restore original parameters and restart with lower alpha
       simulation.velocityDecay(originalVelocityDecay)
-               .alphaDecay(originalAlphaDecay)
-               .alpha(SIMULATION_CONFIG.simulation.restartStrength)
-               .restart();
+        .alphaDecay(originalAlphaDecay)
+        .alpha(SIMULATION_CONFIG.simulation.restartStrength)
+        .restart();
     }
   };
 
   // Setup the simulation with focus+context forces
   const setupSimulation = (nodes, links, width, height) => {
     // Find connected nodes if we have selection
-    const connectedNodeIds = selectedNodes.length > 0 ? 
-      getConnectedNodes(data.links, selectedNodes) : 
+    const connectedNodeIds = selectedNodes.length > 0 ?
+      getConnectedNodes(data.links, selectedNodes) :
       new Set();
-    
+
     // Create the simulation with appropriate forces based on selection state
     const simulation = d3.forceSimulation(nodes);
-    
+
     // Always apply link forces - stronger for exploration mode to maintain cohesion
     simulation.force('link', d3.forceLink(links)
       .id(d => d.id)
       .distance(d => {
         // Base distance that's more consistent regardless of node types
         const baseDistance = 50;
-        return baseDistance * (isLinkSelected(d, selectedNodes) ? 
-          SIMULATION_CONFIG.forces.link.distance.selected : 
+        return baseDistance * (isLinkSelected(d, selectedNodes) ?
+          SIMULATION_CONFIG.forces.link.distance.selected :
           SIMULATION_CONFIG.forces.link.distance.base);
       })
       .strength(d => {
@@ -452,12 +364,12 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
         }
         return SIMULATION_CONFIG.forces.charge.strength * SIMULATION_CONFIG.forces.charge.contextMultiplier;
       }));
-    
+
     // Apply collision detection to prevent overlap
     simulation.force('collision', d3.forceCollide()
       .radius(d => getNodeRadius(d) * SIMULATION_CONFIG.forces.collision.radiusMultiplier)
       .strength(SIMULATION_CONFIG.forces.collision.strength));
-    
+
     // Fix positions of selected nodes to prevent them from moving
     if (selectedNodes.length > 0) {
       // Fix the positions of selected nodes
@@ -475,7 +387,7 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
         }
       });
     }
-    
+
     if (selectedNodes.length === 0) {
       // When no nodes are selected, use central gravity to keep everything visible
       simulation
@@ -487,25 +399,25 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
       // 1. No central attraction to screen center
       // 2. Selected nodes should stay fixed
       // 3. Connected nodes should expand outward but not too far
-      
+
       // Remove any central forces - we don't want pull toward center
       simulation.force('center', null);
-      
+
       // Very minimal positioning forces to prevent nodes from flying too far
       // but allowing them to expand into available space
       simulation.force('x', d3.forceX(width / 2).strength(SIMULATION_CONFIG.forces.positioning.minStrength));
       simulation.force('y', d3.forceY(height / 2).strength(SIMULATION_CONFIG.forces.positioning.minStrength));
-      
+
       // We don't need a radial force anymore since we're using fixed positions
       // for selected nodes and stronger repulsion to push connected nodes outward
       simulation.force('radial', null);
     }
-    
+
     // Use a lower alpha decay to reduce jiggling
-    simulation.alphaDecay(SIMULATION_CONFIG.simulation.alphaDecay); 
+    simulation.alphaDecay(SIMULATION_CONFIG.simulation.alphaDecay);
     simulation.alphaTarget(SIMULATION_CONFIG.simulation.alphaTarget);
     simulation.velocityDecay(SIMULATION_CONFIG.simulation.velocityDecay);
-    
+
     return simulation;
   };
 
@@ -514,30 +426,30 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
       if (event.key === 'Escape') {
         onNodeSelect([]);
       }
-      
+
       // Preview neighboring nodes with 'S' key (second-hop preview)
       if (event.key === 's' || event.key === 'S') {
         // Find second-hop nodes if we have selection
         if (selectedNodes.length > 0) {
           const secondaryNodeIds = new Set();
           const secondaryLinkIds = new Set();
-          
+
           // First get direct connections (first hop)
           const firstHopNodeIds = new Set();
-          
+
           data.links.forEach(link => {
             const sourceId = getNodeId(link.source);
             const targetId = getNodeId(link.target);
-            
+
             if (selectedNodes.includes(sourceId)) firstHopNodeIds.add(targetId);
             if (selectedNodes.includes(targetId)) firstHopNodeIds.add(sourceId);
           });
-          
+
           // Then get second hop connections
           data.links.forEach(link => {
             const sourceId = getNodeId(link.source);
             const targetId = getNodeId(link.target);
-            
+
             if (firstHopNodeIds.has(sourceId) && !selectedNodes.includes(targetId)) {
               secondaryNodeIds.add(targetId);
               secondaryLinkIds.add(`${sourceId}-${targetId}`);
@@ -547,13 +459,13 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
               secondaryLinkIds.add(`${sourceId}-${targetId}`);
             }
           });
-          
+
           // Show the secondary nodes/links with reduced opacity
           d3.selectAll('.nodes > g')
             .filter(d => secondaryNodeIds.has(d.id))
             .classed('secondary-node', true)
             .attr('hidden', null);
-            
+
           d3.selectAll('.links line')
             .filter(d => {
               const sourceId = getNodeId(d.source);
@@ -565,7 +477,7 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
         }
       }
     };
-    
+
     const handleKeyUp = (event) => {
       // Hide second-hop nodes when 'S' key is released
       if (event.key === 's' || event.key === 'S') {
@@ -591,8 +503,8 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
       return;
     }
 
-    console.log('Rendering graph with data:', { 
-      nodes: data.nodes.length, 
+    console.log('Rendering graph with data:', {
+      nodes: data.nodes.length,
       links: data.links.length,
       selectedNodes
     });
@@ -650,45 +562,6 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
       // Setup the simulation with focus+context behavior
       const simulation = setupSimulation(data.nodes, data.links, width, height);
 
-      // Configuration objects for different node types
-      const goalNodeConfig = {
-        nodeType: 'Goal',
-        filter: d => d.label === 'Goal',
-        hitAreaShape: 'circle',
-        hitAreaMultiplier: NODE_CONSTANTS.GOAL_HIT_AREA_MULTIPLIER,
-        nodeShape: 'circle',
-        getNodeFill: d => d.npsColor
-      };
-
-      const userNodeConfig = {
-        nodeType: 'User',
-        filter: d => d.label === 'User',
-        hitAreaShape: 'circle',
-        hitAreaMultiplier: NODE_CONSTANTS.USER_HIT_AREA_MULTIPLIER,
-        nodeShape: 'path',
-        icon: ICONS.USER,
-        getNodeFill: d => d.npsScore ? d.npsColor : COLORS.NODE_USER_DEFAULT
-      };
-
-      const serviceNodeConfig = {
-        nodeType: 'Service',
-        filter: d => d.label === 'Service',
-        hitAreaShape: 'rect',
-        hitAreaMultiplier: NODE_CONSTANTS.SERVICE_HIT_AREA_MULTIPLIER,
-        nodeShape: 'path',
-        icon: ICONS.SERVICE,
-        getNodeFill: d => getServiceColor(d.status),
-        extraIconCondition: d => d.status === 'in_development',
-        extraIconClass: 'planning-icon',
-        extraIcon: ICONS.PLANNING,
-        extraIconFill: 'none',
-        extraIconStroke: COLORS.STATUS_IN_DEVELOPMENT_ICON,
-        extraIconStrokeWidth: '2',
-        extraIconStrokeLinecap: 'round',
-        extraIconStrokeLinejoin: 'round',
-        extraIconTransform: 'translate(-20.1, 3) scale(0.4)'
-      };
-
       // Create node groups using the centralized function
       const goalGroups = createNodeGroups(nodesGroup, goalNodeConfig, tooltip, simulation);
       const userGroups = createNodeGroups(nodesGroup, userNodeConfig, tooltip, simulation);
@@ -700,11 +573,11 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
         data.links.forEach(link => {
           const sourceId = getNodeId(link.source);
           const targetId = getNodeId(link.target);
-          
+
           if (selectedNodes.includes(sourceId)) connectedNodeIds.add(targetId);
           if (selectedNodes.includes(targetId)) connectedNodeIds.add(sourceId);
         });
-        
+
         // Highlight selected and connected nodes
         nodesGroup.selectAll('g')
           .classed('selected-node', d => selectedNodes.includes(d.id))
@@ -739,7 +612,7 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
         .selectAll('line')
         .data(data.links)
         .enter().append('line')
-        .attr('stroke', d => linkColors[d.type] || '#999')
+        .attr('stroke', d => LINK_CONSTANTS[d.type] || '#999')
         .attr('marker-end', d => `url(#arrowhead-${d.type})`);
 
       // Update link positions with edge point calculations
