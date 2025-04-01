@@ -74,8 +74,8 @@ const LayerCakeContainer = styled.div`
     margin-top: 8px;
     font-size: 12px;
     text-align: center;
-    max-width: 100px;
-    white-space: nowrap;
+    max-width: 120px;
+    white-space: wrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
