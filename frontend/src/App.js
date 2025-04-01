@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import Topbar from './components/Topbar/Topbar';
 import Sidebar from './components/Sidebar/Sidebar';
 import Footer from './components/Footer/Footer';
-import Graph from './components/Graph/Graph';
+import GraphWrapper from './components/Graph/GraphWrapper';
 import MockDatabaseService from './services/database/MockDatabaseService';
 import NodeCreationForm from './components/NodeCreation/NodeCreationForm';
 import { toast, ToastContainer } from 'react-toastify';
@@ -213,7 +213,7 @@ function App() {
             <div>Loading graph data...</div>
           ) : (
             <>
-              <Graph
+              <GraphWrapper
                 data={filteredData}
                 onNodeSelect={(nodeId, isCtrlPressed) => handleNodeSelect(nodeId, isCtrlPressed)}
                 selectedNodes={selectedNodes}
