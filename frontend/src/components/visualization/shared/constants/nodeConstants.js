@@ -1,7 +1,7 @@
 // Node size and style constants
 export const NODE_CONSTANTS = {
   // Base sizes
-  BASE_RADIUS: 20,
+  BASE_RADIUS: 20, //todo, I dont think all these are used.
   USER_RADIUS: 22,
   GOAL_RADIUS: 18,
   SERVICE_RADIUS: 16,

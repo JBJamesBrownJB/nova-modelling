@@ -207,9 +207,9 @@ function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
       .attr('width', NODE_CONSTANTS.BASE_RADIUS * 3)
       .attr('height', NODE_CONSTANTS.BASE_RADIUS * 3)
       .append('circle')
-      .attr('cx', NODE_CONSTANTS.BASE_RADIUS)
-      .attr('cy', NODE_CONSTANTS.BASE_RADIUS)
-      .attr('r', NODE_CONSTANTS.BASE_RADIUS * 0.8)
+      .attr('cx', NODE_CONSTANTS.BASE_RADIUS + 11)
+      .attr('cy', NODE_CONSTANTS.BASE_RADIUS + 10)
+      .attr('r', d=>  getNodeRadius(d))
       .attr('fill', d => d.npsColor || COLORS.NPS_UNMEASURED);
     
     // Add label
@@ -235,12 +235,12 @@ function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
     
     // Create SVG icon
     const svgElement = nodeGroups.append('svg')
-      .attr('width', NODE_CONSTANTS.BASE_RADIUS * 2.5)  
-      .attr('height', NODE_CONSTANTS.BASE_RADIUS * 2.5);  
+      .attr('width', NODE_CONSTANTS.SERVICE_RADIUS * 4.5)  
+      .attr('height', NODE_CONSTANTS.SERVICE_RADIUS * 3.5);  
     
     svgElement.append('path')
       .attr('d', ICONS.SERVICE)
-      .attr('transform', `translate(${NODE_CONSTANTS.BASE_RADIUS - 20}, ${NODE_CONSTANTS.BASE_RADIUS - 10}) scale(1)`)
+      .attr('transform', `translate(${NODE_CONSTANTS.SERVICE_RADIUS}, ${NODE_CONSTANTS.SERVICE_RADIUS - 10}) scale(${NODE_CONSTANTS.SERVICE_RADIUS / 10})`)
       .attr('fill', d => {
         // Color based on status
         switch (d.status) {
@@ -266,7 +266,7 @@ function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
       .attr('stroke-width', '2')
       .attr('stroke-linecap', 'round')
       .attr('stroke-linejoin', 'round')
-      .attr('transform', `translate(${NODE_CONSTANTS.BASE_RADIUS + 10}, ${NODE_CONSTANTS.BASE_RADIUS - 20}) scale(0.8)`);
+      .attr('transform', `translate(${NODE_CONSTANTS.BASE_RADIUS + 34}, ${NODE_CONSTANTS.BASE_RADIUS - 20}) scale(0.8)`);
     
     // Add label
     nodeGroups.append('div')
