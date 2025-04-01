@@ -3,8 +3,8 @@ import styled from 'styled-components';
 import Topbar from './components/Topbar/Topbar';
 import Sidebar from './components/Sidebar/Sidebar';
 import Footer from './components/Footer/Footer';
-import Graph from './components/Graph/Graph';
-import LayerCake from './components/Graph/LayerCake';
+import Graph from './components/visualization/Graph/Graph';
+import LayerCakeView from './components/visualization/LayerCakeView';
 import MockDatabaseService from './services/database/MockDatabaseService';
 import NodeCreationForm from './components/NodeCreation/NodeCreationForm';
 import { toast, ToastContainer } from 'react-toastify';
@@ -230,7 +230,7 @@ function App() {
                   selectedNodes={selectedNodes}
                 />
               ) : activeTab === 'progress' ? (
-                <LayerCake
+                <LayerCakeView
                   data={filteredData}
                   onNodeSelect={(nodeId, isCtrlPressed) => handleNodeSelect(nodeId, isCtrlPressed)}
                   selectedNodes={selectedNodes}

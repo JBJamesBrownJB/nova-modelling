@@ -1,10 +1,11 @@
 import React, { useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import * as d3 from 'd3';
-import { COLORS } from '../../../styles/colors';
-import { showTooltip, hideTooltip } from './TooltipUtils';
-import { getNodeRadius } from './GraphUtils';
-import { NODE_CONSTANTS, goalNodeConfig, userNodeConfig, serviceNodeConfig } from './SimulationConfig';
+import { COLORS } from '../../styles/colors';
+import { ICONS } from '../../styles/icons';
+import { showTooltip, hideTooltip } from './Graph/TooltipUtils';
+import { getNodeRadius } from './Graph/GraphUtils';
+import { NODE_CONSTANTS, goalNodeConfig, userNodeConfig, serviceNodeConfig } from './Graph/SimulationConfig';
 
 const LayerCakeContainer = styled.div`
   width: 100%;
@@ -91,7 +92,7 @@ const LayerCakeContainer = styled.div`
   }
 `;
 
-function LayerCake({ data, selectedNodes, onNodeSelect }) {
+function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
   const containerRef = useRef(null);
   const tooltipRef = useRef(null);
   
@@ -175,7 +176,7 @@ function LayerCake({ data, selectedNodes, onNodeSelect }) {
       .attr('width', NODE_CONSTANTS.BASE_RADIUS * 2)
       .attr('height', NODE_CONSTANTS.BASE_RADIUS * 2)
       .append('path')
-      .attr('d', userNodeConfig.icon)
+      .attr('d', ICONS.USER)
       .attr('transform', `translate(${NODE_CONSTANTS.BASE_RADIUS - 10}, ${NODE_CONSTANTS.BASE_RADIUS - 10}) scale(1)`)
       .attr('fill', d => d.npsScore ? d.npsColor : COLORS.NODE_USER_DEFAULT);
     
@@ -237,7 +238,7 @@ function LayerCake({ data, selectedNodes, onNodeSelect }) {
       .attr('height', NODE_CONSTANTS.BASE_RADIUS * 2);
     
     svgElement.append('path')
-      .attr('d', serviceNodeConfig.icon)
+      .attr('d', ICONS.SERVICE)
       .attr('transform', `translate(${NODE_CONSTANTS.BASE_RADIUS - 10}, ${NODE_CONSTANTS.BASE_RADIUS - 10}) scale(1)`)
       .attr('fill', d => {
         // Color based on status
@@ -245,6 +246,7 @@ function LayerCake({ data, selectedNodes, onNodeSelect }) {
           case 'in_development':
             return COLORS.STATUS_IN_DEVELOPMENT;
           case 'vapour':
+          case 'planned':
             return COLORS.STATUS_VAPOUR;
           case 'active':
             return COLORS.STATUS_ACTIVE;
@@ -256,14 +258,14 @@ function LayerCake({ data, selectedNodes, onNodeSelect }) {
     // Add calendar icon for in-development services
     svgElement.filter(d => d.status === 'in_development')
       .append('path')
-      .attr('d', serviceNodeConfig.extraIcon)
+      .attr('d', ICONS.PLANNING)
       .attr('class', 'planning-icon')
       .attr('fill', 'none')
       .attr('stroke', COLORS.STATUS_IN_DEVELOPMENT_ICON)
       .attr('stroke-width', '2')
       .attr('stroke-linecap', 'round')
       .attr('stroke-linejoin', 'round')
-      .attr('transform', serviceNodeConfig.extraIconTransform);
+      .attr('transform', `translate(${NODE_CONSTANTS.BASE_RADIUS - 10}, ${NODE_CONSTANTS.BASE_RADIUS - 10}) scale(1)`);
     
     // Add label
     nodeGroups.append('div')
@@ -283,4 +285,4 @@ function LayerCake({ data, selectedNodes, onNodeSelect }) {
   );
 }
 
-export default LayerCake;
+export default LayerCakeView;

@@ -1,0 +1,9 @@
+// Node size and style constants
+export const NODE_CONSTANTS = {
+  BASE_RADIUS: 20,
+  USER_RADIUS: 22,
+  GOAL_RADIUS: 18,
+  SERVICE_RADIUS: 16,
+  LABEL_OFFSET: 25,
+  SELECTION_STROKE_WIDTH: 2,
+};
