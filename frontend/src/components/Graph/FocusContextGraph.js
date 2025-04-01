@@ -72,9 +72,6 @@ const NODE_CONSTANTS = {
   GOAL_HIT_AREA_MULTIPLIER: 1.25,
   USER_HIT_AREA_MULTIPLIER: 0.3,
   SERVICE_HIT_AREA_MULTIPLIER: 0.5,
-  LINK_STRENGTH: SIMULATION_CONFIG.forces.link.strength,
-  CHARGE_STRENGTH: SIMULATION_CONFIG.forces.charge.strength,
-  POSITIONING_STRENGTH: SIMULATION_CONFIG.forces.positioning.strength,
   LABEL_TRUNCATE_LENGTH: 20
 };
 
@@ -93,14 +90,6 @@ const GraphContainer = styled.div`
     transition: opacity 0.2s ease-in-out;
   }
 
-  .nodes circle {
-    cursor: pointer;
-  }
-  
-  .nodes path {
-    cursor: pointer;
-  }
-  
   .nodes {
     cursor: pointer;
   }
