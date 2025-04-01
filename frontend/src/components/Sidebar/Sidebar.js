@@ -6,7 +6,8 @@ import {
   FaClock,
   FaUser,
   FaServer,
-  FaCircle
+  FaCircle,
+  FaProjectDiagram
 } from 'react-icons/fa';
 import { COLORS } from '../../styles/colors';
 import { ICONS } from '../../styles/icons';
@@ -170,9 +171,7 @@ const ColorSquare = styled.div`
   `}
 `;
 
-function Sidebar({ isOpen }) {
-  const [activeTab, setActiveTab] = React.useState('progress');
-
+function Sidebar({ isOpen, activeTab, onTabChange }) {
   if (!isOpen) return null;
 
   return (
@@ -184,21 +183,28 @@ function Sidebar({ isOpen }) {
       <TabContainer>
         <Tab
           active={activeTab === 'progress'}
-          onClick={() => setActiveTab('progress')}
+          onClick={() => onTabChange('progress')}
         >
           <FaChartLine />
           Progress
         </Tab>
         <Tab
+          active={activeTab === 'explore'}
+          onClick={() => onTabChange('explore')}
+        >
+          <FaProjectDiagram />
+          Explore
+        </Tab>
+        <Tab
           active={activeTab === 'priority'}
-          onClick={() => setActiveTab('priority')}
+          onClick={() => onTabChange('priority')}
         >
           <FaListOl />
           Priority
         </Tab>
         <Tab
           active={activeTab === 'projection'}
-          onClick={() => setActiveTab('projection')}
+          onClick={() => onTabChange('projection')}
         >
           <FaClock />
           Projection
@@ -283,6 +289,13 @@ function Sidebar({ isOpen }) {
                 <span><strong>Vaporware 😶‍🌫️</strong></span>
               </LegendItem>
             </div>
+          </>
+        )}
+
+        {activeTab === 'explore' && (
+          <>
+            <SectionTitle>Explore View</SectionTitle>
+            <div>Explore your goals and services</div>
           </>
         )}
 

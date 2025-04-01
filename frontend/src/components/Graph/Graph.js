@@ -4,19 +4,7 @@ import * as d3 from 'd3';
 import { showTooltip, hideTooltip } from './TooltipUtils';
 import { calculateLinkEdgePoints, getNodeRadius } from './GraphUtils';
 import { COLORS } from '../../styles/colors';
-import { ICONS } from '../../styles/icons';
-
-// Node rendering constants
-const NODE_CONSTANTS = {
-  BASE_RADIUS: 20,
-  GOAL_HIT_AREA_MULTIPLIER: 1.25,
-  USER_HIT_AREA_MULTIPLIER: 0.3,
-  SERVICE_HIT_AREA_MULTIPLIER: 0.5,
-  LINK_STRENGTH: 0.9,
-  CHARGE_STRENGTH: -400,
-  POSITIONING_STRENGTH: 0.07,
-  LABEL_TRUNCATE_LENGTH: 20
-};
+import { SIMULATION_CONFIG, NODE_CONSTANTS, LINK_CONSTANTS, goalNodeConfig, userNodeConfig, serviceNodeConfig } from './SimulationConfig';
 
 const GraphContainer = styled.div`
   width: 100%;
@@ -33,14 +21,6 @@ const GraphContainer = styled.div`
     transition: opacity 0.2s ease-in-out;
   }
 
-  .nodes circle {
-    cursor: pointer;
-  }
-  
-  .nodes path {
-    cursor: pointer;
-  }
-  
   .nodes {
     cursor: pointer;
   }
@@ -74,33 +54,48 @@ const GraphContainer = styled.div`
     z-index: 1000;
     opacity: 0;
   }
+  
+  .secondary-node {
+    opacity: 0.3;
+  }
+  
+  .secondary-link {
+    opacity: 0.2;
+    stroke-dasharray: 3, 3;
+  }
 `;
 
 function Graph({ data, selectedNodes, onNodeSelect }) {
   const svgRef = useRef(null);
-  
-  const linkColors = {
-    'DOES': '#ECB5C9',   // Pink
-    'DEPENDS_ON': '#F16667'  // Red
+  // Utility functions for node and link ID handling
+  const getNodeId = node => typeof node === 'object' ? node.id : node;
+
+  const getConnectedNodes = (links, selectedNodes) => {
+    const connectedNodeIds = new Set(selectedNodes);
+
+    links.forEach(link => {
+      const sourceId = getNodeId(link.source);
+      const targetId = getNodeId(link.target);
+
+      if (selectedNodes.includes(sourceId)) connectedNodeIds.add(targetId);
+      if (selectedNodes.includes(targetId)) connectedNodeIds.add(sourceId);
+    });
+
+    return connectedNodeIds;
   };
 
-  const getServiceColor = (status) => {
-    switch (status) {
-      case 'in_development':
-        return COLORS.STATUS_IN_DEVELOPMENT;
-      case 'vapour':
-        return COLORS.STATUS_VAPOUR;
-      case 'active':
-        return COLORS.STATUS_ACTIVE;
-      default:
-        return COLORS.STATUS_VAPOUR;
-    }
+  const isNodeSelected = (nodeId, selectedNodes) => selectedNodes.includes(nodeId);
+  const isLinkSelected = (link, selectedNodes) => {
+    const sourceId = getNodeId(link.source);
+    const targetId = getNodeId(link.target);
+    return isNodeSelected(sourceId, selectedNodes) || isNodeSelected(targetId, selectedNodes);
   };
 
+  // Setup arrow markers for links
   const setupArrowMarkers = (container) => {
     const defs = container.append('defs');
 
-    Object.entries(linkColors).forEach(([type, color]) => {
+    Object.entries(LINK_CONSTANTS).forEach(([type, color]) => {
       defs.append('marker')
         .attr('id', `arrowhead-${type}`)
         .attr('viewBox', '0 -5 10 10')
@@ -117,40 +112,92 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
     });
   };
 
-  const handleNodeClick = (event, node) => {
-    event.stopPropagation(); 
+  // Track drag state
+  const dragState = {
+    dragStartTime: 0,
+    isDragging: false,
+    initialDragDone: false
+  };
+
+  const handleNodeClick = (event, node, simulation) => {
+    event.stopPropagation();
+
+    // Stop any ongoing simulation activity immediately to prevent movement
+    if (simulation) {
+      simulation.stop();
+
+      // Fix all nodes in their current positions
+      simulation.nodes().forEach(n => {
+        n.fx = n.x;
+        n.fy = n.y;
+      });
+    }
+
     onNodeSelect(node.id, event.ctrlKey);
   };
 
   // Drag event handlers
   const dragstarted = (event, d, simulation) => {
-    if (!event.active) simulation.alphaTarget(0.3).restart();
+    dragState.dragStartTime = Date.now();
+    dragState.isDragging = false;
+    dragState.initialDragDone = false;
+
+    // Start with node fixed at its current position
     d.fx = d.x;
     d.fy = d.y;
+
+    if (!event.active) {
+      simulation.alphaTarget(0.3).restart();
+    }
   };
 
   const dragged = (event, d) => {
-    d.fx = event.x;
-    d.fy = event.y;
+    const timeSinceStart = Date.now() - dragState.dragStartTime;
+
+    // Wait for delay before allowing drag
+    if (!dragState.initialDragDone && timeSinceStart > SIMULATION_CONFIG.timing.dragInitiationDelay) {
+      dragState.initialDragDone = true;
+      dragState.isDragging = true;
+    }
+
+    // Only update position if we're past the initial delay
+    if (dragState.initialDragDone) {
+      d.fx = event.x;
+      d.fy = event.y;
+    }
   };
 
   const dragended = (event, d, simulation) => {
-    if (!event.active) simulation.alphaTarget(0);
+    // If we never started dragging, treat it as a click
+    if (!dragState.isDragging) {
+      handleNodeClick(event.sourceEvent, d, simulation);
+      return;
+    }
+
+    // Reset drag state
+    dragState.isDragging = false;
+    dragState.initialDragDone = false;
+
+    // Free the node and let it settle
     d.fx = null;
     d.fy = null;
+
+    if (!event.active) {
+      simulation.alphaTarget(0);
+    }
   };
 
   // Create a reusable function for node creation
   const createNodeGroups = (parent, nodeConfig, tooltip, simulation) => {
     const { nodeType, filter, hitAreaShape, hitAreaMultiplier, nodeShape, icon, getNodeFill, extraIconCondition } = nodeConfig;
-    
+
     // Create groups
     const groups = parent.selectAll(`.${nodeType.toLowerCase()}-group`)
       .data(data.nodes.filter(filter))
       .enter()
       .append('g')
       .attr('class', `${nodeType.toLowerCase()}-group`);
-      
+
     // Add hit area
     if (hitAreaShape === 'circle') {
       groups.append('circle')
@@ -163,12 +210,12 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
         .attr('class', 'hit-area')
         .attr('width', d => getNodeRadius(d) * hitAreaMultiplier)
         .attr('height', d => getNodeRadius(d) * hitAreaMultiplier)
-        .attr('x', d => -getNodeRadius(d) * (hitAreaMultiplier/2))
-        .attr('y', d => -getNodeRadius(d) * (hitAreaMultiplier/2))
+        .attr('x', d => -getNodeRadius(d) * (hitAreaMultiplier / 2))
+        .attr('y', d => -getNodeRadius(d) * (hitAreaMultiplier / 2))
         .attr('fill', 'rgba(0,0,0,0)')
         .attr('stroke', 'none');
     }
-    
+
     // Add visible node
     if (nodeShape === 'circle') {
       groups.append('circle')
@@ -182,7 +229,7 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
         .attr('fill', getNodeFill)
         .attr('transform', 'translate(-12, -12)');
     }
-    
+
     // Add special icons if needed
     if (extraIconCondition && nodeConfig.extraIcon) {
       groups.filter(extraIconCondition)
@@ -196,17 +243,17 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
         .attr('stroke-linejoin', nodeConfig.extraIconStrokeLinejoin || 'miter')
         .attr('transform', nodeConfig.extraIconTransform || '');
     }
-    
+
     // Add event handlers
     groups
       .on('mouseover', (event, d) => showTooltip(tooltip, event, d))
       .on('mouseout', () => hideTooltip(tooltip))
-      .on('click', (event, d) => handleNodeClick(event, d))
+      .on('click', (event, d) => handleNodeClick(event, d, simulation))
       .call(d3.drag()
         .on('start', (event, d) => dragstarted(event, d, simulation))
         .on('drag', dragged)
         .on('end', (event, d) => dragended(event, d, simulation)));
-        
+
     return groups;
   };
 
@@ -232,17 +279,146 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
     }
   };
 
-  // Setup the simulation with appropriate forces
+  // Track previous selection state for smoother transitions
+  const prevSelectedNodesRef = useRef([]);
+
+  // Update the simulation when nodes are selected to maintain stable positions
+  const updateSimulationOnSelection = (simulation, currentSelectedNodes, previousSelectedNodes) => {
+    // Don't do anything if the simulation isn't initialized yet
+    if (!simulation) return;
+
+    // Only apply when selection changes
+    if (JSON.stringify(currentSelectedNodes) !== JSON.stringify(previousSelectedNodes)) {
+      // Stop the current simulation
+      simulation.stop();
+
+      // Fix positions of newly selected nodes and free previously selected ones
+      simulation.nodes().forEach(node => {
+        if (currentSelectedNodes.includes(node.id)) {
+          // Fix this node in place
+          node.fx = node.x;
+          node.fy = node.y;
+        } else if (previousSelectedNodes && previousSelectedNodes.includes(node.id)) {
+          // Free previously selected nodes
+          node.fx = null;
+          node.fy = null;
+        }
+      });
+
+      // Store original simulation parameters
+      const originalVelocityDecay = simulation.velocityDecay();
+      const originalAlphaDecay = simulation.alphaDecay();
+
+      // Apply fast cooling parameters
+      simulation.velocityDecay(SIMULATION_CONFIG.simulation.fastCooling.velocityDecay)
+        .alphaDecay(SIMULATION_CONFIG.simulation.fastCooling.alphaDecay);
+
+      // Run rapid iterations to quickly reach a more stable state
+      for (let i = 0; i < SIMULATION_CONFIG.simulation.fastCooling.iterations; i++) {
+        simulation.tick();
+      }
+
+      // Restore original parameters and restart with lower alpha
+      simulation.velocityDecay(originalVelocityDecay)
+        .alphaDecay(originalAlphaDecay)
+        .alpha(SIMULATION_CONFIG.simulation.restartStrength)
+        .restart();
+    }
+  };
+
+  // Setup the simulation with focus+context forces
   const setupSimulation = (nodes, links, width, height) => {
-    return d3.forceSimulation(nodes)
-      .force('link', d3.forceLink(links)
-        .id(d => d.id)
-        .distance(d => 4 * getNodeRadius(d.source) + getNodeRadius(d.target))
-        .strength(NODE_CONSTANTS.LINK_STRENGTH))
-      .force('charge', d3.forceManyBody().strength(NODE_CONSTANTS.CHARGE_STRENGTH))
-      .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('x', d3.forceX(width / 2).strength(NODE_CONSTANTS.POSITIONING_STRENGTH))
-      .force('y', d3.forceY(height / 2).strength(NODE_CONSTANTS.POSITIONING_STRENGTH));
+    // Find connected nodes if we have selection
+    const connectedNodeIds = selectedNodes.length > 0 ?
+      getConnectedNodes(data.links, selectedNodes) :
+      new Set();
+
+    // Create the simulation with appropriate forces based on selection state
+    const simulation = d3.forceSimulation(nodes);
+
+    // Always apply link forces - stronger for exploration mode to maintain cohesion
+    simulation.force('link', d3.forceLink(links)
+      .id(d => d.id)
+      .distance(d => {
+        // Base distance that's more consistent regardless of node types
+        const baseDistance = 50;
+        return baseDistance * (isLinkSelected(d, selectedNodes) ?
+          SIMULATION_CONFIG.forces.link.distance.selected :
+          SIMULATION_CONFIG.forces.link.distance.base);
+      })
+      .strength(d => {
+        // Stronger links for connections to selected nodes
+        return isLinkSelected(d, selectedNodes) ?
+          SIMULATION_CONFIG.forces.link.strength * SIMULATION_CONFIG.forces.link.selectedMultiplier :
+          SIMULATION_CONFIG.forces.link.strength;
+      }));
+
+    // Apply charge forces - repulsion between nodes
+    simulation.force('charge', d3.forceManyBody()
+      .strength(d => {
+        if (isNodeSelected(d.id, selectedNodes)) {
+          return SIMULATION_CONFIG.forces.charge.strength * SIMULATION_CONFIG.forces.charge.selectedMultiplier;
+        }
+        if (connectedNodeIds.has(d.id)) {
+          return SIMULATION_CONFIG.forces.charge.strength * SIMULATION_CONFIG.forces.charge.connectedMultiplier;
+        }
+        return SIMULATION_CONFIG.forces.charge.strength * SIMULATION_CONFIG.forces.charge.contextMultiplier;
+      }));
+
+    // Apply collision detection to prevent overlap
+    simulation.force('collision', d3.forceCollide()
+      .radius(d => getNodeRadius(d) * SIMULATION_CONFIG.forces.collision.radiusMultiplier)
+      .strength(SIMULATION_CONFIG.forces.collision.strength));
+
+    // Fix positions of selected nodes to prevent them from moving
+    if (selectedNodes.length > 0) {
+      // Fix the positions of selected nodes
+      nodes.forEach(node => {
+        if (selectedNodes.includes(node.id)) {
+          // Only fix if the node already has a position
+          if (node.x && node.y) {
+            node.fx = node.x;
+            node.fy = node.y;
+          }
+        } else {
+          // Allow other nodes to move freely
+          node.fx = null;
+          node.fy = null;
+        }
+      });
+    }
+
+    if (selectedNodes.length === 0) {
+      // When no nodes are selected, use central gravity to keep everything visible
+      simulation
+        .force('center', d3.forceCenter(width / 2, height / 2))
+        .force('x', d3.forceX(width / 2).strength(SIMULATION_CONFIG.forces.positioning.strength))
+        .force('y', d3.forceY(height / 2).strength(SIMULATION_CONFIG.forces.positioning.strength));
+    } else {
+      // When nodes are selected, we want a very different behavior:
+      // 1. No central attraction to screen center
+      // 2. Selected nodes should stay fixed
+      // 3. Connected nodes should expand outward but not too far
+
+      // Remove any central forces - we don't want pull toward center
+      simulation.force('center', null);
+
+      // Very minimal positioning forces to prevent nodes from flying too far
+      // but allowing them to expand into available space
+      simulation.force('x', d3.forceX(width / 2).strength(SIMULATION_CONFIG.forces.positioning.minStrength));
+      simulation.force('y', d3.forceY(height / 2).strength(SIMULATION_CONFIG.forces.positioning.minStrength));
+
+      // We don't need a radial force anymore since we're using fixed positions
+      // for selected nodes and stronger repulsion to push connected nodes outward
+      simulation.force('radial', null);
+    }
+
+    // Use a lower alpha decay to reduce jiggling
+    simulation.alphaDecay(SIMULATION_CONFIG.simulation.alphaDecay);
+    simulation.alphaTarget(SIMULATION_CONFIG.simulation.alphaTarget);
+    simulation.velocityDecay(SIMULATION_CONFIG.simulation.velocityDecay);
+
+    return simulation;
   };
 
   useEffect(() => {
@@ -250,16 +426,76 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
       if (event.key === 'Escape') {
         onNodeSelect([]);
       }
+
+      // Preview neighboring nodes with 'S' key (second-hop preview)
+      if (event.key === 's' || event.key === 'S') {
+        // Find second-hop nodes if we have selection
+        if (selectedNodes.length > 0) {
+          const secondaryNodeIds = new Set();
+          const secondaryLinkIds = new Set();
+
+          // First get direct connections (first hop)
+          const firstHopNodeIds = new Set();
+
+          data.links.forEach(link => {
+            const sourceId = getNodeId(link.source);
+            const targetId = getNodeId(link.target);
+
+            if (selectedNodes.includes(sourceId)) firstHopNodeIds.add(targetId);
+            if (selectedNodes.includes(targetId)) firstHopNodeIds.add(sourceId);
+          });
+
+          // Then get second hop connections
+          data.links.forEach(link => {
+            const sourceId = getNodeId(link.source);
+            const targetId = getNodeId(link.target);
+
+            if (firstHopNodeIds.has(sourceId) && !selectedNodes.includes(targetId)) {
+              secondaryNodeIds.add(targetId);
+              secondaryLinkIds.add(`${sourceId}-${targetId}`);
+            }
+            if (firstHopNodeIds.has(targetId) && !selectedNodes.includes(sourceId)) {
+              secondaryNodeIds.add(sourceId);
+              secondaryLinkIds.add(`${sourceId}-${targetId}`);
+            }
+          });
+
+          // Show the secondary nodes/links with reduced opacity
+          d3.selectAll('.nodes > g')
+            .filter(d => secondaryNodeIds.has(d.id))
+            .classed('secondary-node', true)
+            .attr('hidden', null);
+
+          d3.selectAll('.links line')
+            .filter(d => {
+              const sourceId = getNodeId(d.source);
+              const targetId = getNodeId(d.target);
+              return secondaryLinkIds.has(`${sourceId}-${targetId}`) || secondaryLinkIds.has(`${targetId}-${sourceId}`);
+            })
+            .classed('secondary-link', true)
+            .attr('hidden', null);
+        }
+      }
     };
 
-    // Add keyboard listener
+    const handleKeyUp = (event) => {
+      // Hide second-hop nodes when 'S' key is released
+      if (event.key === 's' || event.key === 'S') {
+        d3.selectAll('.secondary-node').attr('hidden', 'true');
+        d3.selectAll('.secondary-link').attr('hidden', 'true');
+      }
+    };
+
+    // Add keyboard listeners
     window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
 
     // Cleanup
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [onNodeSelect]);
+  }, [onNodeSelect, selectedNodes, data]);
 
   useEffect(() => {
     if (!data || !data.nodes || !data.links) {
@@ -267,8 +503,8 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
       return;
     }
 
-    console.log('Rendering graph with data:', { 
-      nodes: data.nodes.length, 
+    console.log('Rendering graph with data:', {
+      nodes: data.nodes.length,
       links: data.links.length,
       selectedNodes
     });
@@ -323,56 +559,35 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
       const nodesGroup = container.append('g')
         .attr('class', 'nodes');
 
-      // Setup the simulation
+      // Setup the simulation with focus+context behavior
       const simulation = setupSimulation(data.nodes, data.links, width, height);
 
-      // Configuration objects for different node types
-      const goalNodeConfig = {
-        nodeType: 'Goal',
-        filter: d => d.label === 'Goal',
-        hitAreaShape: 'circle',
-        hitAreaMultiplier: NODE_CONSTANTS.GOAL_HIT_AREA_MULTIPLIER,
-        nodeShape: 'circle',
-        getNodeFill: d => d.npsColor
-      };
-
-      const userNodeConfig = {
-        nodeType: 'User',
-        filter: d => d.label === 'User',
-        hitAreaShape: 'circle',
-        hitAreaMultiplier: NODE_CONSTANTS.USER_HIT_AREA_MULTIPLIER,
-        nodeShape: 'path',
-        icon: ICONS.USER,
-        getNodeFill: d => d.npsScore ? d.npsColor : COLORS.NODE_USER_DEFAULT
-      };
-
-      const serviceNodeConfig = {
-        nodeType: 'Service',
-        filter: d => d.label === 'Service',
-        hitAreaShape: 'rect',
-        hitAreaMultiplier: NODE_CONSTANTS.SERVICE_HIT_AREA_MULTIPLIER,
-        nodeShape: 'path',
-        icon: ICONS.SERVICE,
-        getNodeFill: d => getServiceColor(d.status),
-        extraIconCondition: d => d.status === 'in_development',
-        extraIconClass: 'planning-icon',
-        extraIcon: ICONS.PLANNING,
-        extraIconFill: 'none',
-        extraIconStroke: COLORS.STATUS_IN_DEVELOPMENT_ICON,
-        extraIconStrokeWidth: '2',
-        extraIconStrokeLinecap: 'round',
-        extraIconStrokeLinejoin: 'round',
-        extraIconTransform: 'translate(-20.1, 3) scale(0.4)'
-      };
-
       // Create node groups using the centralized function
-      const GoalGroups = createNodeGroups(nodesGroup, goalNodeConfig, tooltip, simulation);
+      const goalGroups = createNodeGroups(nodesGroup, goalNodeConfig, tooltip, simulation);
       const userGroups = createNodeGroups(nodesGroup, userNodeConfig, tooltip, simulation);
       const serviceGroups = createNodeGroups(nodesGroup, serviceNodeConfig, tooltip, simulation);
 
+      // Find all nodes directly connected to selected nodes for styling
+      const connectedNodeIds = new Set();
+      if (selectedNodes.length > 0) {
+        data.links.forEach(link => {
+          const sourceId = getNodeId(link.source);
+          const targetId = getNodeId(link.target);
+
+          if (selectedNodes.includes(sourceId)) connectedNodeIds.add(targetId);
+          if (selectedNodes.includes(targetId)) connectedNodeIds.add(sourceId);
+        });
+
+        // Highlight selected and connected nodes
+        nodesGroup.selectAll('g')
+          .classed('selected-node', d => selectedNodes.includes(d.id))
+          .classed('primary-node', d => connectedNodeIds.has(d.id))
+          .classed('context-node', d => !selectedNodes.includes(d.id) && !connectedNodeIds.has(d.id));
+      }
+
       // Highlight selected nodes
       if (selectedNodes.length > 0) {
-        GoalGroups.select('.circle-node').classed('selected-node', d => selectedNodes.includes(d.id));
+        goalGroups.select('.circle-node').classed('selected-node', d => selectedNodes.includes(d.id));
         userGroups.select('path').classed('selected-node', d => selectedNodes.includes(d.id));
         serviceGroups.select('path').classed('selected-node', d => selectedNodes.includes(d.id));
       }
@@ -397,7 +612,7 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
         .selectAll('line')
         .data(data.links)
         .enter().append('line')
-        .attr('stroke', d => linkColors[d.type] || '#999')
+        .attr('stroke', d => LINK_CONSTANTS[d.type] || '#999')
         .attr('marker-end', d => `url(#arrowhead-${d.type})`);
 
       // Update link positions with edge point calculations
@@ -421,7 +636,7 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
 
       // Update node positions with appropriate transforms
       const updateNodePositions = () => {
-        GoalGroups
+        goalGroups
           .attr('transform', d => `translate(${d.x},${d.y})`);
 
         const getScaledTransform = (d) => {
@@ -457,6 +672,10 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
         // No-op - keeping the event handler to prevent bubbling
         event.stopPropagation();
       });
+
+      // Update simulation on selection changes
+      updateSimulationOnSelection(simulation, selectedNodes, prevSelectedNodesRef.current);
+      prevSelectedNodesRef.current = selectedNodes;
     }, 300); // Wait 300ms for transition to complete
 
   }, [data, selectedNodes, onNodeSelect]);

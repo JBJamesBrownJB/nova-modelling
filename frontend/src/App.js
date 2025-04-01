@@ -3,7 +3,8 @@ import styled from 'styled-components';
 import Topbar from './components/Topbar/Topbar';
 import Sidebar from './components/Sidebar/Sidebar';
 import Footer from './components/Footer/Footer';
-import GraphWrapper from './components/Graph/GraphWrapper';
+import Graph from './components/Graph/Graph';
+import LayerCake from './components/Graph/LayerCake';
 import MockDatabaseService from './services/database/MockDatabaseService';
 import NodeCreationForm from './components/NodeCreation/NodeCreationForm';
 import { toast, ToastContainer } from 'react-toastify';
@@ -65,6 +66,7 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showNodeForm, setShowNodeForm] = useState(false);
   const [selectedNodes, setSelectedNodes] = useState([]);
+  const [activeTab, setActiveTab] = useState('progress');
 
   // Node and relationship types
   const nodeTypes = ['Goal', 'User', 'Service'];
@@ -139,19 +141,25 @@ function App() {
   }, []);
 
   const getVisibleData = () => {
-    if (selectedNodes.length === 0) {
-      // Show only Goal and User nodes when nothing is selected
-      const filteredNodes = graphData.nodes.filter(node => 
-        node.label === 'Goal' || node.label === 'User'
-      );
-      console.log('No nodes selected. Showing Goal and User nodes:', filteredNodes);
-      return {
-        nodes: filteredNodes,
-        links: []
-      };
+    if (activeTab === 'progress') {
+      // For LayerCake view: show all nodes by default
+      if (selectedNodes.length === 0) {
+        return graphData;
+      }
+    } else if (activeTab === 'explore') {
+      // For Graph view: show only Goal and User nodes when nothing is selected
+      if (selectedNodes.length === 0) {
+        const filteredNodes = graphData.nodes.filter(node => 
+          node.label === 'Goal' || node.label === 'User'
+        );
+        return {
+          nodes: filteredNodes,
+          links: []
+        };
+      }
     }
   
-    // Get all connected nodes and links
+    // When nodes are selected (for both views)
     const relevantLinks = graphData.links.filter(link => {
       const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
       const targetId = typeof link.target === 'object' ? link.target.id : link.target;
@@ -207,17 +215,29 @@ function App() {
         <Sidebar
           isOpen={sidebarOpen}
           selectedNodes={selectedNodes}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
         />
         <GraphContainer>
           {isLoading ? (
             <div>Loading graph data...</div>
           ) : (
             <>
-              <GraphWrapper
-                data={filteredData}
-                onNodeSelect={(nodeId, isCtrlPressed) => handleNodeSelect(nodeId, isCtrlPressed)}
-                selectedNodes={selectedNodes}
-              />
+              {activeTab === 'explore' ? (
+                <Graph
+                  data={filteredData}
+                  onNodeSelect={(nodeId, isCtrlPressed) => handleNodeSelect(nodeId, isCtrlPressed)}
+                  selectedNodes={selectedNodes}
+                />
+              ) : activeTab === 'progress' ? (
+                <LayerCake
+                  data={filteredData}
+                  onNodeSelect={(nodeId, isCtrlPressed) => handleNodeSelect(nodeId, isCtrlPressed)}
+                  selectedNodes={selectedNodes}
+                />
+              ) : (
+                <div>Invalid tab selected</div>
+              )}
               <AddNodeButton onClick={() => setShowNodeForm(true)}>+</AddNodeButton>
             </>
           )}
