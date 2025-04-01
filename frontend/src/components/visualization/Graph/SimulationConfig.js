@@ -4,6 +4,7 @@
 // Adjust these values to control the physics and behavior of the graph
 import { ICONS } from '../../../styles/icons';
 import { COLORS } from '../../../styles/colors';
+import { NODE_CONSTANTS } from '../shared/constants/nodeConstants';
 
 const getServiceColor = (status) => {
     switch (status) {
@@ -74,20 +75,6 @@ const SIMULATION_CONFIG = {
     }
 };
 
-// Legacy constants - maintained for compatibility
-const NODE_CONSTANTS = {
-    BASE_RADIUS: 20,
-    GOAL_HIT_AREA_MULTIPLIER: 1.25,
-    USER_HIT_AREA_MULTIPLIER: 0.2,
-    SERVICE_HIT_AREA_MULTIPLIER: 0.5,
-    LABEL_TRUNCATE_LENGTH: 20
-};
-
-const LINK_CONSTANTS = {
-    DOES: '#ECB5C9',   // Pink
-    DEPENDS_ON: '#F16667'  // Red
-};
-
 // Configuration objects for different node types
 const goalNodeConfig = {
     nodeType: 'Goal',
@@ -127,4 +114,4 @@ const serviceNodeConfig = {
     extraIconTransform: 'translate(-20.1, 3) scale(0.4)'
 };
 
-export { SIMULATION_CONFIG, NODE_CONSTANTS, LINK_CONSTANTS, goalNodeConfig, userNodeConfig, serviceNodeConfig };
+export { SIMULATION_CONFIG, goalNodeConfig, userNodeConfig, serviceNodeConfig };

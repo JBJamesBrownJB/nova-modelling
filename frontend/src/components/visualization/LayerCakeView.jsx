@@ -5,7 +5,8 @@ import { COLORS } from '../../styles/colors';
 import { ICONS } from '../../styles/icons';
 import { showTooltip, hideTooltip } from './Graph/TooltipUtils';
 import { getNodeRadius } from './Graph/GraphUtils';
-import { NODE_CONSTANTS, goalNodeConfig, userNodeConfig, serviceNodeConfig } from './Graph/SimulationConfig';
+import { goalNodeConfig, userNodeConfig, serviceNodeConfig } from './Graph/SimulationConfig';
+import { NODE_CONSTANTS } from './shared/constants/nodeConstants';
 
 const LayerCakeContainer = styled.div`
   width: 100%;
@@ -177,7 +178,7 @@ function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
       .attr('height', NODE_CONSTANTS.BASE_RADIUS * 2)
       .append('path')
       .attr('d', ICONS.USER)
-      .attr('transform', `translate(${NODE_CONSTANTS.BASE_RADIUS - 10}, ${NODE_CONSTANTS.BASE_RADIUS - 10}) scale(1)`)
+      .attr('transform', `translate(${NODE_CONSTANTS.BASE_RADIUS - 23}, ${NODE_CONSTANTS.BASE_RADIUS - 20}) scale(2)`)
       .attr('fill', d => d.npsScore ? d.npsColor : COLORS.NODE_USER_DEFAULT);
     
     // Add label
@@ -203,8 +204,8 @@ function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
     
     // Create SVG circle
     nodeGroups.append('svg')
-      .attr('width', NODE_CONSTANTS.BASE_RADIUS * 2)
-      .attr('height', NODE_CONSTANTS.BASE_RADIUS * 2)
+      .attr('width', NODE_CONSTANTS.BASE_RADIUS * 3)
+      .attr('height', NODE_CONSTANTS.BASE_RADIUS * 3)
       .append('circle')
       .attr('cx', NODE_CONSTANTS.BASE_RADIUS)
       .attr('cy', NODE_CONSTANTS.BASE_RADIUS)
@@ -234,12 +235,12 @@ function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
     
     // Create SVG icon
     const svgElement = nodeGroups.append('svg')
-      .attr('width', NODE_CONSTANTS.BASE_RADIUS * 2)
-      .attr('height', NODE_CONSTANTS.BASE_RADIUS * 2);
+      .attr('width', NODE_CONSTANTS.BASE_RADIUS * 2.5)  
+      .attr('height', NODE_CONSTANTS.BASE_RADIUS * 2.5);  
     
     svgElement.append('path')
       .attr('d', ICONS.SERVICE)
-      .attr('transform', `translate(${NODE_CONSTANTS.BASE_RADIUS - 10}, ${NODE_CONSTANTS.BASE_RADIUS - 10}) scale(1)`)
+      .attr('transform', `translate(${NODE_CONSTANTS.BASE_RADIUS - 20}, ${NODE_CONSTANTS.BASE_RADIUS - 10}) scale(1)`)
       .attr('fill', d => {
         // Color based on status
         switch (d.status) {
@@ -265,7 +266,7 @@ function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
       .attr('stroke-width', '2')
       .attr('stroke-linecap', 'round')
       .attr('stroke-linejoin', 'round')
-      .attr('transform', `translate(${NODE_CONSTANTS.BASE_RADIUS - 10}, ${NODE_CONSTANTS.BASE_RADIUS - 10}) scale(1)`);
+      .attr('transform', `translate(${NODE_CONSTANTS.BASE_RADIUS + 10}, ${NODE_CONSTANTS.BASE_RADIUS - 20}) scale(0.8)`);
     
     // Add label
     nodeGroups.append('div')

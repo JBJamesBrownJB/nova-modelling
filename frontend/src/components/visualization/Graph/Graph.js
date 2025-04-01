@@ -4,7 +4,8 @@ import * as d3 from 'd3';
 import { showTooltip, hideTooltip } from './TooltipUtils';
 import { calculateLinkEdgePoints, getNodeRadius } from './GraphUtils';
 import { COLORS } from '../../../styles/colors';
-import { SIMULATION_CONFIG, NODE_CONSTANTS, LINK_CONSTANTS, goalNodeConfig, userNodeConfig, serviceNodeConfig } from './SimulationConfig';
+import { SIMULATION_CONFIG, goalNodeConfig, userNodeConfig, serviceNodeConfig } from './SimulationConfig';
+import { NODE_CONSTANTS, LINK_CONSTANTS } from '../shared/constants/nodeConstants';
 
 const GraphContainer = styled.div`
   width: 100%;
