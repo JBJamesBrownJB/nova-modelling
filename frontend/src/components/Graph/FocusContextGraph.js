@@ -61,7 +61,8 @@ const SIMULATION_CONFIG = {
   // Timing configuration
   timing: {
     restartDelay: 500,            // Delay before simulation restarts after selection (ms)
-    stabilizationDelay: 300       // Delay before initial stabilization starts (ms)
+    stabilizationDelay: 300,      // Delay before initial stabilization starts (ms)
+    dragInitiationDelay: 100      // Delay before deciding if it's a drag operation (ms)
   }
 };
 
@@ -210,9 +211,16 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
     });
   };
 
+  // Track drag state
+  const dragState = {
+    dragStartTime: 0,
+    isDragging: false,
+    initialDragDone: false
+  };
+
   const handleNodeClick = (event, node, simulation) => {
     event.stopPropagation(); 
-    
+  
     // Stop any ongoing simulation activity immediately to prevent movement
     if (simulation) {
       simulation.stop();
@@ -229,20 +237,53 @@ function FocusContextGraph({ data, selectedNodes, onNodeSelect }) {
 
   // Drag event handlers
   const dragstarted = (event, d, simulation) => {
-    if (!event.active) simulation.alphaTarget(SIMULATION_CONFIG.simulation.restartStrength).restart();
+    dragState.dragStartTime = Date.now();
+    dragState.isDragging = false;
+    dragState.initialDragDone = false;
+
+    // Start with node fixed at its current position
     d.fx = d.x;
     d.fy = d.y;
+    
+    if (!event.active) {
+      simulation.alphaTarget(0.3).restart();
+    }
   };
 
   const dragged = (event, d) => {
-    d.fx = event.x;
-    d.fy = event.y;
+    const timeSinceStart = Date.now() - dragState.dragStartTime;
+    
+    // Wait for delay before allowing drag
+    if (!dragState.initialDragDone && timeSinceStart > SIMULATION_CONFIG.timing.dragInitiationDelay) {
+      dragState.initialDragDone = true;
+      dragState.isDragging = true;
+    }
+
+    // Only update position if we're past the initial delay
+    if (dragState.initialDragDone) {
+      d.fx = event.x;
+      d.fy = event.y;
+    }
   };
 
   const dragended = (event, d, simulation) => {
-    if (!event.active) simulation.alphaTarget(SIMULATION_CONFIG.simulation.alphaTarget);
+    // If we never started dragging, treat it as a click
+    if (!dragState.isDragging) {
+      handleNodeClick(event.sourceEvent, d, simulation);
+      return;
+    }
+    
+    // Reset drag state
+    dragState.isDragging = false;
+    dragState.initialDragDone = false;
+    
+    // Free the node and let it settle
     d.fx = null;
     d.fy = null;
+    
+    if (!event.active) {
+      simulation.alphaTarget(0);
+    }
   };
 
   // Create a reusable function for node creation
