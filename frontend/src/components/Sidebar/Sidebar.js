@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
-import { 
-  FaChartLine, 
+import {
+  FaChartLine,
   FaListOl,
   FaClock,
   FaUser,
@@ -214,40 +214,46 @@ function Sidebar({ isOpen, activeTab, onTabChange }) {
       <SidebarContent>
         {activeTab === 'progress' && (
           <>
-            <SectionTitle>Progress View</SectionTitle>
+            <SectionTitle>This is our product</SectionTitle>
             <div>
               <p>
-                Progress means enabling users to achieve their goals effectively. It's not about code changes, velocity, or features. It's about helping users achieve their goals and receiving positive feedback.
-                Your product is successful when it helps all users accomplish their goals with positive outcomes.
+                These are our users, their sentiment to our services, their goals and our underlying technical capabilities.
+                We use this to prioritize what to build next, for who, to achieve what.
+                Progress is an ever incresing green picture.
+              </p>
+              <SectionTitle>Progress View</SectionTitle>
+              <p>
+                Progress means enabling users to achieve their goals effectively. It's not about building things. We only build if that is how we get better feedback from users. Our product is successful when it helps all users accomplish most goals with positive outcomes.
+                Progress is measured through Net Promoter Scores (NPS)against each goal and users who achieve them.
               </p>
               <p>
                 Progress is measured through <strong>Net Promoter Scores (NPS)</strong> from users for the Goals they engage with.
               </p>
-              
+
               <SectionTitle>Node Types</SectionTitle>
-              
+
               <LegendItem>
                 <FaCircle style={{ color: COLORS.NODE_GOAL_DEFAULT }} />
                 <span><strong>Goal</strong> - Goals users aim to achieve</span>
               </LegendItem>
-              
+
               <LegendItem>
                 <FaUser style={{ color: COLORS.NODE_USER_DEFAULT }} />
                 <span><strong>User</strong> - Users of your product</span>
               </LegendItem>
-              
+
               <LegendItem>
                 <FaServer style={{ color: COLORS.STATUS_VAPOUR }} />
                 <span><strong>Services</strong> - Architectural components</span>
               </LegendItem>
-              
+
               <SectionTitle>Node Sizes</SectionTitle>
               <ul style={{ fontSize: '0.85rem', paddingLeft: '20px', margin: '5px 0' }}>
                 <li><strong>User</strong>: Larger = more goals</li>
                 <li><strong>Goal</strong>: Larger = more complex</li>
                 <li><strong>Service</strong>: Larger = supports more goals</li>
               </ul>
-              
+
               <SectionTitle>NPS Colors</SectionTitle>
               <LegendItem>
                 <ColorDot color="#81C784" />
@@ -265,7 +271,7 @@ function Sidebar({ isOpen, activeTab, onTabChange }) {
                 <ColorDot color="#BDBDBD" />
                 <span><strong>Unmeasured</strong>: No NPS data</span>
               </LegendItem>
-              
+
               <SectionTitle>Service Status</SectionTitle>
               <LegendItem>
                 <ColorSquare color={COLORS.STATUS_ACTIVE} />
