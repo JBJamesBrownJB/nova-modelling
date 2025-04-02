@@ -40,15 +40,15 @@ const LayerCakeContainer = styled.div`
   }
   
   .user-layer {
-    background-color: ${COLORS.GREY_100};
+    background-color: ${COLORS.BLUE_50};
   }
   
   .goal-layer {
-    background-color: ${COLORS.GREY_200};
+    background-color: ${COLORS.GREY_50};
   }
   
   .service-layer {
-    background-color: ${COLORS.GREY_100};
+    background-color: ${COLORS.BLUE_50};
   }
   
   .node {
