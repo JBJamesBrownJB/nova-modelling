@@ -6,6 +6,7 @@ import { calculateLinkEdgePoints, getNodeRadius } from './GraphUtils';
 import { COLORS } from '../../../styles/colors';
 import { SIMULATION_CONFIG, goalNodeConfig, userNodeConfig, serviceNodeConfig } from './SimulationConfig';
 import { NODE_CONSTANTS, LINK_CONSTANTS } from '../shared/constants/nodeConstants';
+import { tooltipStyles } from '../../../styles/tooltips';
 
 const GraphContainer = styled.div`
   width: 100%;
@@ -42,18 +43,8 @@ const GraphContainer = styled.div`
   .fading {
     opacity: 0;
   }
-  
-  .tooltip {
-    position: absolute;
-    background-color: white;
-    border-radius: 4px;
-    padding: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    pointer-events: none;
-    font-size: 12px;
-    z-index: 1000;
-    opacity: 0;
-  }
+
+  ${tooltipStyles}
   
   .secondary-node {
     opacity: 0.3;

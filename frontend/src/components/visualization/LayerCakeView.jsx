@@ -6,6 +6,7 @@ import { showTooltip, hideTooltip } from './Graph/TooltipUtils';
 import { getNodeRadius } from './Graph/GraphUtils';
 import { goalNodeConfig, userNodeConfig, serviceNodeConfig } from './Graph/SimulationConfig';
 import { NODE_CONSTANTS } from './shared/constants/nodeConstants';
+import { tooltipStyles } from '../../styles/tooltips';
 
 const LayerCakeContainer = styled.div`
   width: 100%;
@@ -96,17 +97,7 @@ const LayerCakeContainer = styled.div`
     white-space: normal;
   }
   
-  .tooltip {
-    position: absolute;
-    background-color: white;
-    border-radius: 4px;
-    padding: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    pointer-events: none;
-    font-size: 12px;
-    z-index: 1000;
-    opacity: 0;
-  }
+  ${tooltipStyles}
 `;
 
 function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
@@ -117,23 +108,15 @@ function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
   const isNodeSelected = (nodeId) => selectedNodes.includes(nodeId);
 
   useEffect(() => {
-    // Create tooltip if it doesn't exist
-    if (!tooltipRef.current) {
-      const tooltip = d3.select(containerRef.current)
-        .append('div')
-        .attr('class', 'tooltip')
-        .style('opacity', 0);
-      tooltipRef.current = tooltip;
-    }
-
-    // Separate nodes by type
-    const userNodes = data.nodes.filter(userNodeConfig.filter);
-    const goalNodes = data.nodes.filter(goalNodeConfig.filter);
-    const serviceNodes = data.nodes.filter(serviceNodeConfig.filter);
-
     // Create layers
     const container = d3.select(containerRef.current);
     container.html(''); // Clear previous content
+
+    // Create tooltip if it doesn't exist
+    const tooltip = container.append('div')
+      .attr('class', 'tooltip')
+      .style('opacity', 0);
+    tooltipRef.current = tooltip;
 
     const layersContainer = container.append('div')
       .attr('class', 'layer-container');
@@ -162,6 +145,11 @@ function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
       .attr('class', 'layer-title')
       .text('Services');
 
+    // Separate nodes by type
+    const userNodes = data.nodes.filter(userNodeConfig.filter);
+    const goalNodes = data.nodes.filter(goalNodeConfig.filter);
+    const serviceNodes = data.nodes.filter(serviceNodeConfig.filter);
+
     // Render User Nodes
     createUserNodes(userLayer, userNodes);
 
@@ -182,7 +170,7 @@ function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
       .attr('class', d => `node user-node ${isNodeSelected(d.id) ? 'node-selected' : ''}`)
       .on('click', (event, d) => handleNodeClick(event, d))
       .on('mouseover', (event, d) => {
-        showTooltip(tooltipRef.current, d, event.pageX, event.pageY);
+        showTooltip(tooltipRef.current, event, d);
       })
       .on('mouseout', () => {
         hideTooltip(tooltipRef.current);
@@ -213,7 +201,7 @@ function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
       .attr('class', d => `node goal-node ${isNodeSelected(d.id) ? 'node-selected' : ''}`)
       .on('click', (event, d) => handleNodeClick(event, d))
       .on('mouseover', (event, d) => {
-        showTooltip(tooltipRef.current, d, event.pageX, event.pageY);
+        showTooltip(tooltipRef.current, event, d);
       })
       .on('mouseout', () => {
         hideTooltip(tooltipRef.current);
@@ -244,7 +232,7 @@ function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
       .attr('class', d => `node service-node ${isNodeSelected(d.id) ? 'node-selected' : ''}`)
       .on('click', (event, d) => handleNodeClick(event, d))
       .on('mouseover', (event, d) => {
-        showTooltip(tooltipRef.current, d, event.pageX, event.pageY);
+        showTooltip(tooltipRef.current, event, d);
       })
       .on('mouseout', () => {
         hideTooltip(tooltipRef.current);

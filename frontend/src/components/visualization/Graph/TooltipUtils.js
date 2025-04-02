@@ -38,9 +38,9 @@ export const generateTooltipContent = (node) => {
  */
 export const showTooltip = (tooltip, event, node) => {
   tooltip.transition()
-    .delay(500)
-    .duration(500)
-    .style('opacity', 0.9);
+    .delay(200)
+    .duration(200)
+    .style('opacity', 1);
 
   tooltip.html(generateTooltipContent(node))
     .style('left', (event.pageX - 270) + 'px')
