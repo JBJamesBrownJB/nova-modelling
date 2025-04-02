@@ -196,11 +196,11 @@ function Sidebar({ isOpen, activeTab, onTabChange }) {
           Explore
         </Tab>
         <Tab
-          active={activeTab === 'priority'}
-          onClick={() => onTabChange('priority')}
+          active={activeTab === 'ranking'}
+          onClick={() => onTabChange('ranking')}
         >
           <FaListOl />
-          Priority
+          Ranking
         </Tab>
         <Tab
           active={activeTab === 'projection'}
@@ -305,10 +305,17 @@ function Sidebar({ isOpen, activeTab, onTabChange }) {
           </>
         )}
 
-        {activeTab === 'priority' && (
+        {activeTab === 'ranking' && (
           <>
-            <SectionTitle>Priority View</SectionTitle>
-            <div>Visualize and prioritize Goals based on complexity and impact</div>
+            <SectionTitle>Ranking Opportunities</SectionTitle>
+            <div><p>The fastest and most effective way to deliver is to continuousley re-organise your
+              cross functional skillsets so that they can be autonomous to deliver to a user for a goal, <strong>"one stream, one team!"</strong>.
+            </p>
+            <p>
+              That is not always possible and breaking organisational lines also has consequences.
+              So, this model <i>can</i> help you divide up the work across teams and track the dependencies and
+              hand-offs as well.
+            </p></div>
           </>
         )}
 
