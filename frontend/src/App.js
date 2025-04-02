@@ -98,12 +98,7 @@ function App() {
   }, []);
 
   const handleNodeSelect = (nodeId, isCtrlPressed) => {
-    console.log('Node selection:', { nodeId, isCtrlPressed, currentSelection: selectedNodes });
-    
-    // REVERSED BEHAVIOR: Default is multi-select, Ctrl+click is single-select
     if (isCtrlPressed) {
-      // Ctrl+click now selects only this node (replaces selection)
-      // If clicking already selected single node, clear selection
       if (selectedNodes.length === 1 && selectedNodes.includes(nodeId)) {
         setSelectedNodes([]);
       } else {
