@@ -36,7 +36,7 @@ const GraphContainer = styled.div`
   }
   
   .selected-node {
-    filter: drop-shadow(0 0 2.5px ${COLORS.PRIMARY});
+    filter: drop-shadow(0 0 4px ${COLORS.GREY_600});
   }
 
   .fading {

@@ -77,10 +77,10 @@ const LayerCakeContainer = styled.div`
     transform: scale(1.1);
   }
   
-.node-selected {
-    transform: scale(1.1);
-    filter: drop-shadow(0 0 4px ${COLORS.PRIMARY});
-}
+  .node-selected {
+      transform: scale(1.1);
+      filter: drop-shadow(0 0 4px ${COLORS.GREY_600});
+  }
   
   .node-label {
     position: relative;
