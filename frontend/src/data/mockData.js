@@ -81,57 +81,58 @@ const mockData = {
   ],
   links: [
     // Doctor relationships
-    { id: 'rel1', source: 'user1', target: 'Goal1', type: 'DOES', nps: 85 },
-    { id: 'rel2', source: 'user1', target: 'Goal2', type: 'DOES', nps: 45 },
-    { id: 'rel3', source: 'user1', target: 'Goal3', type: 'DOES', nps: null },
-    { id: 'rel4', source: 'user1', target: 'Goal4', type: 'DOES', nps: 75 },
-    { id: 'rel5', source: 'user1', target: 'Goal5', type: 'DOES', nps: null },
-    { id: 'rel6', source: 'user1', target: 'Goal7', type: 'DOES', nps: -15 },
-    { id: 'rel7', source: 'user1', target: 'Goal8', type: 'DOES', nps: -20 },
-    { id: 'rel8', source: 'user1', target: 'Goal9', type: 'DOES', nps: 20 },
-    { id: 'rel9', source: 'user1', target: 'Goal10', type: 'DOES' },
-    { id: 'rel10', source: 'user1', target: 'Goal11', type: 'DOES', nps: 90 },
-    { id: 'rel11', source: 'user1', target: 'Goal13', type: 'DOES', nps: -90 },
+    { id: 'rel1', source: 'user1', target: 'Goal1', type: 'DOES', nps: 85, demand: 'high' },
+    { id: 'rel2', source: 'user1', target: 'Goal2', type: 'DOES', nps: 45, demand: 'med' },
+    { id: 'rel3', source: 'user1', target: 'Goal3', type: 'DOES', nps: null, demand: 'high' },
+    { id: 'rel4', source: 'user1', target: 'Goal4', type: 'DOES', nps: 75, demand: 'high' },
+    { id: 'rel5', source: 'user1', target: 'Goal5', type: 'DOES', nps: null, demand: 'med' },
+    { id: 'rel6', source: 'user1', target: 'Goal7', type: 'DOES', nps: -15, demand: 'med' },
+    { id: 'rel7', source: 'user1', target: 'Goal8', type: 'DOES', nps: -20, demand: 'high' },
+    { id: 'rel8', source: 'user1', target: 'Goal9', type: 'DOES', nps: 20, demand: 'high' },
+    { id: 'rel9', source: 'user1', target: 'Goal10', type: 'DOES', demand: 'low' },
+    { id: 'rel10', source: 'user1', target: 'Goal11', type: 'DOES', nps: 90, demand: 'med' },
+    { id: 'rel11', source: 'user1', target: 'Goal13', type: 'DOES', nps: -90, demand: 'low' },
     
     // Nurse relationships
-    { id: 'rel12', source: 'user2', target: 'Goal3', type: 'DOES', nps: 65 },
-    { id: 'rel13', source: 'user2', target: 'Goal5', type: 'DOES', nps: null },
-    { id: 'rel14', source: 'user2', target: 'Goal7', type: 'DOES', nps: 55 },
-    { id: 'rel15', source: 'user2', target: 'Goal8', type: 'DOES', nps: null },
-    { id: 'rel16', source: 'user2', target: 'Goal9', type: 'DOES', nps: 30 },
-    { id: 'rel17', source: 'user2', target: 'Goal10', type: 'DOES' },
-    { id: 'rel18', source: 'user2', target: 'Goal11', type: 'DOES', nps: -40 },
-    { id: 'rel19', source: 'user2', target: 'Goal13', type: 'DOES', nps: null },
+    { id: 'rel12', source: 'user2', target: 'Goal3', type: 'DOES', nps: 65, demand: 'high' },
+    { id: 'rel13', source: 'user2', target: 'Goal5', type: 'DOES', nps: null, demand: 'med' },
+    { id: 'rel14', source: 'user2', target: 'Goal7', type: 'DOES', nps: 55, demand: 'med' },
+    { id: 'rel15', source: 'user2', target: 'Goal8', type: 'DOES', nps: null, demand: 'high' },
+    { id: 'rel16', source: 'user2', target: 'Goal9', type: 'DOES', nps: 30, demand: 'high' },
+    { id: 'rel17', source: 'user2', target: 'Goal10', type: 'DOES', demand: 'low' },
+    { id: 'rel18', source: 'user2', target: 'Goal11', type: 'DOES', nps: -40, demand: 'med' },
+    { id: 'rel19', source: 'user2', target: 'Goal13', type: 'DOES', nps: null, demand: 'low' },
+    
+    // Admin relationships
+    { id: 'rel32', source: 'user3', target: 'Goal3', type: 'DOES', nps: 20, demand: 'med' },
+    { id: 'rel33', source: 'user3', target: 'Goal5', type: 'DOES', nps: 35, demand: 'high' },
+    { id: 'rel34', source: 'user3', target: 'Goal6', type: 'DOES', nps: -50, demand: 'low' },
+    { id: 'rel35', source: 'user3', target: 'Goal10', type: 'DOES', nps: 80, demand: 'high' },
+    { id: 'rel36', source: 'user3', target: 'Goal11', type: 'DOES', nps: 75, demand: 'med' },
+    { id: 'rel37', source: 'user3', target: 'Goal13', type: 'DOES', nps: 60, demand: 'med' },
+    { id: 'rel38', source: 'user3', target: 'Goal14', type: 'DOES', nps: 90, demand: 'high' },
     
     // Patient relationships
-    { id: 'rel20', source: 'user4', target: 'Goal6', type: 'DOES' },
-    { id: 'rel21', source: 'user4', target: 'Goal7', type: 'DOES', nps: null },
+    { id: 'rel39', source: 'user4', target: 'Goal6', type: 'DOES', nps: 40, demand: 'med' },
+    { id: 'rel40', source: 'user4', target: 'Goal14', type: 'DOES', nps: -30, demand: 'low' },
     
-    // Add missing relationships for Contact on duty doctor
-    { id: 'rel53', source: 'user2', target: 'Goal12', type: 'DOES', nps: -60 }, 
-    { id: 'rel54', source: 'Goal12', target: 'service19', type: 'DEPENDS_ON', nps: null }, 
-    { id: 'rel55', source: 'Goal12', target: 'service23', type: 'DEPENDS_ON', nps: null }, 
+    // Security Guard relationships
+    { id: 'rel41', source: 'user5', target: 'Goal11', type: 'DOES', nps: 85, demand: 'high' },
+    { id: 'rel42', source: 'user5', target: 'Goal13', type: 'DOES', nps: 70, demand: 'med' },
     
-    // Add missing relationships for Pay Invoice
-    { id: 'rel56', source: 'user4', target: 'Goal14', type: 'DOES', nps: -80 }, 
-    { id: 'rel57', source: 'user3', target: 'Goal14', type: 'DOES', nps: null }, 
-    { id: 'rel58', source: 'Goal14', target: 'service25', type: 'DEPENDS_ON', nps: null }, 
+    // Family Member relationships
+    { id: 'rel43', source: 'user6', target: 'Goal6', type: 'DOES', nps: 25, demand: 'low' },
     
-    // Connect Security Guard
-    { id: 'rel60', source: 'user5', target: 'Goal23', type: 'DOES', nps: 10 }, 
+    // Police relationships
+    { id: 'rel44', source: 'user7', target: 'Goal11', type: 'DOES', nps: 90, demand: 'low' },
     
-    // Connect Family Member
-    { id: 'rel61', source: 'user6', target: 'Goal23', type: 'DOES', nps: 50 }, 
-    
-    // Connect Police
-    { id: 'rel62', source: 'user7', target: 'Goal27', type: 'DOES', nps: -30 }, 
-    
-    // Connect Porter
-    { id: 'rel63', source: 'user8', target: 'Goal21', type: 'DOES', nps: 60 }, 
+    // Porter relationships
+    { id: 'rel45', source: 'user8', target: 'Goal5', type: 'DOES', nps: 45, demand: 'high' },
+    { id: 'rel46', source: 'user8', target: 'Goal13', type: 'DOES', nps: 80, demand: 'med' },
     
     // Connect Staff with unassigned Goals
-    { id: 'rel64', source: 'user9', target: 'Goal13', type: 'DOES', nps: -10 }, 
-    { id: 'rel65', source: 'user9', target: 'Goal22', type: 'DOES', nps: 70 }, 
+    { id: 'rel64', source: 'user9', target: 'Goal13', type: 'DOES', nps: -10, demand: 'med' }, 
+    { id: 'rel65', source: 'user9', target: 'Goal22', type: 'DOES', nps: 70, demand: 'high' },
     
     // Service dependencies for Find Patient
     { id: 'rel66', source: 'Goal3', target: 'service1', type: 'DEPENDS_ON' },

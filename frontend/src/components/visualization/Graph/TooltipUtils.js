@@ -5,13 +5,18 @@
  */
 export const generateTooltipContent = (node) => {
   let content = `<strong>${node.name}</strong><br/>`;
-  content += `<strong>Type:</strong> ${node.label}<br/>`;
 
   switch (node.label) {
     case 'Goal':
       if (node.complexity) {
         content += `<strong>Complexity Score:</strong> ${node.complexity.toFixed(1)}<br/>`;
         content += `<strong>NPS Score:</strong> ${node.npsScore}<br/>`;
+        if (node.demand) {
+          content += '<br/><strong>User Demand:</strong><br/>';
+          Object.entries(node.demand).forEach(([role, level]) => {
+            content += `&nbsp;&nbsp;${role}: <span class="demand-level demand-${level}">${level}</span><br/>`;
+          });
+        }
       }
       break;
     case 'Service':

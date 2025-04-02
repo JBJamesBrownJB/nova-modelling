@@ -9,4 +9,28 @@ export const tooltipStyles = `
     pointer-events: none;
     z-index: 1000;
   }
+
+  .demand-level {
+    font-weight: bold;
+  }
+
+  .demand-High {
+    color: #ff4d4d;
+  }
+
+  .demand-Medium {
+    color: #ffa64d;
+  }
+
+  .demand-Low {
+    color: #ffff4d;
+  }
+
+  .demand-none {
+    color: #cccccc;
+  }
+
+  .demand-unknown {
+    color: #808080;
+  }
 `;
