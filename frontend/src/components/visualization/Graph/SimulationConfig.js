@@ -60,7 +60,7 @@ const SIMULATION_CONFIG = {
         restartStrength: 0.1,          // Alpha value when restarting simulation
         nodeFixedDamping: 0.0,         // How strongly fixed nodes resist movement
         velocityDecay: 0.4,           // How quickly node velocity decays (lower = faster movement)
-        initialStabilizationSpeed: 0.12, // Initial alpha for faster initial layout (0-1)
+        initialStabilizationSpeed: 0.22, // Initial alpha for faster initial layout (0-1)
         fastCooling: {                // Fast cooling parameters for quick stabilization
             velocityDecay: 0.2,         // Lower value = faster movement during fast cooling
             alphaDecay: 0.6,           // Higher value = faster cooling

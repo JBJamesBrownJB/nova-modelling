@@ -2,7 +2,6 @@ import React, { useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import * as d3 from 'd3';
 import { COLORS } from '../../styles/colors';
-import { ICONS } from '../../styles/icons';
 import { showTooltip, hideTooltip } from './Graph/TooltipUtils';
 import { getNodeRadius } from './Graph/GraphUtils';
 import { goalNodeConfig, userNodeConfig, serviceNodeConfig } from './Graph/SimulationConfig';
@@ -194,7 +193,7 @@ function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
       .attr('width', d => Math.max(18, getNodeRadius(d)))
       .attr('height', d => Math.max(18, getNodeRadius(d)))
       .append('path')
-      .attr('d', ICONS.USER)
+      .attr('d', userNodeConfig.icon)
       // .attr('transform', d => `translate(${0}, ${0}) scale(${getNodeRadius(d)})`)
       .attr('transform', d => `translate(${NODE_CONSTANTS.BASE_RADIUS - 23}, ${NODE_CONSTANTS.BASE_RADIUS - 20}) scale(${getNodeRadius(d) / NODE_CONSTANTS.BASE_RADIUS})`)
       .attr('fill', d => d.npsScore ? d.npsColor : COLORS.NODE_USER_DEFAULT);
@@ -257,7 +256,7 @@ function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
       .attr('height', NODE_CONSTANTS.SERVICE_RADIUS * 3.5);
 
     svgElement.append('path')
-      .attr('d', ICONS.SERVICE)
+      .attr('d', serviceNodeConfig.icon)
       .attr('transform', `translate(${NODE_CONSTANTS.SERVICE_RADIUS}, ${NODE_CONSTANTS.SERVICE_RADIUS - 10}) scale(${NODE_CONSTANTS.SERVICE_RADIUS / 10})`)
       .attr('fill', d => {
         // Color based on status
@@ -277,7 +276,7 @@ function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
     // Add calendar icon for in-development services
     svgElement.filter(d => d.status === 'in_development')
       .append('path')
-      .attr('d', ICONS.PLANNING)
+      .attr('d', serviceNodeConfig.extraIcon)
       .attr('class', 'planning-icon')
       .attr('fill', 'none')
       .attr('stroke', COLORS.STATUS_IN_DEVELOPMENT_ICON)
