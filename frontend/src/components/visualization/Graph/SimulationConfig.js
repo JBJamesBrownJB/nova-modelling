@@ -19,13 +19,14 @@ const getServiceColor = (status) => {
     }
 };
 
+
 const SIMULATION_CONFIG = {
     // Base force parameters
     forces: {
         // Link forces - control how nodes are connected by links
         link: {
-            strength: 0.8,                // Base link strength (0-1), higher = more rigid connections
-            selectedMultiplier: 1.9,      // Multiplier for links connected to selected nodes
+            strength: 0.5,                // Base link strength (0-1), higher = more rigid connections
+            selectedMultiplier: 3.9,      // Multiplier for links connected to selected nodes
             distance: {
                 selected: 2.8                 // Link distance multiplier for selected connections
             }
@@ -54,15 +55,15 @@ const SIMULATION_CONFIG = {
 
     // Simulation behavior
     simulation: {
-        alphaDecay: 0.03,             // How quickly simulation cools down (higher = faster stabilization)
+        alphaDecay: 0.3,             // How quickly simulation cools down (higher = faster stabilization)
         alphaTarget: 0,                // Target cooling value (0 = complete stop)
         restartStrength: 0.1,          // Alpha value when restarting simulation
         nodeFixedDamping: 0.0,         // How strongly fixed nodes resist movement
         velocityDecay: 0.4,           // How quickly node velocity decays (lower = faster movement)
-        initialStabilizationSpeed: 0.012, // Initial alpha for faster initial layout (0-1)
+        initialStabilizationSpeed: 0.12, // Initial alpha for faster initial layout (0-1)
         fastCooling: {                // Fast cooling parameters for quick stabilization
             velocityDecay: 0.2,         // Lower value = faster movement during fast cooling
-            alphaDecay: 0.06,           // Higher value = faster cooling
+            alphaDecay: 0.6,           // Higher value = faster cooling
             iterations: 100             // Number of rapid iterations to run
         }
     },
