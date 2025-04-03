@@ -60,8 +60,8 @@ export const calculateLinkEdgePoints = (link, nodes, nodeRadiusCalculator) => {
   const sourceRadius = nodeRadiusCalculator(sourceNode);
 
   // Calculate ratios for edge points
-  const targetRatio = (distance - 3 - targetRadius) / distance;
-  const sourceRatio = sourceRadius / distance;
+  const targetRatio = (distance - targetRadius - 6) / distance;
+  const sourceRatio = (sourceRadius) / distance;
 
   // Calculate edge points
   return {
