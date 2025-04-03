@@ -53,8 +53,8 @@ export const COLORS = {
 };
 
 export const LINK_CONSTANTS = {
-  DOES:'#BBDEFB',  
-  DEPENDS_ON: '#E0E0E0'  
+  DOES:'#4361EE',  
+  DEPENDS_ON: '#BDBDBD' 
 };
 
 // Helper function to get NPS color based on score

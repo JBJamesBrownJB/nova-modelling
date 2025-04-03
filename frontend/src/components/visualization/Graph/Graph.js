@@ -40,8 +40,7 @@ const GraphContainer = styled.div`
     opacity: 0.3;
   }
 
-  .selected {
-    opacity: 1;
+  .nodes .selected {
     filter: drop-shadow(0 0 4px ${COLORS.GREY_600});
   }
 
@@ -100,8 +99,8 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
         .attr('refX', 0)
         .attr('refY', 0)
         .attr('orient', 'auto')
-        .attr('markerWidth', 3)
-        .attr('markerHeight', 2)
+        .attr('markerWidth', 5)
+        .attr('markerHeight', 5)
         .attr('xoverflow', 'visible')
         .append('svg:path')
         .attr('d', 'M 0,-5 L 10,0 L 0,5')
@@ -189,7 +188,7 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
     if (selectedNodes.includes(d.id)) {
       // Keep position fixed
     } else {
-      // Free non-selected nodes
+      // Allow other nodes to move freely
       d.fx = null;
       d.fy = null;
     }
@@ -232,12 +231,12 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
     // Add visible node
     if (nodeShape === 'circle') {
       groups.append('circle')
-        .attr('class', d => `circle-node ${selectedNodes.includes(d.id) ? 'selected' : 'unselected'}`)
+        .attr('class', d => `circle-node ${selectedNodes.length > 0 ? (selectedNodes.includes(d.id) ? 'selected' : 'unselected') : ''}`)
         .attr('r', d => getNodeRadius(d))
         .attr('fill', getNodeFill);
     } else if (nodeShape === 'path') {
       groups.append('path')
-        .attr('class', d => `${nodeType.toLowerCase()}-node ${selectedNodes.includes(d.id) ? 'selected' : 'unselected'}`)
+        .attr('class', d => `${nodeType.toLowerCase()}-node ${selectedNodes.length > 0 ? (selectedNodes.includes(d.id) ? 'selected' : 'unselected') : ''}`)
         .attr('d', icon)
         .attr('fill', getNodeFill)
         .attr('transform', 'translate(-12, -12)');
@@ -248,6 +247,7 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
       groups.filter(extraIconCondition)
         .append('path')
         .attr('class', nodeConfig.extraIconClass)
+        .attr('class', d => `${nodeConfig.extraIconClass} ${selectedNodes.length > 0 ? (selectedNodes.includes(d.id) ? 'selected' : 'unselected') : ''}`)
         .attr('d', nodeConfig.extraIcon)
         .attr('fill', nodeConfig.extraIconFill || 'none')
         .attr('stroke', nodeConfig.extraIconStroke || 'none')
@@ -503,10 +503,10 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
         });
 
       svg.call(zoom);
-      
+
       // Create a container for all graph elements that will be zoomed
       const container = svg.append('g');
-      
+
       // Restore previous zoom transformation if it exists
       if (currentZoom) {
         svg.call(zoom.transform, currentZoom);
@@ -560,7 +560,7 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
         .selectAll('text')
         .data(data.nodes)
         .enter().append('text')
-        .attr('class', d => `node-label ${selectedNodes.includes(d.id) ? 'selected' : 'unselected'}`)
+        .attr('class', d => `node-label ${selectedNodes.length > 0 ? (selectedNodes.includes(d.id) ? 'selected' : 'unselected') : ''}`)
         .text(d => {
           // Truncate long Goal node names
           if (d.label === 'Goal' && d.name.length > NODE_CONSTANTS.LABEL_TRUNCATE_LENGTH) {
@@ -569,12 +569,16 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
           return d.name;
         });
 
+      // Add links
       const link = container.append('g')
-        .attr('class', 'links')
         .selectAll('line')
         .data(data.links)
         .enter().append('line')
+        .attr('class', d => `link ${selectedNodes.length > 0 ? (selectedNodes.includes(d.source.id) && selectedNodes.includes(d.target.id) ? 'selected' : 'unselected') : ''}`)
         .attr('stroke', d => LINK_CONSTANTS[d.type] || '#999')
+        .attr('stroke-opacity', d => selectedNodes.length > 0 ?
+          (selectedNodes.includes(d.source.id) || selectedNodes.includes(d.target.id) ? 1 : 0.3)
+          : 1)
         .attr('marker-end', d => `url(#arrowhead-${d.type})`);
 
       // Update link positions with edge point calculations
@@ -638,6 +642,15 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
       // Update simulation on selection changes
       updateSimulationOnSelection(simulation, selectedNodes, prevSelectedNodesRef.current, width, height);
       prevSelectedNodesRef.current = selectedNodes;
+
+      // Update link opacity when selection changes
+      if (selectedNodes.length > 0) {
+        link.attr('stroke-opacity', d =>
+          selectedNodes.includes(d.source.id) || selectedNodes.includes(d.target.id) ? 1 : 0.3
+        );
+      } else {
+        link.attr('stroke-opacity', 1);
+      }
     }, 300); // Wait 300ms for transition to complete
 
   }, [data, selectedNodes, onNodeSelect]);
@@ -646,56 +659,6 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         onNodeSelect([]);  // This will trigger updateSimulationOnSelection with empty selection
-      }
-
-      // Preview neighboring nodes with 'S' key (second-hop preview)
-      if (event.key === 's' || event.key === 'S') {
-        // Find second-hop nodes if we have selection
-        if (selectedNodes.length > 0) {
-          const secondaryNodeIds = new Set();
-          const secondaryLinkIds = new Set();
-
-          // First get direct connections (first hop)
-          const firstHopNodeIds = new Set();
-
-          data.links.forEach(link => {
-            const sourceId = getNodeId(link.source);
-            const targetId = getNodeId(link.target);
-
-            if (selectedNodes.includes(sourceId)) firstHopNodeIds.add(targetId);
-            if (selectedNodes.includes(targetId)) firstHopNodeIds.add(sourceId);
-          });
-
-          // Then get second hop connections
-          data.links.forEach(link => {
-            const sourceId = getNodeId(link.source);
-            const targetId = getNodeId(link.target);
-
-            if (firstHopNodeIds.has(sourceId) && !selectedNodes.includes(targetId)) {
-              secondaryNodeIds.add(targetId);
-              secondaryLinkIds.add(`${sourceId}-${targetId}`);
-            }
-            if (firstHopNodeIds.has(targetId) && !selectedNodes.includes(sourceId)) {
-              secondaryNodeIds.add(sourceId);
-              secondaryLinkIds.add(`${sourceId}-${targetId}`);
-            }
-          });
-
-          // Show the secondary nodes/links with reduced opacity
-          d3.selectAll('.nodes > g')
-            .filter(d => secondaryNodeIds.has(d.id))
-            .classed('secondary-node', true)
-            .attr('hidden', null);
-
-          d3.selectAll('.links line')
-            .filter(d => {
-              const sourceId = getNodeId(d.source);
-              const targetId = getNodeId(d.target);
-              return secondaryLinkIds.has(`${sourceId}-${targetId}`) || secondaryLinkIds.has(`${targetId}-${sourceId}`);
-            })
-            .classed('secondary-link', true)
-            .attr('hidden', null);
-        }
       }
     };
 
