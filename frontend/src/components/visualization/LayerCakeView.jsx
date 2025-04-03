@@ -83,6 +83,11 @@ const LayerCakeContainer = styled.div`
       filter: drop-shadow(0 0 4px ${COLORS.GREY_600});
   }
   
+  .unselected {
+    opacity: 0.2;
+    filter: grayscale(100%);
+  }
+  
   .node-label {
     position: relative;
     margin-top: 4px;
@@ -106,6 +111,30 @@ function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
 
   // Helper to check if a node is selected
   const isNodeSelected = (nodeId) => selectedNodes.includes(nodeId);
+
+  // Helper to check if a node is connected to any selected node
+  const isConnectedToSelected = (nodeId) => {
+    if (selectedNodes.length === 0) return true;
+    if (isNodeSelected(nodeId)) return true;
+    
+    // Check if this node has any connection to selected nodes
+    return data.links.some(link => {
+      const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+      const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+      return (sourceId === nodeId && isNodeSelected(targetId)) ||
+             (targetId === nodeId && isNodeSelected(sourceId));
+    });
+  };
+
+  // Helper to get node classes based on selection and connection state
+  const getNodeClasses = (nodeType, nodeId) => {
+    const baseClass = `node ${nodeType}-node`;
+    if (selectedNodes.length === 0) return baseClass;
+    
+    if (isNodeSelected(nodeId)) return `${baseClass} node-selected`;
+    if (isConnectedToSelected(nodeId)) return baseClass;
+    return `${baseClass} unselected`;
+  };
 
   useEffect(() => {
     // Create layers
@@ -167,7 +196,7 @@ function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
       .data(nodes)
       .enter()
       .append('div')
-      .attr('class', d => `node user-node ${isNodeSelected(d.id) ? 'node-selected' : ''}`)
+      .attr('class', d => getNodeClasses('user', d.id))
       .on('click', (event, d) => handleNodeClick(event, d))
       .on('mouseover', (event, d) => {
         showTooltip(tooltipRef.current, event, d);
@@ -182,7 +211,6 @@ function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
       .attr('height', d => Math.max(18, getNodeRadius(d)))
       .append('path')
       .attr('d', userNodeConfig.icon)
-      // .attr('transform', d => `translate(${0}, ${0}) scale(${getNodeRadius(d)})`)
       .attr('transform', d => `translate(${NODE_CONSTANTS.BASE_RADIUS - 23}, ${NODE_CONSTANTS.BASE_RADIUS - 20}) scale(${getNodeRadius(d) / NODE_CONSTANTS.BASE_RADIUS})`)
       .attr('fill', d => d.npsScore ? d.npsColor : COLORS.NODE_USER_DEFAULT);
 
@@ -198,7 +226,7 @@ function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
       .data(nodes)
       .enter()
       .append('div')
-      .attr('class', d => `node goal-node ${isNodeSelected(d.id) ? 'node-selected' : ''}`)
+      .attr('class', d => getNodeClasses('goal', d.id))
       .on('click', (event, d) => handleNodeClick(event, d))
       .on('mouseover', (event, d) => {
         showTooltip(tooltipRef.current, event, d);
@@ -229,7 +257,7 @@ function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
       .data(nodes)
       .enter()
       .append('div')
-      .attr('class', d => `node service-node ${isNodeSelected(d.id) ? 'node-selected' : ''}`)
+      .attr('class', d => getNodeClasses('service', d.id))
       .on('click', (event, d) => handleNodeClick(event, d))
       .on('mouseover', (event, d) => {
         showTooltip(tooltipRef.current, event, d);

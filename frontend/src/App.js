@@ -81,10 +81,10 @@ function App() {
       try {
         // Get raw data
         const rawData = await dbService.getGraph();
-        
+
         // Process data using the enhancement service
         const enhancedData = enhanceGraphData(rawData);
-        
+
         console.log('Initial graph data loaded:', enhancedData);
         setGraphData(enhancedData);
       } catch (error) {
@@ -138,13 +138,11 @@ function App() {
   const getVisibleData = () => {
     if (activeTab === 'progress') {
       // For LayerCake view: show all nodes by default
-      if (selectedNodes.length === 0) {
-        return graphData;
-      }
+      return graphData;
     } else if (activeTab === 'explore') {
       // For Graph view: show only Goal and User nodes when nothing is selected
       if (selectedNodes.length === 0) {
-        const filteredNodes = graphData.nodes.filter(node => 
+        const filteredNodes = graphData.nodes.filter(node =>
           node.label === 'Goal' || node.label === 'User'
         );
         return {
@@ -153,14 +151,14 @@ function App() {
         };
       }
     }
-  
+
     // When nodes are selected (for both views)
     const relevantLinks = graphData.links.filter(link => {
       const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
       const targetId = typeof link.target === 'object' ? link.target.id : link.target;
       return selectedNodes.includes(sourceId) || selectedNodes.includes(targetId);
     });
-  
+
     const connectedIds = new Set([
       ...selectedNodes,
       ...relevantLinks.map(link => {
@@ -170,7 +168,7 @@ function App() {
         return typeof link.target === 'object' ? link.target.id : link.target;
       })
     ]);
-  
+
     return {
       nodes: graphData.nodes.filter(node => connectedIds.has(node.id)),
       links: relevantLinks
@@ -186,10 +184,10 @@ function App() {
     try {
       await dbService.addNode(nodeType, properties);
       const updatedData = await dbService.getGraph();
-      
+
       // Process the updated data using the enhancement service
       const enhancedData = enhanceGraphData(updatedData);
-      
+
       setGraphData(enhancedData);
       setShowNodeForm(false);
       toast.success(`${nodeType} node added successfully`);
