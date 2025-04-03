@@ -147,12 +147,12 @@ export const calculateAggregateNps = (nodeId, links, connectionPoint = 'target',
 
   if (edgesWithNps.length === 0) return null; // No NPS data at all
 
-  const npsSum = relevantEdges.reduce((sum, link) => {
+  const npsSum = edgesWithNps.reduce((sum, link) => {
     const npsValue = link.nps !== undefined && link.nps !== null ? link.nps : 0;
     return sum + npsValue;
   }, 0);
 
-  return Math.round(npsSum / relevantEdges.length);
+  return Math.round(npsSum / edgesWithNps.length);
 };
 
 export const calculateUserNps = (userId, links) => {
@@ -161,7 +161,7 @@ export const calculateUserNps = (userId, links) => {
 
 export const calculateNodeComplexity = (node, links, nodes) => {
   if (node.label !== 'Goal') {
-    return 0;
+    return null;
   }
 
   const dependencyCount = countServiceDependencies(node, links, nodes);

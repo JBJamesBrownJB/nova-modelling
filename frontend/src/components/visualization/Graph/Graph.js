@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import * as d3 from 'd3';
 import { showTooltip, hideTooltip } from './TooltipUtils';
 import { calculateLinkEdgePoints, getNodeRadius } from './GraphUtils';
-import { COLORS, LINK_CONSTANTS } from '../../../styles/colors';
+import { COLORS, getNpsColor, LINK_CONSTANTS } from '../../../styles/colors';
 import { SIMULATION_CONFIG, goalNodeConfig, userNodeConfig, serviceNodeConfig } from './SimulationConfig';
 import { NODE_CONSTANTS } from '../shared/constants/nodeConstants';
 import { tooltipStyles } from '../../../styles/tooltips';
@@ -92,9 +92,11 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
   const setupArrowMarkers = (container) => {
     const defs = container.append('defs');
 
-    Object.entries(LINK_CONSTANTS).forEach(([type, color]) => {
+    // Create markers for each link with its specific color
+    data.links.forEach((link, i) => {
+      const color = link.nps ? getNpsColor(link.nps) : LINK_CONSTANTS[link.type];
       defs.append('marker')
-        .attr('id', `arrowhead-${type}`)
+        .attr('id', `arrowhead-${link.source.id}-${link.target.id}`)
         .attr('viewBox', '0 -5 10 10')
         .attr('refX', 0)
         .attr('refY', 0)
@@ -575,11 +577,38 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
         .data(data.links)
         .enter().append('line')
         .attr('class', d => `link ${selectedNodes.length > 0 ? (selectedNodes.includes(d.source.id) && selectedNodes.includes(d.target.id) ? 'selected' : 'unselected') : ''}`)
-        .attr('stroke', d => LINK_CONSTANTS[d.type] || '#999')
+        .attr('stroke', d => d.nps ? getNpsColor(d.nps) : '#999')
         .attr('stroke-opacity', d => selectedNodes.length > 0 ?
           (selectedNodes.includes(d.source.id) || selectedNodes.includes(d.target.id) ? 1 : 0.3)
           : 1)
-        .attr('marker-end', d => `url(#arrowhead-${d.type})`);
+        .attr('marker-end', d => `url(#arrowhead-${d.source.id}-${d.target.id})`);
+
+      // Add NPS score labels for DOES relationships
+      // First add a background pill/capsule for each label
+      const linkLabelBackgrounds = container.append('g')
+        .attr('class', 'link-label-backgrounds')
+        .selectAll('rect')
+        .data(data.links.filter(d => d.type === 'DOES' && d.nps !== undefined && d.nps !== null))
+        .enter().append('rect')
+        .attr('rx', 10)
+        .attr('ry', 10)
+        .attr('height', 15)
+        .attr('fill', COLORS.BACKGROUND)
+        .attr('class', d => `link-label-bg ${selectedNodes.length > 0 ? (selectedNodes.includes(d.source.id) && selectedNodes.includes(d.target.id) ? 'selected' : 'unselected') : ''}`);
+      
+      // Then add the text labels
+      const linkLabels = container.append('g')
+        .attr('class', 'link-labels')
+        .selectAll('text')
+        .data(data.links.filter(d => d.type === 'DOES' && d.nps !== undefined && d.nps !== null))
+        .enter().append('text')
+        .attr('class', d => `link-label ${selectedNodes.length > 0 ? (selectedNodes.includes(d.source.id) && selectedNodes.includes(d.target.id) ? 'selected' : 'unselected') : ''}`)
+        .text(d => `nps ${d.nps}`)
+        .attr('font-size', '10px')
+        .attr('fill', d => getNpsColor(d.nps))
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .attr('pointer-events', 'none');
 
       // Update link positions with edge point calculations
       const updateLinkPositions = () => {
@@ -598,6 +627,49 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
           .attr('y1', d => d.sourceEdgeY || d.source.y)
           .attr('x2', d => d.targetEdgeX || d.target.x)
           .attr('y2', d => d.targetEdgeY || d.target.y);
+
+        // Update position of link labels
+        // First create a temporary hidden element to measure text width
+        const tempText = container.append('text')
+          .attr('font-size', '10px')
+          .style('visibility', 'hidden');
+        
+        linkLabels.each(function(d, i) {
+          if (!d.sourceEdgeX || !d.targetEdgeX) return;
+          
+          // Calculate midpoint of the line
+          const midX = (d.sourceEdgeX + d.targetEdgeX) / 2;
+          const midY = (d.sourceEdgeY + d.targetEdgeY) / 2;
+          
+          // Calculate angle of the line
+          const dx = d.targetEdgeX - d.sourceEdgeX;
+          const dy = d.targetEdgeY - d.sourceEdgeY;
+          const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+          
+          // Measure text to properly size the background
+          const labelText = d3.select(this).text();
+          tempText.text(labelText);
+          const textWidth = tempText.node().getComputedTextLength() + 9; // Add padding
+          
+          // Get the background element
+          const bgElement = d3.select(linkLabelBackgrounds.nodes()[i]);
+          
+          // Update background size and position
+          bgElement
+            .attr('width', textWidth)
+            .attr('x', midX - textWidth/2)
+            .attr('y', midY - 8)
+            .attr('transform', `rotate(${angle}, ${midX}, ${midY})`);
+          
+          // Apply rotation and position to the text
+          d3.select(this)
+            .attr('x', midX)
+            .attr('y', midY)
+            .attr('transform', `rotate(${angle}, ${midX}, ${midY})`);
+        });
+        
+        // Remove the temporary text element
+        tempText.remove();
       };
 
       // Update node positions with appropriate transforms

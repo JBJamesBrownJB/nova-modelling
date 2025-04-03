@@ -49,12 +49,12 @@ export const COLORS = {
   
   // Node type colors
   NODE_USER_DEFAULT: '#D4C4BC',
-  NODE_GOAL_DEFAULT: '#BBDEFB',         // Blue 100
+  NODE_GOAL_DEFAULT: '#BBDEFB',     
 };
 
 export const LINK_CONSTANTS = {
-  DOES:'#4361EE',  
-  DEPENDS_ON: '#BDBDBD' 
+  DOES:COLORS.GREEN_200,  
+  DEPENDS_ON:COLORS.GREY_400 
 };
 
 // Helper function to get NPS color based on score
@@ -67,6 +67,6 @@ export const getNpsColor = (score, nodeType) => {
   } 
   if (score >= 70) return COLORS.NPS_EXCELLENT;
   if (score >= 30) return COLORS.NPS_GOOD;
-  if (score >= 0) return COLORS.NPS_NEUTRAL;
-  return COLORS.NPS_LOW;
+  if (score >= 0) return COLORS.NPS_LOW;
+  return COLORS.NPS_BAD;
 };
