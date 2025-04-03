@@ -3,9 +3,9 @@ import styled from 'styled-components';
 import * as d3 from 'd3';
 import { showTooltip, hideTooltip } from './TooltipUtils';
 import { calculateLinkEdgePoints, getNodeRadius } from './GraphUtils';
-import { COLORS } from '../../../styles/colors';
+import { COLORS, LINK_CONSTANTS } from '../../../styles/colors';
 import { SIMULATION_CONFIG, goalNodeConfig, userNodeConfig, serviceNodeConfig } from './SimulationConfig';
-import { NODE_CONSTANTS, LINK_CONSTANTS } from '../shared/constants/nodeConstants';
+import { NODE_CONSTANTS } from '../shared/constants/nodeConstants';
 import { tooltipStyles } from '../../../styles/tooltips';
 
 const GraphContainer = styled.div`
@@ -35,8 +35,13 @@ const GraphContainer = styled.div`
     fill: #333;
     font-weight: 500;
   }
-  
-  .selected-node {
+
+  .unselected {
+    opacity: 0.3;
+  }
+
+  .selected {
+    opacity: 1;
     filter: drop-shadow(0 0 4px ${COLORS.GREY_600});
   }
 
@@ -227,12 +232,12 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
     // Add visible node
     if (nodeShape === 'circle') {
       groups.append('circle')
-        .attr('class', d => `circle-node ${selectedNodes.includes(d.id) ? 'selected-node' : ''}`)
+        .attr('class', d => `circle-node ${selectedNodes.includes(d.id) ? 'selected' : 'unselected'}`)
         .attr('r', d => getNodeRadius(d))
         .attr('fill', getNodeFill);
     } else if (nodeShape === 'path') {
       groups.append('path')
-        .attr('class', d => `${nodeType.toLowerCase()}-node ${selectedNodes.includes(d.id) ? 'selected-node' : ''}`)
+        .attr('class', d => `${nodeType.toLowerCase()}-node ${selectedNodes.includes(d.id) ? 'selected' : 'unselected'}`)
         .attr('d', icon)
         .attr('fill', getNodeFill)
         .attr('transform', 'translate(-12, -12)');
@@ -555,7 +560,7 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
         .selectAll('text')
         .data(data.nodes)
         .enter().append('text')
-        .attr('class', 'node-label')
+        .attr('class', d => `node-label ${selectedNodes.includes(d.id) ? 'selected' : 'unselected'}`)
         .text(d => {
           // Truncate long Goal node names
           if (d.label === 'Goal' && d.name.length > NODE_CONSTANTS.LABEL_TRUNCATE_LENGTH) {

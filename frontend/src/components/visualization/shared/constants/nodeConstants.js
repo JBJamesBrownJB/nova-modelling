@@ -16,8 +16,3 @@ export const NODE_CONSTANTS = {
   SELECTION_STROKE_WIDTH: 2,
   LABEL_TRUNCATE_LENGTH: 20
 };
-
-export const LINK_CONSTANTS = {
-  DOES: '#ECB5C9',   // Pink
-  DEPENDS_ON: '#F16667'  // Red
-};

@@ -50,10 +50,11 @@ export const COLORS = {
   // Node type colors
   NODE_USER_DEFAULT: '#D4C4BC',
   NODE_GOAL_DEFAULT: '#BBDEFB',         // Blue 100
-  
-  // Edge colors
-  EDGE_DOES: '#F8BBD0',         // Pink 100
-  EDGE_DEPENDS: '#FFCDD2',      // Red 100
+};
+
+export const LINK_CONSTANTS = {
+  DOES:'#BBDEFB',  
+  DEPENDS_ON: '#E0E0E0'  
 };
 
 // Helper function to get NPS color based on score
