@@ -58,6 +58,8 @@ const GraphContainer = styled.div`
 
 function Graph({ data, selectedNodes, onNodeSelect }) {
   const svgRef = useRef(null);
+  const containerRef = useRef({ width: 0, height: 0 });
+
   // Utility functions for node and link ID handling
   const getNodeId = node => typeof node === 'object' ? node.id : node;
 
@@ -107,7 +109,9 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
   const dragState = {
     dragStartTime: 0,
     isDragging: false,
-    initialDragDone: false
+    dragThreshold: 3, // pixels of movement needed to consider it a drag
+    dragStartPosition: { x: 0, y: 0 },
+    simulation: null
   };
 
   const handleNodeClick = (event, node, simulation) => {
@@ -129,52 +133,65 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
 
   // Drag event handlers
   const dragstarted = (event, d, simulation) => {
+    // Track that we're starting a potential drag
     dragState.dragStartTime = Date.now();
     dragState.isDragging = false;
-    dragState.initialDragDone = false;
+    dragState.dragStartPosition = { x: event.x, y: event.y };
+    dragState.simulation = simulation;
 
     // Start with node fixed at its current position
     d.fx = d.x;
     d.fy = d.y;
 
-    if (!event.active) {
-      simulation.alphaTarget(0.3).restart();
+    // Stop simulation immediately
+    if (simulation) {
+      simulation.stop();
     }
   };
 
   const dragged = (event, d) => {
-    const timeSinceStart = Date.now() - dragState.dragStartTime;
+    // Calculate distance moved
+    const dx = event.x - dragState.dragStartPosition.x;
+    const dy = event.y - dragState.dragStartPosition.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
 
-    // Wait for delay before allowing drag
-    if (!dragState.initialDragDone && timeSinceStart > SIMULATION_CONFIG.timing.dragInitiationDelay) {
-      dragState.initialDragDone = true;
+    // If we've moved past the threshold, it's definitely a drag
+    if (!dragState.isDragging && distance > dragState.dragThreshold) {
       dragState.isDragging = true;
     }
 
-    // Only update position if we're past the initial delay
-    if (dragState.initialDragDone) {
-      d.fx = event.x;
-      d.fy = event.y;
+    // Update position
+    d.fx = event.x;
+    d.fy = event.y;
+
+    // Only restart simulation if we're definitely dragging
+    if (dragState.isDragging && dragState.simulation) {
+      dragState.simulation.alpha(0.3).restart(); // Use a moderate alpha for smooth movement
     }
   };
 
   const dragended = (event, d, simulation) => {
-    // If we never started dragging, treat it as a click
-    if (!dragState.isDragging) {
+    // If we never actually dragged, treat it as a click
+    if (!dragState.isDragging && event.sourceEvent) {
       handleNodeClick(event.sourceEvent, d, simulation);
       return;
     }
 
     // Reset drag state
     dragState.isDragging = false;
-    dragState.initialDragDone = false;
 
-    // Free the node and let it settle
-    d.fx = null;
-    d.fy = null;
+    // Keep selected nodes fixed
+    if (selectedNodes.includes(d.id)) {
+      // Keep position fixed
+    } else {
+      // Free non-selected nodes
+      d.fx = null;
+      d.fy = null;
+    }
 
-    if (!event.active) {
-      simulation.alphaTarget(0);
+    // Cool down the simulation gently
+    if (simulation) {
+      simulation.alpha(0.1).alphaTarget(0);
     }
   };
 
@@ -274,11 +291,9 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
   const prevSelectedNodesRef = useRef([]);
 
   // Update the simulation when nodes are selected to maintain stable positions
-  const updateSimulationOnSelection = (simulation, currentSelectedNodes, previousSelectedNodes) => {
-    // Don't do anything if the simulation isn't initialized yet
+  const updateSimulationOnSelection = (simulation, currentSelectedNodes, previousSelectedNodes, width, height) => {
     if (!simulation) return;
 
-    // Only apply when selection changes
     if (JSON.stringify(currentSelectedNodes) !== JSON.stringify(previousSelectedNodes)) {
       // Stop the current simulation
       simulation.stop();
@@ -286,17 +301,32 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
       // Fix positions of newly selected nodes and free previously selected ones
       simulation.nodes().forEach(node => {
         if (currentSelectedNodes.includes(node.id)) {
-          // Fix this node in place
           node.fx = node.x;
           node.fy = node.y;
-        } else if (previousSelectedNodes && previousSelectedNodes.includes(node.id)) {
-          // Free previously selected nodes
+        } else {
+          // Free ALL non-selected nodes
           node.fx = null;
           node.fy = null;
         }
       });
 
-      // Store original simulation parameters
+      // If no nodes are selected, reset forces to create spherical layout
+      if (currentSelectedNodes.length === 0) {
+        simulation
+          .force('charge', d3.forceManyBody().strength(SIMULATION_CONFIG.forces.charge.strength))
+          .force('collision', d3.forceCollide().radius(d => getNodeRadius(d) * SIMULATION_CONFIG.forces.collision.radiusMultiplier).strength(SIMULATION_CONFIG.forces.collision.strength))
+          .force('x', d3.forceX(width / 2).strength(SIMULATION_CONFIG.forces.positioning.strength))
+          .force('y', d3.forceY(height / 2).strength(SIMULATION_CONFIG.forces.positioning.strength));
+
+        simulation
+          .alpha(1)
+          .alphaTarget(SIMULATION_CONFIG.simulation.alphaTarget)
+          .velocityDecay(SIMULATION_CONFIG.simulation.velocityDecay)
+          .restart();
+        return;
+      }
+
+      // Store original parameters
       const originalVelocityDecay = simulation.velocityDecay();
       const originalAlphaDecay = simulation.alphaDecay();
 
@@ -335,7 +365,7 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
         const baseDistance = 50;
         return baseDistance * (isLinkSelected(d, selectedNodes) ?
           SIMULATION_CONFIG.forces.link.distance.selected :
-          SIMULATION_CONFIG.forces.link.distance.base);
+          1);
       })
       .strength(d => {
         // Stronger links for connections to selected nodes
@@ -398,10 +428,6 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
       // but allowing them to expand into available space
       simulation.force('x', d3.forceX(width / 2).strength(SIMULATION_CONFIG.forces.positioning.minStrength));
       simulation.force('y', d3.forceY(height / 2).strength(SIMULATION_CONFIG.forces.positioning.minStrength));
-
-      // We don't need a radial force anymore since we're using fixed positions
-      // for selected nodes and stronger repulsion to push connected nodes outward
-      simulation.force('radial', null);
     }
 
     // Use a lower alpha decay to reduce jiggling
@@ -411,82 +437,6 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
 
     return simulation;
   };
-
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        onNodeSelect([]);
-      }
-
-      // Preview neighboring nodes with 'S' key (second-hop preview)
-      if (event.key === 's' || event.key === 'S') {
-        // Find second-hop nodes if we have selection
-        if (selectedNodes.length > 0) {
-          const secondaryNodeIds = new Set();
-          const secondaryLinkIds = new Set();
-
-          // First get direct connections (first hop)
-          const firstHopNodeIds = new Set();
-
-          data.links.forEach(link => {
-            const sourceId = getNodeId(link.source);
-            const targetId = getNodeId(link.target);
-
-            if (selectedNodes.includes(sourceId)) firstHopNodeIds.add(targetId);
-            if (selectedNodes.includes(targetId)) firstHopNodeIds.add(sourceId);
-          });
-
-          // Then get second hop connections
-          data.links.forEach(link => {
-            const sourceId = getNodeId(link.source);
-            const targetId = getNodeId(link.target);
-
-            if (firstHopNodeIds.has(sourceId) && !selectedNodes.includes(targetId)) {
-              secondaryNodeIds.add(targetId);
-              secondaryLinkIds.add(`${sourceId}-${targetId}`);
-            }
-            if (firstHopNodeIds.has(targetId) && !selectedNodes.includes(sourceId)) {
-              secondaryNodeIds.add(sourceId);
-              secondaryLinkIds.add(`${sourceId}-${targetId}`);
-            }
-          });
-
-          // Show the secondary nodes/links with reduced opacity
-          d3.selectAll('.nodes > g')
-            .filter(d => secondaryNodeIds.has(d.id))
-            .classed('secondary-node', true)
-            .attr('hidden', null);
-
-          d3.selectAll('.links line')
-            .filter(d => {
-              const sourceId = getNodeId(d.source);
-              const targetId = getNodeId(d.target);
-              return secondaryLinkIds.has(`${sourceId}-${targetId}`) || secondaryLinkIds.has(`${targetId}-${sourceId}`);
-            })
-            .classed('secondary-link', true)
-            .attr('hidden', null);
-        }
-      }
-    };
-
-    const handleKeyUp = (event) => {
-      // Hide second-hop nodes when 'S' key is released
-      if (event.key === 's' || event.key === 'S') {
-        d3.selectAll('.secondary-node').attr('hidden', 'true');
-        d3.selectAll('.secondary-link').attr('hidden', 'true');
-      }
-    };
-
-    // Add keyboard listeners
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-
-    // Cleanup
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-    };
-  }, [onNodeSelect, selectedNodes, data]);
 
   useEffect(() => {
     if (!data || !data.nodes || !data.links) {
@@ -517,6 +467,17 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
       .filter(d => !currentNodes.has(d.id))
       .classed('fading', true);
 
+    // Store current zoom transform before redrawing
+    let currentZoom;
+    try {
+      const svgNode = d3.select(svgRef.current).select('svg').node();
+      if (svgNode) {
+        currentZoom = d3.zoomTransform(svgNode);
+      }
+    } catch (e) {
+      console.log('No existing zoom transform found');
+    }
+
     // Wait for transition to complete before removing elements
     setTimeout(() => {
       d3.select(svgRef.current).selectAll('*').remove();
@@ -537,9 +498,14 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
         });
 
       svg.call(zoom);
-
+      
       // Create a container for all graph elements that will be zoomed
       const container = svg.append('g');
+      
+      // Restore previous zoom transformation if it exists
+      if (currentZoom) {
+        svg.call(zoom.transform, currentZoom);
+      }
 
       setupArrowMarkers(container);
 
@@ -665,11 +631,87 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
       });
 
       // Update simulation on selection changes
-      updateSimulationOnSelection(simulation, selectedNodes, prevSelectedNodesRef.current);
+      updateSimulationOnSelection(simulation, selectedNodes, prevSelectedNodesRef.current, width, height);
       prevSelectedNodesRef.current = selectedNodes;
     }, 300); // Wait 300ms for transition to complete
 
   }, [data, selectedNodes, onNodeSelect]);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        onNodeSelect([]);  // This will trigger updateSimulationOnSelection with empty selection
+      }
+
+      // Preview neighboring nodes with 'S' key (second-hop preview)
+      if (event.key === 's' || event.key === 'S') {
+        // Find second-hop nodes if we have selection
+        if (selectedNodes.length > 0) {
+          const secondaryNodeIds = new Set();
+          const secondaryLinkIds = new Set();
+
+          // First get direct connections (first hop)
+          const firstHopNodeIds = new Set();
+
+          data.links.forEach(link => {
+            const sourceId = getNodeId(link.source);
+            const targetId = getNodeId(link.target);
+
+            if (selectedNodes.includes(sourceId)) firstHopNodeIds.add(targetId);
+            if (selectedNodes.includes(targetId)) firstHopNodeIds.add(sourceId);
+          });
+
+          // Then get second hop connections
+          data.links.forEach(link => {
+            const sourceId = getNodeId(link.source);
+            const targetId = getNodeId(link.target);
+
+            if (firstHopNodeIds.has(sourceId) && !selectedNodes.includes(targetId)) {
+              secondaryNodeIds.add(targetId);
+              secondaryLinkIds.add(`${sourceId}-${targetId}`);
+            }
+            if (firstHopNodeIds.has(targetId) && !selectedNodes.includes(sourceId)) {
+              secondaryNodeIds.add(sourceId);
+              secondaryLinkIds.add(`${sourceId}-${targetId}`);
+            }
+          });
+
+          // Show the secondary nodes/links with reduced opacity
+          d3.selectAll('.nodes > g')
+            .filter(d => secondaryNodeIds.has(d.id))
+            .classed('secondary-node', true)
+            .attr('hidden', null);
+
+          d3.selectAll('.links line')
+            .filter(d => {
+              const sourceId = getNodeId(d.source);
+              const targetId = getNodeId(d.target);
+              return secondaryLinkIds.has(`${sourceId}-${targetId}`) || secondaryLinkIds.has(`${targetId}-${sourceId}`);
+            })
+            .classed('secondary-link', true)
+            .attr('hidden', null);
+        }
+      }
+    };
+
+    const handleKeyUp = (event) => {
+      // Hide second-hop nodes when 'S' key is released
+      if (event.key === 's' || event.key === 'S') {
+        d3.selectAll('.secondary-node').attr('hidden', 'true');
+        d3.selectAll('.secondary-link').attr('hidden', 'true');
+      }
+    };
+
+    // Add keyboard listeners
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [onNodeSelect, selectedNodes, data]);
 
   return (
     <GraphContainer ref={svgRef}>
