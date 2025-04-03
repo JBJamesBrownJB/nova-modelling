@@ -64,7 +64,7 @@ const SIMULATION_CONFIG = {
         fastCooling: {                // Fast cooling parameters for quick stabilization
             velocityDecay: 0.2,         // Lower value = faster movement during fast cooling
             alphaDecay: 0.6,           // Higher value = faster cooling
-            iterations: 100             // Number of rapid iterations to run
+            iterations: 10             // Number of rapid iterations to run
         }
     },
 
