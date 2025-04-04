@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import * as d3 from 'd3';
 import { showTooltip, hideTooltip } from '../shared/utils/tooltipUtils';
 import { calculateLinkEdgePoints } from './GraphUtils';
+import { getConnectedNodes, isNodeSelected, isLinkSelected } from '../shared/utils/nodeConnectionUtils';
 import { getNodeRadius } from '../../../services/visualization/VisualizationUtils';
 import { COLORS, getNpsColor, LINK_CONSTANTS } from '../../../styles/colors';
 import { SIMULATION_CONFIG, goalNodeConfig, userNodeConfig, serviceNodeConfig } from './SimulationConfig';
@@ -63,32 +64,6 @@ const GraphContainer = styled.div`
 
 function Graph({ data, selectedNodes, onNodeSelect }) {
   const svgRef = useRef(null);
-  const containerRef = useRef({ width: 0, height: 0 });
-
-  // Utility functions for node and link ID handling
-  const getNodeId = node => typeof node === 'object' ? node.id : node;
-
-  const getConnectedNodes = (links, selectedNodes) => {
-    const connectedNodeIds = new Set(selectedNodes);
-
-    links.forEach(link => {
-      const sourceId = getNodeId(link.source);
-      const targetId = getNodeId(link.target);
-
-      if (selectedNodes.includes(sourceId)) connectedNodeIds.add(targetId);
-      if (selectedNodes.includes(targetId)) connectedNodeIds.add(sourceId);
-    });
-
-    return connectedNodeIds;
-  };
-
-  const isNodeSelected = (nodeId, selectedNodes) => selectedNodes.includes(nodeId);
-  const isLinkSelected = (link, selectedNodes) => {
-    const sourceId = getNodeId(link.source);
-    const targetId = getNodeId(link.target);
-    return isNodeSelected(sourceId, selectedNodes) || isNodeSelected(targetId, selectedNodes);
-  };
-
   // Setup arrow markers for links
   const setupArrowMarkers = (container) => {
     const defs = container.append('defs');
@@ -533,22 +508,10 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
       const serviceGroups = createNodeGroups(nodesGroup, serviceNodeConfig, tooltip, simulation);
 
       // Find all nodes directly connected to selected nodes for styling
-      const connectedNodeIds = new Set();
-      if (selectedNodes.length > 0) {
-        data.links.forEach(link => {
-          const sourceId = getNodeId(link.source);
-          const targetId = getNodeId(link.target);
-
-          if (selectedNodes.includes(sourceId)) connectedNodeIds.add(targetId);
-          if (selectedNodes.includes(targetId)) connectedNodeIds.add(sourceId);
-        });
-
-        // Highlight selected and connected nodes
-        nodesGroup.selectAll('g')
-          .classed('selected-node', d => selectedNodes.includes(d.id))
-          .classed('primary-node', d => connectedNodeIds.has(d.id))
-          .classed('context-node', d => !selectedNodes.includes(d.id) && !connectedNodeIds.has(d.id));
-      }
+      nodesGroup.selectAll('g')
+        .classed('selected-node', d => selectedNodes.includes(d.id))
+        .classed('primary-node', d => getConnectedNodes(data.links, selectedNodes).has(d.id))
+        .classed('context-node', d => !selectedNodes.includes(d.id) && !getConnectedNodes(data.links, selectedNodes).has(d.id));
 
       // Highlight selected nodes
       if (selectedNodes.length > 0) {
@@ -596,7 +559,7 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
         .attr('height', 15)
         .attr('fill', COLORS.BACKGROUND)
         .attr('class', d => `link-label-bg ${selectedNodes.length > 0 ? (selectedNodes.includes(d.source.id) && selectedNodes.includes(d.target.id) ? 'selected' : 'unselected') : ''}`);
-      
+
       // Then add the text labels
       const linkLabels = container.append('g')
         .attr('class', 'link-labels')
@@ -634,41 +597,41 @@ function Graph({ data, selectedNodes, onNodeSelect }) {
         const tempText = container.append('text')
           .attr('font-size', '10px')
           .style('visibility', 'hidden');
-        
-        linkLabels.each(function(d, i) {
+
+        linkLabels.each(function (d, i) {
           if (!d.sourceEdgeX || !d.targetEdgeX) return;
-          
+
           // Calculate midpoint of the line
           const midX = (d.sourceEdgeX + d.targetEdgeX) / 2;
           const midY = (d.sourceEdgeY + d.targetEdgeY) / 2;
-          
+
           // Calculate angle of the line
           const dx = d.targetEdgeX - d.sourceEdgeX;
           const dy = d.targetEdgeY - d.sourceEdgeY;
           const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-          
+
           // Measure text to properly size the background
           const labelText = d3.select(this).text();
           tempText.text(labelText);
           const textWidth = tempText.node().getComputedTextLength() + 9; // Add padding
-          
+
           // Get the background element
           const bgElement = d3.select(linkLabelBackgrounds.nodes()[i]);
-          
+
           // Update background size and position
           bgElement
             .attr('width', textWidth)
-            .attr('x', midX - textWidth/2)
+            .attr('x', midX - textWidth / 2)
             .attr('y', midY - 8)
             .attr('transform', `rotate(${angle}, ${midX}, ${midY})`);
-          
+
           // Apply rotation and position to the text
           d3.select(this)
             .attr('x', midX)
             .attr('y', midY)
             .attr('transform', `rotate(${angle}, ${midX}, ${midY})`);
         });
-        
+
         // Remove the temporary text element
         tempText.remove();
       };

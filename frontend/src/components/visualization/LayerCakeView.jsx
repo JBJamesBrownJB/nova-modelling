@@ -1,12 +1,13 @@
 import React, { useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import * as d3 from 'd3';
-import { COLORS, getNpsColor } from '../../styles/colors';
+import { COLORS } from '../../styles/colors';
 import { showTooltip, hideTooltip } from './shared/utils/tooltipUtils';
 import { getNodeRadius } from '../../services/visualization/VisualizationUtils';
 import { NODE_CONSTANTS } from './shared/constants/nodeConstants';
 import { goalNodeConfig, userNodeConfig, serviceNodeConfig } from './Graph/SimulationConfig';
 import { tooltipStyles } from '../../styles/tooltips';
+import { isConnectedToSelected, isNodeSelected } from './shared/utils/nodeConnectionUtils';
 
 const LayerCakeContainer = styled.div`
   width: 100%;
@@ -109,30 +110,13 @@ function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
   const containerRef = useRef(null);
   const tooltipRef = useRef(null);
 
-  // Helper to check if a node is selected
-  const isNodeSelected = (nodeId) => selectedNodes.includes(nodeId);
-
-  // Helper to check if a node is connected to any selected node
-  const isConnectedToSelected = (nodeId) => {
-    if (selectedNodes.length === 0) return true;
-    if (isNodeSelected(nodeId)) return true;
-    
-    // Check if this node has any connection to selected nodes
-    return data.links.some(link => {
-      const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
-      const targetId = typeof link.target === 'object' ? link.target.id : link.target;
-      return (sourceId === nodeId && isNodeSelected(targetId)) ||
-             (targetId === nodeId && isNodeSelected(sourceId));
-    });
-  };
-
   // Helper to get node classes based on selection and connection state
   const getNodeClasses = (nodeType, nodeId) => {
     const baseClass = `node ${nodeType}-node`;
     if (selectedNodes.length === 0) return baseClass;
     
-    if (isNodeSelected(nodeId)) return `${baseClass} node-selected`;
-    if (isConnectedToSelected(nodeId)) return baseClass;
+    if (isNodeSelected(nodeId, selectedNodes)) return `${baseClass} node-selected`;
+    if (isConnectedToSelected(data, selectedNodes, nodeId)) return baseClass;
     return `${baseClass} unselected`;
   };
 
@@ -179,13 +163,8 @@ function LayerCakeView({ data, selectedNodes, onNodeSelect }) {
     const goalNodes = data.nodes.filter(goalNodeConfig.filter);
     const serviceNodes = data.nodes.filter(serviceNodeConfig.filter);
 
-    // Render User Nodes
     createUserNodes(userLayer, userNodes);
-
-    // Render Goal Nodes
     createGoalNodes(goalLayer, goalNodes);
-
-    // Render Service Nodes
     createServiceNodes(serviceLayer, serviceNodes);
 
   }, [data, selectedNodes]);
