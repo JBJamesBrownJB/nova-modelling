@@ -15,19 +15,24 @@ const getNodeFromReference = (reference, nodes) => {
  * @returns {number} The calculated radius
  */
 export const getNodeRadius = (node) => {
+  // First try to use the nodeSize property which should have been calculated
+  // by our VisualizationUtils.calculateNodeSize function
+  if (node.nodeSize) {
+    return node.nodeSize;
+  }
+  
+  // Fallback to the old property names if nodeSize isn't available
   switch (node.label) {
     case 'Goal':
       // Scale Goal nodes based on their complexity
-      // Complexity reflects the essential complexity in Fred Brooks' model
-      return node.complexity;
+      return node.complexity || 10; 
     case 'Service':
       // Scale Service nodes based on number of Goal dependants
-      // More dependants indicate a more critical service (potential toil reduction target)
-      return node.dependants;
+      return node.dependants || 20;
     case 'User':
       // Scale User nodes based on number of Goals they perform
-      // More Goals indicate a more prominent user persona
-      return node.Importance;
+      // Handle both capital and lowercase 'importance'
+      return node.importance || node.Importance || 30;
     default:
       return 10; // Default size
   }
