@@ -2,7 +2,8 @@
  * Demand calculation utilities
  */
 
-import { getRelevantEdges, formatDemandLevel } from './CommonUtils';
+import { formatDemandLevel } from './CommonUtils';
+import { getRelevantEdges } from '../../services/calculations/nodeConnectionUtils';
 
 /**
  * Calculates aggregate demand information for a node based on its relationships

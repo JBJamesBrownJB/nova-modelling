@@ -2,7 +2,7 @@
  * NPS (Net Promoter Score) calculation utilities
  */
 
-import { getRelevantEdges } from './CommonUtils';
+import { getRelevantEdges } from '../../services/calculations/nodeConnectionUtils';
 
 /**
  * Calculates aggregate NPS score for a node based on its relationships

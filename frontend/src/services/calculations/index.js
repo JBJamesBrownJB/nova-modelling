@@ -21,4 +21,6 @@ export { calculateServiceDependants } from './ServiceCalculations';
 export { getNpsColor, getDemandColor } from './ColorCalculations';
 
 // Common Utilities
-export { getRelevantEdges, formatDemandLevel } from './CommonUtils';
+export { formatDemandLevel } from './CommonUtils';
+
+export { getConnectedNodes, isNodeSelected, isLinkSelected } from './nodeConnectionUtils';

@@ -3,11 +3,11 @@ import styled from 'styled-components';
 import * as d3 from 'd3';
 import { COLORS } from '../../styles/colors';
 import { showTooltip, hideTooltip } from './shared/utils/tooltipUtils';
-import { getNodeRadius } from '../../services/visualization/VisualizationUtils';
+import { getNodeRadius } from './shared/utils/VisualizationUtils';
 import { NODE_CONSTANTS } from './shared/constants/nodeConstants';
 import { goalNodeConfig, userNodeConfig, serviceNodeConfig } from './Graph/SimulationConfig';
 import { tooltipStyles } from '../../styles/tooltips';
-import { isConnectedToSelected, isNodeSelected } from './shared/utils/nodeConnectionUtils';
+import { isConnectedToSelected, isNodeSelected } from '../../services/calculations/nodeConnectionUtils';
 
 const LayerCakeContainer = styled.div`
   width: 100%;

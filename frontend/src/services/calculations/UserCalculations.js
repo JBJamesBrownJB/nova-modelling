@@ -2,7 +2,7 @@
  * User metric calculation utilities
  */
 
-import { isUserGoalLink } from './CommonUtils';
+import { isUserGoalLink } from '../../services/calculations/nodeConnectionUtils';
 
 /**
  * Calculates the importance of a user based on goal relationships

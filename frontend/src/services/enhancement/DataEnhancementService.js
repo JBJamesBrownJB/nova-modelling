@@ -9,7 +9,7 @@ import {
   getRelevantEdges
 } from "../calculations";
 import { getNpsColor } from "../calculations/ColorCalculations";
-import { calculateNodeSize } from "../visualization/VisualizationUtils";
+import { calculateNodeSize } from "../../components/visualization/shared/utils/VisualizationUtils";
 
 export const enhanceGraphData = (data) => {
   const enhancedData = JSON.parse(JSON.stringify(data));

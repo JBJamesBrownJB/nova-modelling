@@ -1,4 +1,4 @@
-import { getNodeRadius } from '../../../services/visualization/VisualizationUtils';
+import { getNodeRadius } from '../shared/utils/VisualizationUtils';
 import { getRelevantEdges } from '../../../services/calculations/CommonUtils';
 
 /**
