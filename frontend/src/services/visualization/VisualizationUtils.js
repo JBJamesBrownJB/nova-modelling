@@ -87,3 +87,41 @@ export const calculateNodeSize = (node, metricValue, allMetricValues) => {
       return NODE_SIZES.GOAL.MIN;
   }
 };
+
+/**
+ * Calculate the radius of a node based on its type and properties
+ * Supports both new nodeSize property and legacy properties
+ * @param {Object} node - The node object
+ * @returns {number} The calculated radius
+ */
+export const getNodeRadius = (node) => {
+  // First try to use the nodeSize property which should have been calculated
+  // by our calculateBucketedSize function
+  if (node.nodeSize) {
+    return node.nodeSize;
+  }
+  
+  // Fallback to the old property names if nodeSize isn't available
+  const sizes = NODE_SIZES[node.label.toUpperCase()] || { MIN: 10, MAX: 25 };
+  
+  switch (node.label) {
+    case 'Goal':
+      // Scale Goal nodes based on their complexity
+      return node.complexity ? 
+        calculateBucketedSize(node.complexity, [node.complexity], sizes.MIN, sizes.MAX) : 
+        sizes.MIN;
+    case 'Service':
+      // Scale Service nodes based on number of Goal dependants
+      return node.dependants ? 
+        calculateBucketedSize(node.dependants, [node.dependants], sizes.MIN, sizes.MAX) : 
+        sizes.MIN;
+    case 'User':
+      // Scale User nodes based on importance
+      const importance = node.importance || node.Importance;
+      return importance ? 
+        calculateBucketedSize(importance, [importance], sizes.MIN, sizes.MAX) : 
+        sizes.MIN;
+    default:
+      return sizes.MIN;
+  }
+};

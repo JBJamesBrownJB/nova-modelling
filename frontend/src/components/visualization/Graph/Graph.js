@@ -1,8 +1,9 @@
 import React, { useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import * as d3 from 'd3';
-import { showTooltip, hideTooltip } from './TooltipUtils';
-import { calculateLinkEdgePoints, getNodeRadius } from './GraphUtils';
+import { showTooltip, hideTooltip } from '../shared/utils/tooltipUtils';
+import { calculateLinkEdgePoints } from './GraphUtils';
+import { getNodeRadius } from '../../../services/visualization/VisualizationUtils';
 import { COLORS, getNpsColor, LINK_CONSTANTS } from '../../../styles/colors';
 import { SIMULATION_CONFIG, goalNodeConfig, userNodeConfig, serviceNodeConfig } from './SimulationConfig';
 import { NODE_CONSTANTS } from '../shared/constants/nodeConstants';

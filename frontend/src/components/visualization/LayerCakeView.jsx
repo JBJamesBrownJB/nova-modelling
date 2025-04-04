@@ -1,11 +1,11 @@
 import React, { useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import * as d3 from 'd3';
-import { COLORS } from '../../styles/colors';
-import { showTooltip, hideTooltip } from './Graph/TooltipUtils';
-import { getNodeRadius } from './Graph/GraphUtils';
-import { goalNodeConfig, userNodeConfig, serviceNodeConfig } from './Graph/SimulationConfig';
+import { COLORS, getNpsColor } from '../../styles/colors';
+import { showTooltip, hideTooltip } from './shared/utils/tooltipUtils';
+import { getNodeRadius } from '../../services/visualization/VisualizationUtils';
 import { NODE_CONSTANTS } from './shared/constants/nodeConstants';
+import { goalNodeConfig, userNodeConfig, serviceNodeConfig } from './Graph/SimulationConfig';
 import { tooltipStyles } from '../../styles/tooltips';
 
 const LayerCakeContainer = styled.div`
