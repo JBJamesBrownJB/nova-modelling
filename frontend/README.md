@@ -1,5 +1,7 @@
 # Nova Modelling Visualization
 
+ [Live Demo 🚀](https://nova-modelling.surge.sh)
+
 A D3.js and React-based visualization tool for Nova Modelling, providing an interactive force-directed graph similar to Neo4j Bloom.
 
 ## Features
@@ -88,21 +90,3 @@ const dbService = new Neo4jDatabaseService(
   'password'                 // Password
 );
 ```
-
-## Extending the Visualization
-
-### Adding New Node Types
-
-To add new node types:
-
-1. Update the `nodeColors` object in `Graph.js`
-2. Add new filter options in `Sidebar.js`
-3. Update the mock data or Neo4j query to include the new node types
-
-### Adding New Relationship Types
-
-To add new relationship types:
-
-1. Update the `linkColors` object in `Graph.js`
-2. Add new filter options in `Sidebar.js`
-3. Update the mock data or Neo4j query to include the new relationship types
